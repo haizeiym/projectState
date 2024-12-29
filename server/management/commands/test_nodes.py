@@ -48,5 +48,8 @@ class Command(BaseCommand):
 
         # 获取节点
         node = Node.get(100000007)
-        node.update(name="新节点666ssssdf试试", description="描述测试")
-        self.stdout.write(f"获取节点: {node.node_name}")
+        if node:
+            isSuccess = Node.update(node.node_id, node_name="测试节点")
+            self.stdout.write(self.style.SUCCESS(f"更新节点: {isSuccess}"))
+        else:
+            self.stdout.write(self.style.ERROR("获取节点失败"))

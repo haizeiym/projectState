@@ -1,5 +1,5 @@
-from django.core.exceptions import ObjectDoesNotExist
 from ..models import NodeModel
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 
 
@@ -11,110 +11,108 @@ class Node:
         self.node_name = node_name
         self.description = description
         self.children_state = 0
-        self.state_change_callback = None
 
-    @classmethod
-    def get(cls, node_id):
+    @staticmethod
+    def _get_node_model(node_id):
         """
-        从数据库获取节点
-        :param node_id: 节点id
-        :return: Node对象或None
+        获取节点模型的辅助方法
+        :param node_id: 节点ID
+        :return: NodeModel实例或None
         """
         try:
-            node_data = NodeModel.objects.get(node_id=node_id)
-            return cls.create_from_db(node_data)
+            node = NodeModel.objects.get(node_id=node_id)
+            return node
         except ObjectDoesNotExist:
             return None
 
-    @classmethod
-    def get_all(cls):
+    @staticmethod
+    def get(node_id):
         """
-        获取所有节点
-        :return: Node对象列表
+        获取节点信息
+        :param node_id: 节点ID
+        :return: Node对象或None
         """
-        nodes = NodeModel.objects.all()
-        return [cls.create_from_db(node) for node in nodes]
+        node_model = Node._get_node_model(node_id)
+        return Node.create_from_db(node_model)
 
-    def delete(self):
+    @staticmethod
+    def create(**kwargs):
         """
-        从数据库删除节点
-        :return: 是否删除成功
+        创建节点
+        :param kwargs: 节点参数
+        :return: Node对象或None
         """
+        with transaction.atomic():
+            try:
+                node_id = NodeModel.get_next_id() or 1
+
+                node_model = NodeModel(
+                    node_id=node_id,
+                    node_name=kwargs.get("node_name"),
+                    description=kwargs.get("description"),
+                    state=kwargs.get("state", 0),
+                    parent_id=kwargs.get("parent_id", 0),
+                    children_state=kwargs.get("children_state", 0),
+                )
+                node_model.save()
+                node_model.node_id = node_id
+                return Node.create_from_db(node_model)
+            except Exception:
+                return None
+
+    @staticmethod
+    def update(node_id, **kwargs):
+        """
+        更新节点信息
+        :param node_id: 节点ID
+        :param kwargs: 要更新的字段和值
+        :return: 是否更新成功
+        """
+        node_model = Node._get_node_model(node_id)
+        if node_model is None:
+            return False
+
+        field_mapping = {
+            "node_name": "node_name",
+            "description": "description",
+            "state": "state",
+            "parent_id": "parent_id",
+            "children_state": "children_state",
+        }
+
         try:
-            NodeModel.objects.get(node_id=self.node_id).delete()
+            for key, value in kwargs.items():
+                if key in field_mapping:
+                    setattr(node_model, field_mapping[key], value)
+            node_model.save()
+            Node._check_children_states(node_id)
             return True
         except ObjectDoesNotExist:
             return False
 
-    def update(self, **kwargs):
+    @staticmethod
+    def delete(node_id):
         """
-        更新节点属性
-        :param kwargs: 要更新的属性和值
-        例如:node.update(name="新名称", state=1)
-        """
-        valid_fields = {
-            "name": "node_name",
-            "state": "state",
-            "description": "description",
-            "parent_id": "parent_id",
-        }
-
-        updates = {}
-        for key, value in kwargs.items():
-            if key in valid_fields:
-                db_field = valid_fields[key]
-                setattr(self, db_field, value)
-                updates[db_field] = value
-
-        if updates:
-            NodeModel.objects.filter(node_id=self.node_id).update(**updates)
-            if "state" in kwargs:
-                self._check_children_states()
-
-    @property
-    def children(self):
-        """
-        获取子节点列表
-        :return: 子节点列表
-        """
-        children = NodeModel.objects.filter(parent_id=self.node_id)
-        return [self.create_from_db(child) for child in children]
-
-    def add_child(self, child_node):
-        """
-        添加子节点
-        :param child_node: Node对象
-        """
-        child_node.update(parent_id=self.node_id)
-        child_node.save()
-        self._check_children_states()
-
-    def remove_child(self, child_id):
-        """
-        删除子节点
-        :param child_id: 子节点id
+        删除节点
+        :param node_id: 节点ID
         :return: 是否删除成功
         """
-        deleted = NodeModel.objects.filter(
-            node_id=child_id, parent_id=self.node_id
-        ).delete()[0]
-        if deleted:
-            self._check_children_states()
+        node_model = Node._get_node_model(node_id)
+        if not node_model:
+            return False
+        try:
+            node_model.delete()
             return True
-        return False
+        except ObjectDoesNotExist:
+            return False
 
-    def on_children_state_change(self, callback):
-        """
-        设置子节点状态变更回调
-        :param callback: 回调函数
-        """
-        self.state_change_callback = callback
-
-    def _check_children_states(self):
+    @staticmethod
+    def _check_children_states(node_id):
         """
         检查子节点状态一致性
+        :param node_id: 节点ID
         """
-        children = NodeModel.objects.filter(parent_id=self.node_id)
+        children = NodeModel.objects.filter(parent_id=node_id)
         if not children.exists():
             return
 
@@ -122,52 +120,21 @@ class Node:
         all_same = all(child.state == first_state for child in children)
 
         if all_same:
-            self.children_state = first_state
-            NodeModel.objects.filter(node_id=self.node_id).update(
-                children_state=first_state
-            )
-            if self.state_change_callback:
-                self.state_change_callback(first_state)
-
-    @classmethod
-    def create_from_db(cls, node_data):
-        """
-        从数据库记录创建Node实例
-        """
-        return cls(
-            node_id=node_data.node_id,
-            node_name=node_data.node_name,
-            description=node_data.description,
-            state=node_data.state,
-            parent_id=node_data.parent_id,
-        )
+            NodeModel.objects.filter(node_id=node_id).update(children_state=first_state)
 
     @staticmethod
-    def create(**kwargs):
-        """创建节点"""
-        with transaction.atomic():
-            try:
-                # 获取下一个节点ID
-                node_id = NodeModel.get_next_id() or 1
-
-                node_model = NodeModel(
-                    node_id=node_id,
-                    node_name=kwargs.get("node_name", ""),
-                    description=kwargs.get("description", ""),
-                    state=kwargs.get("state", 0),
-                    parent_id=kwargs.get("parent_id", 0),
-                    children_state=kwargs.get("children_state", 0),
-                )
-                node_model.save()
-
-                return Node(
-                    node_id=node_id,
-                    node_name=kwargs.get("node_name", ""),
-                    description=kwargs.get("description", ""),
-                    state=kwargs.get("state", 0),
-                    parent_id=kwargs.get("parent_id", 0),
-                )
-
-            except Exception:
-                transaction.set_rollback(True)
-                return None
+    def create_from_db(node_model):
+        """
+        从数据库模型创建Node对象
+        :param node_model: NodeModel实例
+        :return: Node对象
+        """
+        if not node_model:
+            return None
+        return Node(
+            node_id=node_model.node_id,
+            node_name=node_model.node_name,
+            description=node_model.description,
+            state=node_model.state,
+            parent_id=node_model.parent_id,
+        )
