@@ -8,9 +8,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # # 创建和保存节点
-        # node = Node(1, "测试节点")
-        # node.save()
-        # self.stdout.write(self.style.SUCCESS("创建节点成功"))
+        # node = Node.create(node_name="测试节点阿斯顿发", description="测试描述阿斯顿发")
+        # self.stdout.write(
+        #     self.style.SUCCESS(f"创建节点成功: {node.node_id}，{node.node_name}")
+        # )
 
         # # 获取节点
         # node = Node.get(1)
@@ -39,16 +40,13 @@ class Command(BaseCommand):
         # self.stdout.write(f"总节点数量: {len(all_nodes)}")
 
         # # 创建项目
-        # Project.create(1000, "测试项目100012")
-        # self.stdout.write(self.style.SUCCESS("创建项目成功23"))
-        # Project.update(
-        #     1000, project_name="新名称qwe", state=6, description="新描述123", node_id=2
-        # )
-        project = Project.get(1000)
-        self.stdout.write(
-            f"获取项目: {project.project_name,project.state,project.node_id}"
-        )
+        # project = Project.create(project_name="测试项目100012")
+        # self.stdout.write(self.style.SUCCESS(f"创建项目成功 {project.project_id}"))
+
+        # isSuccess = Project.update(100000013, project_name="测试项目1003332", node_id=2)
+        # self.stdout.write(self.style.SUCCESS(f"更新项目成功: {isSuccess}"))
+
         # 获取节点
-        node = Node.get(2)
+        node = Node.get(100000007)
         node.update(name="新节点666ssssdf试试", description="描述测试")
         self.stdout.write(f"获取节点: {node.node_name}")

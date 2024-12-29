@@ -1,5 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
-from ..model.models import NodeModel
+from ..models import NodeModel
+from django.db import transaction
 
 
 class Node:
@@ -33,20 +34,6 @@ class Node:
         """
         nodes = NodeModel.objects.all()
         return [cls.create_from_db(node) for node in nodes]
-
-    def save(self):
-        """
-        保存或更新节点到数据库
-        """
-        node_data = {
-            "parent_id": self.parent_id,
-            "node_id": self.node_id,
-            "state": self.state,
-            "node_name": self.node_name,
-            "description": self.description,
-            "children_state": self.children_state,
-        }
-        NodeModel.objects.update_or_create(node_id=self.node_id, defaults=node_data)
 
     def delete(self):
         """
@@ -154,3 +141,33 @@ class Node:
             state=node_data.state,
             parent_id=node_data.parent_id,
         )
+
+    @staticmethod
+    def create(**kwargs):
+        """创建节点"""
+        with transaction.atomic():
+            try:
+                # 获取下一个节点ID
+                node_id = NodeModel.get_next_id() or 1
+
+                node_model = NodeModel(
+                    node_id=node_id,
+                    node_name=kwargs.get("node_name", ""),
+                    description=kwargs.get("description", ""),
+                    state=kwargs.get("state", 0),
+                    parent_id=kwargs.get("parent_id", 0),
+                    children_state=kwargs.get("children_state", 0),
+                )
+                node_model.save()
+
+                return Node(
+                    node_id=node_id,
+                    node_name=kwargs.get("node_name", ""),
+                    description=kwargs.get("description", ""),
+                    state=kwargs.get("state", 0),
+                    parent_id=kwargs.get("parent_id", 0),
+                )
+
+            except Exception:
+                transaction.set_rollback(True)
+                return None

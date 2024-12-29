@@ -1,5 +1,6 @@
-from ..model.models import ProjectModel
+from ..models import ProjectModel
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 
 
 class Project:
@@ -18,7 +19,8 @@ class Project:
         :return: ProjectModel实例或None
         """
         try:
-            return ProjectModel.objects.filter(project_id=project_id).first()
+            project = ProjectModel.objects.get(project_id=project_id)
+            return project
         except ObjectDoesNotExist:
             return None
 
@@ -33,29 +35,28 @@ class Project:
         return Project.create_from_db(project_model)
 
     @staticmethod
-    def create(project_id, project_name, description="", state=0, node_id=0):
+    def create(**kwargs):
         """
-        创建或更新项目
-        :param project_id: 项目ID
-        :param project_name: 项目名称
-        :param description: 项目描述
-        :param state: 项目状态
-        :param node_id: 项目节点ID
+        创建项目
+        :param kwargs: 项目参数
         :return: Project对象或None
         """
-        try:
-            project, created = ProjectModel.objects.update_or_create(
-                project_id=project_id,  # 查询条件
-                defaults={  # 需要更新或创建的字段
-                    "project_name": project_name,
-                    "description": description,
-                    "state": state,
-                    "node_id": node_id,
-                },
-            )
-            return Project.create_from_db(project)
-        except ObjectDoesNotExist:
-            return None
+        with transaction.atomic():
+            try:
+                project_id = ProjectModel.get_next_id() or 1
+
+                project_model = ProjectModel(
+                    project_id=project_id,
+                    project_name=kwargs.get("project_name"),
+                    description=kwargs.get("description"),
+                    state=kwargs.get("state", 0),
+                    node_id=kwargs.get("node_id"),
+                )
+                project_model.save()
+                project_model.project_id = project_id
+                return Project.create_from_db(project_model)
+            except Exception:
+                return None
 
     @staticmethod
     def update(project_id, **kwargs):
@@ -66,7 +67,7 @@ class Project:
         :return: 是否更新成功
         """
         project_model = Project._get_project_model(project_id)
-        if not project_model:
+        if project_model is None:
             return False
 
         field_mapping = {
@@ -110,7 +111,6 @@ class Project:
         """
         if not project_model:
             return None
-
         return Project(
             project_id=project_model.project_id,
             project_name=project_model.project_name,
