@@ -1,14 +1,3 @@
-# 使用Django对ProjectModel进行CRUD操作，要求满足以下要求
-# 1,根据project_id获取项目
-# 2,根据project_id获取项目节点
-# 3,根据project_id获取项目状态
-# 4,根据project_id获取项目描述
-# 5,根据project_id修改项目状态
-# 6,根据project_id修改项目描述
-# 7,根据project_id修改项目节点
-# 8,根据project_id修改项目名称
-# 9,根据project_id删除项目
-
 from ..model.models import ProjectModel
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -30,7 +19,7 @@ class Project:
         """
         try:
             return ProjectModel.objects.filter(project_id=project_id).first()
-        except Exception:
+        except ObjectDoesNotExist:
             return None
 
     @staticmethod
@@ -65,7 +54,7 @@ class Project:
                 },
             )
             return Project.create_from_db(project)
-        except Exception:
+        except ObjectDoesNotExist:
             return None
 
     @staticmethod
@@ -81,7 +70,7 @@ class Project:
             return False
 
         field_mapping = {
-            "project_name": "name",
+            "project_name": "project_name",
             "description": "description",
             "state": "state",
             "node_id": "node_id",
@@ -93,7 +82,7 @@ class Project:
                     setattr(project_model, field_mapping[key], value)
             project_model.save()
             return True
-        except Exception:
+        except ObjectDoesNotExist:
             return False
 
     @staticmethod
@@ -109,7 +98,7 @@ class Project:
         try:
             project_model.delete()
             return True
-        except Exception:
+        except ObjectDoesNotExist:
             return False
 
     @staticmethod
