@@ -1,6 +1,7 @@
 from ..models import ProjectModel
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
+from django.http import JsonResponse
 
 
 class Project:
@@ -118,3 +119,24 @@ class Project:
             state=project_model.state,
             node_id=project_model.node_id,
         )
+
+    @staticmethod
+    def list(request):
+        if request.method == "GET":
+            try:
+                projects = Project.objects.all()
+                response_data = []
+
+                for project in projects:
+                    project_data = {
+                        "id": project.id,
+                        "name": project.name,
+                        # 根据您的Project模型添加其他需要的字段
+                    }
+                    response_data.append(project_data)
+
+                return JsonResponse(response_data, safe=False)
+            except Exception as e:
+                return JsonResponse({"error": str(e)}, status=500)
+
+        return JsonResponse({"error": "Invalid request method"}, status=405)

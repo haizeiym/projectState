@@ -16,5 +16,5 @@ urlpatterns = [
     path("api/project/delete/<int:project_id>", Project.delete, name="project_delete"),
     path("api/project/update/<int:project_id>", Project.update, name="project_update"),
     path("api/project/get/<int:project_id>", Project.get, name="project_get"),
-    # path("api/project/list", Project.list, name="project_list"),
+    path("api/project/list", Project.list, name="project_list"),
 ]
