@@ -15,10 +15,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "server",  # 添加你的应用
+    "corsheaders",
 ]
 
 # 中间件配置
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # 需要放在最前面
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -70,3 +72,11 @@ STATIC_URL = "static/"
 
 # 默认主键类型
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTH_PASSWORD_VALIDATORS = []
+
+# CORS 设置
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Vue 开发服务器地址
+]
+CORS_ALLOW_CREDENTIALS = True

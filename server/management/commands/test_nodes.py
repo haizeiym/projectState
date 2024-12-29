@@ -46,10 +46,17 @@ class Command(BaseCommand):
         # isSuccess = Project.update(100000013, project_name="测试项目1003332", node_id=2)
         # self.stdout.write(self.style.SUCCESS(f"更新项目成功: {isSuccess}"))
 
-        # 获取节点
-        node = Node.get(100000007)
-        if node:
-            isSuccess = Node.update(node.node_id, node_name="测试节点")
-            self.stdout.write(self.style.SUCCESS(f"更新节点: {isSuccess}"))
-        else:
-            self.stdout.write(self.style.ERROR("获取节点失败"))
+        # # 获取节点
+        # node = Node.get(100000007)
+        # if node:
+        #     isSuccess = Node.update(node.node_id, node_name="测试节点")
+        #     self.stdout.write(self.style.SUCCESS(f"更新节点: {isSuccess}"))
+        # else:
+        #     self.stdout.write(self.style.ERROR("获取节点失败"))
+
+        # 获取项目列表
+        try:
+            projects = Project.list()
+            self.stdout.write(self.style.SUCCESS(f"获取项目列表成功: {projects}"))
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f"获取项目列表失败: {str(e)}"))

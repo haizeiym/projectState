@@ -19,6 +19,7 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const form = ref({
@@ -28,10 +29,18 @@ const form = ref({
 
 const submitForm = async () => {
     try {
-        await axios.post('/api/project/create', form.value)
+        // 从 localStorage 获取 token
+        const token = localStorage.getItem('token')
+        await axios.post('/api/project/create', form.value, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
         router.push('/projects')
     } catch (error) {
         console.error('Error creating project:', error)
+        // 添加错误提示
+        ElMessage.error('创建项目失败：' + (error.response?.data?.message || error.message))
     }
 }
 </script>
