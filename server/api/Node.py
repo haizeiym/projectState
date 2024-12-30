@@ -5,13 +5,22 @@ from django.http import JsonResponse
 
 
 class Node:
-    def __init__(self, node_id, node_name="", description="", state=0, parent_id=0):
-        self.parent_id = parent_id
+    def __init__(
+        self,
+        node_id,
+        node_name="",
+        description="",
+        state=0,
+        parent_id=0,
+        childrens=None,
+    ):
         self.node_id = node_id
-        self.state = state
         self.node_name = node_name
         self.description = description
+        self.state = state
+        self.parent_id = parent_id
         self.children_state = 0
+        self.childrens = childrens or []
 
     @staticmethod
     def _get_node_model(node_id):
@@ -46,7 +55,6 @@ class Node:
         with transaction.atomic():
             try:
                 node_id = NodeModel.get_next_id() or 1
-
                 node_model = NodeModel(
                     node_id=node_id,
                     node_name=kwargs.get("node_name"),
@@ -56,7 +64,16 @@ class Node:
                     children_state=kwargs.get("children_state", 0),
                 )
                 node_model.save()
-                node_model.node_id = node_id
+
+                # 如果有父节点，更新父节点的 childrens
+                if node_model.parent_id:
+                    parent = NodeModel.objects.get(node_id=node_model.parent_id)
+                    if parent:
+                        childrens = parent.get_childrens()
+                        childrens.append(node_id)
+                        parent.set_childrens(childrens)
+                        parent.save()
+
                 return Node.create_from_db(node_model)
             except Exception:
                 return None
@@ -98,14 +115,24 @@ class Node:
         :param node_id: 节点ID
         :return: 是否删除成功
         """
-        node_model = Node._get_node_model(node_id)
-        if not node_model:
-            return False
-        try:
-            node_model.delete()
-            return True
-        except ObjectDoesNotExist:
-            return False
+        with transaction.atomic():
+            node_model = Node._get_node_model(node_id)
+            if not node_model:
+                return False
+            try:
+                # 更新父节点的 childrens
+                if node_model.parent_id:
+                    parent = NodeModel.objects.get(node_id=node_model.parent_id)
+                    if parent:
+                        childrens = parent.get_childrens()
+                        childrens.remove(node_id)
+                        parent.set_childrens(childrens)
+                        parent.save()
+
+                node_model.delete()
+                return True
+            except ObjectDoesNotExist:
+                return False
 
     @staticmethod
     def _check_children_states(node_id):
@@ -138,6 +165,7 @@ class Node:
             description=node_model.description,
             state=node_model.state,
             parent_id=node_model.parent_id,
+            childrens=node_model.get_childrens(),
         )
 
     @staticmethod
@@ -149,31 +177,30 @@ class Node:
         :return: JsonResponse 或 dict
         """
         try:
-            # 如果是通过 URL 参数传入的 node_id
             if node_id is None and request is not None:
                 node_id = request.resolver_match.kwargs.get("node_id")
 
             def get_node_with_children(node_id):
                 node = NodeModel.objects.get(node_id=node_id)
-                children = NodeModel.objects.filter(parent_id=node_id)
+                childrens = node.get_childrens()
 
                 node_data = {
                     "node_id": node.node_id,
                     "node_name": node.node_name,
                     "description": node.description,
                     "state": node.state,
+                    "parent_id": node.parent_id,
+                    "children_state": node.children_state,
+                    "childrens": childrens,
                     "children": [
-                        get_node_with_children(child.node_id) for child in children
+                        get_node_with_children(child_id) for child_id in childrens
                     ],
                 }
                 return node_data
 
             result = get_node_with_children(node_id)
-
-            # 如果是 HTTP 请求，返回 JsonResponse
             if request:
                 return JsonResponse(result)
-            # 如果是直接调用，返回字典
             return result
 
         except NodeModel.DoesNotExist:
