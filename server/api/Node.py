@@ -3,6 +3,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import JsonResponse
 import json
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
 
 class Node:
@@ -47,37 +49,72 @@ class Node:
         return Node.create_from_db(node_model)
 
     @staticmethod
-    def create(**kwargs):
+    def create(request=None, **kwargs):
         """
         创建节点
+        :param request: HTTP请求对象（可选）
         :param kwargs: 节点参数
-        :return: Node对象或None
+        :return: JsonResponse 或 Node对象
         """
-        with transaction.atomic():
-            try:
+        try:
+            with transaction.atomic():
                 node_id = NodeModel.get_next_id() or 1
+
+                # 如果是HTTP请求
+                if request is not None:
+                    if request.method != "POST":
+                        return JsonResponse({"error": "Method not allowed"}, status=405)
+                    try:
+                        data = json.loads(request.body)
+                    except json.JSONDecodeError:
+                        return JsonResponse({"error": "Invalid JSON"}, status=400)
+                else:
+                    # 如果是直接调用
+                    data = kwargs
+
                 node_model = NodeModel(
                     node_id=node_id,
-                    node_name=kwargs.get("node_name"),
-                    description=kwargs.get("description"),
-                    state=kwargs.get("state", 0),
-                    parent_id=kwargs.get("parent_id", 0),
-                    children_state=kwargs.get("children_state", 0),
+                    node_name=data.get("node_name"),
+                    description=data.get("description"),
+                    state=data.get("state", 0),
+                    parent_id=data.get("parent_id", 0),
+                    children_state=data.get("children_state", 0),
                 )
                 node_model.save()
 
                 # 如果有父节点，更新父节点的 childrens
                 if node_model.parent_id:
-                    parent = NodeModel.objects.get(node_id=node_model.parent_id)
+                    parent = Node._get_node_model(node_model.parent_id)
                     if parent:
                         childrens = parent.get_childrens()
                         childrens.append(node_id)
                         parent.set_childrens(childrens)
                         parent.save()
                 node_model.node_id = node_id
-                return Node.create_from_db(node_model)
-            except Exception:
-                return None
+                node = Node.create_from_db(node_model)
+
+                # 如果是HTTP请求，返回JsonResponse
+                if request is not None:
+                    return JsonResponse(
+                        {
+                            "node_id": str(node.node_id),
+                            "node_name": node.node_name,
+                            "description": node.description,
+                            "state": node.state,
+                            "parent_id": str(node.parent_id) if node.parent_id else 0,
+                        }
+                    )
+                # 如果是直接调用，返回Node对象
+                return node
+
+        except Exception as e:
+            import traceback
+
+            print(f"Error in create: {str(e)}")
+            print(traceback.format_exc())
+            if request is not None:
+                return JsonResponse({"error": str(e)}, status=500)
+            raise e
 
     @staticmethod
     def update(request=None, node_id=None, **kwargs):

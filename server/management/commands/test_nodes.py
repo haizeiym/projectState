@@ -13,9 +13,9 @@ class Command(BaseCommand):
         #     self.style.SUCCESS(f"创建节点成功: {node.node_id}，{node.node_name}")
         # )
 
-        # 获取节点
-        node = Node.get(100000013)
-        self.stdout.write(f"获取节点: {node.node_id}")
+        # # 获取节点
+        # node = Node.get(100000013)
+        # self.stdout.write(f"获取节点: {node.node_id}")
 
         # # 更新属性
         # node.update(name="新名称", state=1, description="新描述")
@@ -23,8 +23,8 @@ class Command(BaseCommand):
 
         # 添加子节点
         child = Node.create(node_name="子1", description="测试描述阿斯顿发")
-        isSuccess = Node.add_child(parent_id=node.node_id, child_id=child.node_id)
-        self.stdout.write(f"添加子节点成功: {isSuccess}")
+        # isSuccess = Node.add_child(parent_id=node.node_id, child_id=child.node_id)
+        self.stdout.write(f"添加子节点成功: {child.node_id}")
 
         # # 添加子节点
         # child = Node.create(node_name="子2", description="测试描述阿斯顿发")
@@ -68,8 +68,8 @@ class Command(BaseCommand):
         #     self.stdout.write(self.style.SUCCESS("删除项目成功"))
         # else:
         #     self.stdout.write(self.style.ERROR("删除项目失败"))
-        node_tree = Node.get_tree(node_id=100000013)
-        if node_tree:
-            self.stdout.write(self.style.SUCCESS(f"获取节点树成功: {node_tree}"))
-        else:
-            self.stdout.write(self.style.ERROR("获取节点树失败"))
+        # node_tree = Node.get_tree(node_id=100000013)
+        # if node_tree:
+        #     self.stdout.write(self.style.SUCCESS(f"获取节点树成功: {node_tree}"))
+        # else:
+        #     self.stdout.write(self.style.ERROR("获取节点树失败"))
