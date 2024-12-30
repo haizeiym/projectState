@@ -162,30 +162,45 @@ class Node:
             return False
 
     @staticmethod
-    def delete(node_id):
+    def delete(request=None, node_id=None):
         """
         删除节点
+        :param request: HTTP请求对象（可选）
         :param node_id: 节点ID
-        :return: 是否删除成功
+        :return: JsonResponse 或 bool
         """
-        with transaction.atomic():
-            node_model = Node._get_node_model(node_id)
-            if not node_model:
-                return False
-            try:
+        try:
+            # 如果是通过 URL 参数传入的 node_id
+            if node_id is None and request is not None:
+                node_id = request.resolver_match.kwargs.get("node_id")
+
+            with transaction.atomic():
+                node_model = Node._get_node_model(node_id)
+                if not node_model:
+                    if request:
+                        return JsonResponse({"error": "Node not found"}, status=404)
+                    return False
+
                 # 更新父节点的 childrens
                 if node_model.parent_id:
-                    parent = NodeModel.objects.get(node_id=node_model.parent_id)
+                    parent = Node._get_node_model(node_model.parent_id)
                     if parent:
                         childrens = parent.get_childrens()
-                        childrens.remove(node_id)
-                        parent.set_childrens(childrens)
-                        parent.save()
+                        if node_id in childrens:
+                            childrens.remove(node_id)
+                            parent.set_childrens(childrens)
+                            parent.save()
 
                 node_model.delete()
+
+                if request:
+                    return JsonResponse({"status": "success"})
                 return True
-            except ObjectDoesNotExist:
-                return False
+
+        except Exception as e:
+            if request:
+                return JsonResponse({"error": str(e)}, status=500)
+            return False
 
     @staticmethod
     def _check_children_states(node_id):
