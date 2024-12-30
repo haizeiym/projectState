@@ -1,10 +1,12 @@
 <template>
-    <div class="project-list">
-        <h2>项目列表</h2>
-        <el-button type="primary" @click="$router.push('/project/add')">添加项目</el-button>
-        <el-button type="primary" @click="$router.push('/node/add')">添加节点</el-button>
+    <PageLayout title="项目列表">
+        <template #actions>
+            <el-button type="primary" @click="$router.push('/project/add')">
+                添加项目
+            </el-button>
+        </template>
 
-        <el-table v-loading="loading" :data="projects" style="width: 100%; margin-top: 20px;">
+        <el-table v-loading="loading" :data="projects" style="width: 100%">
             <el-table-column prop="project_id" label="项目ID" width="180" />
             <el-table-column prop="project_name" label="项目名称" width="180" />
             <el-table-column prop="description" label="描述" width="180" />
@@ -15,20 +17,22 @@
             </el-table-column>
             <el-table-column label="操作" width="280">
                 <template #default="scope">
-                    <el-button type="primary" size="small" @click="handleViewNodes(scope.row.node_id)"
-                        :disabled="!scope.row.node_id">
-                        查看节点
-                    </el-button>
-                    <el-button type="warning" size="small" @click="handleEdit(scope.row.project_id)">
-                        修改
-                    </el-button>
-                    <el-button type="danger" size="small" @click="handleDelete(scope.row.project_id)">
-                        删除
-                    </el-button>
+                    <el-button-group>
+                        <el-button type="primary" size="small" @click="handleViewNodes(scope.row.node_id)"
+                            :disabled="!scope.row.node_id">
+                            查看节点
+                        </el-button>
+                        <el-button type="warning" size="small" @click="handleEdit(scope.row.project_id)">
+                            修改
+                        </el-button>
+                        <el-button type="danger" size="small" @click="handleDelete(scope.row.project_id)">
+                            删除
+                        </el-button>
+                    </el-button-group>
                 </template>
             </el-table-column>
         </el-table>
-    </div>
+    </PageLayout>
 </template>
 
 <script setup>
@@ -37,6 +41,7 @@ import axios from 'axios'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import StateSelect from '../components/StateSelect.vue'
+import PageLayout from '../components/PageLayout.vue'
 
 const projects = ref([])
 const loading = ref(false)

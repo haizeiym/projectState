@@ -1,6 +1,5 @@
 <template>
-    <div class="project-edit">
-        <h2>修改项目</h2>
+    <PageLayout title="修改项目">
         <el-form :model="form" label-width="120px">
             <el-form-item label="项目名称">
                 <el-input v-model="form.project_name" />
@@ -28,11 +27,13 @@
                 </el-input>
             </el-form-item>
             <el-form-item>
-                <el-button type="primary" @click="handleSubmit">保存</el-button>
-                <el-button @click="handleCancel">取消</el-button>
+                <el-button-group>
+                    <el-button type="primary" @click="handleSubmit">保存</el-button>
+                    <el-button @click="handleCancel">取消</el-button>
+                </el-button-group>
             </el-form-item>
         </el-form>
-    </div>
+    </PageLayout>
 </template>
 
 <script setup>
@@ -42,6 +43,7 @@ import { ElMessage } from 'element-plus'
 import { InfoFilled } from '@element-plus/icons-vue'
 import axios from 'axios'
 import StateSelect from '../components/StateSelect.vue'
+import PageLayout from '../components/PageLayout.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -83,10 +85,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.project-edit {
-    padding: 20px;
-}
-
 :deep(.el-input.is-disabled .el-input__wrapper) {
     background-color: var(--el-fill-color-light);
 }
