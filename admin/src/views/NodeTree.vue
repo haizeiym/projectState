@@ -2,7 +2,10 @@
     <div class="node-tree">
         <div class="header">
             <h2>节点树形展示</h2>
-            <el-button type="default" @click="handleClose">关闭</el-button>
+            <div class="header-buttons">
+                <el-button type="primary" @click="handleAddNode">添加节点</el-button>
+                <el-button type="default" @click="handleClose">关闭</el-button>
+            </div>
         </div>
 
         <!-- 当前节点信息 -->
@@ -40,14 +43,34 @@
                     <StateSelect v-model="scope.row.state" disabled />
                 </template>
             </el-table-column>
-            <el-table-column label="操作" width="180">
+            <el-table-column label="操作" width="280">
                 <template #default="scope">
-                    <el-button type="danger" size="small" @click="handleDelete(scope.row.node_id)">
-                        删除
-                    </el-button>
+                    <el-button-group>
+                        <el-button 
+                            type="primary" 
+                            size="small" 
+                            @click="handleAddSubNode(scope.row.node_id)"
+                        >
+                            添加子节点
+                        </el-button>
+                        <el-button 
+                            type="danger" 
+                            size="small" 
+                            @click="handleDelete(scope.row.node_id)"
+                        >
+                            删除
+                        </el-button>
+                    </el-button-group>
                 </template>
             </el-table-column>
         </el-table>
+
+        <!-- 添加节点弹窗 -->
+        <NodeAdd
+            ref="nodeAddRef"
+            :parent-id="selectedParentId"
+            @success="fetchNodes(route.params.nodeId)"
+        />
     </div>
 </template>
 
@@ -57,12 +80,15 @@ import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import StateSelect from '../components/StateSelect.vue'
+import NodeAdd from './NodeAdd.vue'
 
 const route = useRoute()
 const router = useRouter()
 const nodes = ref([])
 const loading = ref(false)
 const currentNode = ref(null)
+const nodeAddRef = ref(null)
+const selectedParentId = ref(0)
 
 // 获取节点及其子节点数据
 const fetchNodes = async (nodeId) => {
@@ -86,7 +112,7 @@ const handleDelete = async (nodeId) => {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning',
-            
+            message: '此操作将永久删除该节点及其所有子节点，是否继续？'
         })
 
         await axios.delete(`/api/node/delete/${nodeId}`)
@@ -105,6 +131,17 @@ const handleClose = () => {
     router.push('/projects')
 }
 
+// 打开添加节点弹窗
+const handleAddNode = () => {
+    selectedParentId.value = Number(route.params.nodeId)
+    nodeAddRef.value.open()
+}
+
+// 添加子节点
+const handleAddSubNode = (parentId) => {
+    selectedParentId.value = parentId
+    nodeAddRef.value.open()
+}
 
 onMounted(() => {
     if (route.params.nodeId) {
@@ -123,6 +160,11 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 10px;
 }
 
 .current-node {
