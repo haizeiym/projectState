@@ -92,13 +92,12 @@ class Node:
                 if request is not None:
                     return JsonResponse(
                         {
-                            "node_id": str(node.node_id),
+                            "node_id": node.node_id,
                             "node_name": node.node_name,
                             "description": node.description,
                             "state": node.state,
-                            "parent_id": str(node.parent_id) if node.parent_id else 0,
-                        },
-                        encoder=NodeJSONEncoder,
+                            "parent_id": node.parent_id if node.parent_id else 0,
+                        }
                     )
                 return node
 

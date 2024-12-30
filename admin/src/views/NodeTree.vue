@@ -42,9 +42,6 @@
             </el-table-column>
             <el-table-column label="操作" width="180">
                 <template #default="scope">
-                    <el-button type="primary" size="small" @click="handleExpand(scope.row.node_id)">
-                        展开
-                    </el-button>
                     <el-button type="danger" size="small" @click="handleDelete(scope.row.node_id)">
                         删除
                     </el-button>
@@ -82,18 +79,14 @@ const fetchNodes = async (nodeId) => {
     }
 }
 
-// 展开节点
-const handleExpand = (nodeId) => {
-    router.push(`/node/${nodeId}`)
-}
-
 // 删除节点
 const handleDelete = async (nodeId) => {
     try {
-        await ElMessageBox.confirm('确认要删除该节点吗？', '提示', {
+        await ElMessageBox.confirm('确认要删除该节点及其所有子节点吗？', '提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
-            type: 'warning'
+            type: 'warning',
+            
         })
 
         await axios.delete(`/api/node/delete/${nodeId}`)
