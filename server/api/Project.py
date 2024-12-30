@@ -29,14 +29,46 @@ class Project:
             return None
 
     @staticmethod
-    def get(project_id):
+    def get(request=None, project_id=None):
         """
         获取项目信息
+        :param request: HTTP请求对象（可选）
         :param project_id: 项目ID
-        :return: Project对象或None
+        :return: JsonResponse 或 Project对象
         """
-        project_model = Project._get_project_model(project_id)
-        return Project.create_from_db(project_model)
+        try:
+            # 如果是通过 URL 参数传入的 project_id
+            if project_id is None and request is not None:
+                project_id = request.resolver_match.kwargs.get("project_id")
+
+            project = ProjectModel.objects.get(project_id=project_id)
+
+            if request:
+                return JsonResponse(
+                    {
+                        "project_id": project.project_id,
+                        "project_name": project.project_name,
+                        "description": project.description,
+                        "state": project.state,
+                        "node_id": project.node_id,
+                    }
+                )
+            return Project(
+                project_id=project.project_id,
+                project_name=project.project_name,
+                description=project.description,
+                state=project.state,
+                node_id=project.node_id,
+            )
+
+        except ProjectModel.DoesNotExist:
+            if request:
+                return JsonResponse({"error": "Project not found"}, status=404)
+            return None
+        except Exception as e:
+            if request:
+                return JsonResponse({"error": str(e)}, status=500)
+            raise e
 
     @staticmethod
     def create(request=None, **kwargs):
@@ -93,31 +125,54 @@ class Project:
             raise e
 
     @staticmethod
-    def update(project_id, **kwargs):
+    def update(request=None, project_id=None, **kwargs):
         """
         更新项目信息
+        :param request: HTTP请求对象（可选）
         :param project_id: 项目ID
         :param kwargs: 要更新的字段和值
-        :return: 是否更新成功
+        :return: JsonResponse 或 bool
         """
-        project_model = Project._get_project_model(project_id)
-        if project_model is None:
-            return False
-
-        field_mapping = {
-            "project_name": "project_name",
-            "description": "description",
-            "state": "state",
-            "node_id": "node_id",
-        }
-
         try:
+            # 如果是通过 URL 参数传入的 project_id
+            if project_id is None and request is not None:
+                project_id = request.resolver_match.kwargs.get("project_id")
+
+            project_model = Project._get_project_model(project_id)
+            if project_model is None:
+                if request:
+                    return JsonResponse({"error": "Project not found"}, status=404)
+                return False
+
+            # 如果是 HTTP 请求，从请求体获取数据
+            if request and request.method == "POST":
+                try:
+                    data = json.loads(request.body)
+                    kwargs.update(data)
+                except json.JSONDecodeError:
+                    return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+            field_mapping = {
+                "project_name": "project_name",
+                "description": "description",
+                "state": "state",
+                "node_id": "node_id",
+            }
+
+            # 更新字段
             for key, value in kwargs.items():
                 if key in field_mapping:
                     setattr(project_model, field_mapping[key], value)
+
             project_model.save()
+
+            if request:
+                return JsonResponse({"status": "success"})
             return True
-        except ObjectDoesNotExist:
+
+        except Exception as e:
+            if request:
+                return JsonResponse({"error": str(e)}, status=500)
             return False
 
     @staticmethod

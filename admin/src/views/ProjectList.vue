@@ -8,13 +8,20 @@
             <el-table-column prop="project_id" label="项目ID" width="180" />
             <el-table-column prop="project_name" label="项目名称" width="180" />
             <el-table-column prop="description" label="描述" width="180" />
-            <el-table-column prop="state" label="状态" width="180" />
+            <el-table-column prop="state" label="状态" width="180">
+                <template #default="scope">
+                    <StateSelect v-model="scope.row.state" disabled />
+                </template>
+            </el-table-column>
             <el-table-column prop="node_id" label="节点ID" width="180" />
-            <el-table-column label="操作" width="200">
+            <el-table-column label="操作" width="280">
                 <template #default="scope">
                     <el-button type="primary" size="small" @click="handleViewNodes(scope.row.node_id)"
                         :disabled="!scope.row.node_id">
                         查看节点
+                    </el-button>
+                    <el-button type="warning" size="small" @click="handleEdit(scope.row.project_id)">
+                        修改
                     </el-button>
                     <el-button type="danger" size="small" @click="handleDelete(scope.row.project_id)">
                         删除
@@ -30,6 +37,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
+import StateSelect from '../components/StateSelect.vue'
 
 const projects = ref([])
 const loading = ref(false)
@@ -82,6 +90,10 @@ const handleViewNodes = (nodeId) => {
     if (nodeId) {
         router.push(`/node/${nodeId}`)
     }
+}
+
+const handleEdit = (projectId) => {
+    router.push(`/project/edit/${projectId}`)
 }
 
 onMounted(() => {
