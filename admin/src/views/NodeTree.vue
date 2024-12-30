@@ -18,7 +18,7 @@
             <div class="node-info">
                 <div class="info-row">
                     <div class="info-col">
-                        <p><strong>节点ID:</strong>{{ currentNode.node_id }}</p>
+                        <!-- <p><strong>节点ID:</strong>{{ currentNode.node_id }}</p> -->
                         <p><strong>节点名称:</strong>{{ currentNode.node_name }}</p>
                         <p><strong>描述:</strong>{{ currentNode.description }}</p>
                     </div>
@@ -26,7 +26,6 @@
                         <p><strong>状态:</strong>
                             <StateSelect v-model="currentNode.state" disabled />
                         </p>
-                        <p><strong>父节点ID:</strong>{{ currentNode.parent_id }}</p>
                     </div>
                 </div>
             </div>
@@ -35,7 +34,7 @@
         <!-- 子节点列表 -->
         <h3 class="subtitle">子节点列表</h3>
         <el-table v-loading="loading" :data="nodes" row-key="node_id" style="width: 100%; margin-top: 20px;">
-            <el-table-column prop="node_id" label="节点ID" width="180" />
+            <!-- <el-table-column prop="node_id" label="节点ID" width="180" /> -->
             <el-table-column prop="node_name" label="节点名称" width="180" />
             <el-table-column prop="description" label="描述" width="180" />
             <el-table-column prop="state" label="状态" width="180">
@@ -46,18 +45,10 @@
             <el-table-column label="操作" width="280">
                 <template #default="scope">
                     <el-button-group>
-                        <el-button 
-                            type="primary" 
-                            size="small" 
-                            @click="handleAddSubNode(scope.row.node_id)"
-                        >
+                        <el-button type="primary" size="small" @click="handleAddSubNode(scope.row.node_id)">
                             添加子节点
                         </el-button>
-                        <el-button 
-                            type="danger" 
-                            size="small" 
-                            @click="handleDelete(scope.row.node_id)"
-                        >
+                        <el-button type="danger" size="small" @click="handleDelete(scope.row.node_id)">
                             删除
                         </el-button>
                     </el-button-group>
@@ -66,11 +57,7 @@
         </el-table>
 
         <!-- 添加节点弹窗 -->
-        <NodeAdd
-            ref="nodeAddRef"
-            :parent-id="selectedParentId"
-            @success="fetchNodes(route.params.nodeId)"
-        />
+        <NodeAdd ref="nodeAddRef" :parent-id="selectedParentId" @success="fetchNodes(route.params.nodeId)" />
     </div>
 </template>
 

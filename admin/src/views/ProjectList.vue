@@ -7,7 +7,7 @@
         </template>
 
         <el-table v-loading="loading" :data="projects" style="width: 100%">
-            <el-table-column prop="project_id" label="项目ID" width="180" />
+            <!-- <el-table-column prop="project_id" label="项目ID" width="180" /> -->
             <el-table-column prop="project_name" label="项目名称" width="180" />
             <el-table-column prop="description" label="描述" width="180" />
             <el-table-column prop="state" label="状态" width="180">
