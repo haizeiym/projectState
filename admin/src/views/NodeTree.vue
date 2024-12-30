@@ -14,25 +14,21 @@
             </template>
             <div class="node-info">
                 <div class="info-row">
-                    <div class="info-col">
-                        <p><strong>节点ID：</strong>{{ currentNode.node_id }}</p>
-                        <p><strong>节点名称：</strong>{{ currentNode.node_name }}</p>
-                        <p><strong>描述：</strong>{{ currentNode.description }}</p>
-                        <p><strong>状态：</strong>
-                            <el-tag :type="getStateType(currentNode.state)">
-                                {{ getStateLabel(currentNode.state) }}
-                            </el-tag>
-                        </p>
-                    </div>
-                    <div class="info-col">
-                        <p><strong>父节点ID：</strong>{{ currentNode.parent_id }}</p>
-                        <p><strong>子节点状态：</strong>
-                            <el-tag :type="getStateType(currentNode.children_state)">
-                                {{ getStateLabel(currentNode.children_state) }}
-                            </el-tag>
-                        </p>
-                        <p><strong>子节点列表：</strong>{{ currentNode.childrens.join(', ') || '无' }}</p>
-                    </div>
+                    <p><strong>节点ID：</strong>{{ currentNode.node_id }}</p>
+                    <p><strong>节点名称：</strong>{{ currentNode.node_name }}</p>
+                    <p><strong>描述：</strong>{{ currentNode.description }}</p>
+                    <p><strong>状态：</strong>
+                        <el-tag :type="getStateType(currentNode.state)">
+                            {{ getStateLabel(currentNode.state) }}
+                        </el-tag>
+                    </p>
+                    <p><strong>父节点ID：</strong>{{ currentNode.parent_id }}</p>
+                    <p><strong>子节点状态：</strong>
+                        <el-tag :type="getStateType(currentNode.children_state)">
+                            {{ getStateLabel(currentNode.children_state) }}
+                        </el-tag>
+                    </p>
+                    <p><strong>子节点列表：</strong>{{ currentNode.childrens.join(', ') || '无' }}</p>
                 </div>
             </div>
         </el-card>
@@ -178,24 +174,22 @@ onMounted(() => {
 
 .info-row {
     display: flex;
-    gap: 40px;
-    /* 两列之间的间距 */
+    flex-wrap: wrap;
+    gap: 20px;
+    /* 项目之间的间距 */
 }
 
-.info-col {
-    flex: 1;
-    /* 平均分配空间 */
-}
-
-.info-col p {
-    margin: 10px 0;
+.info-row p {
+    margin: 0;
     display: flex;
     align-items: center;
     gap: 8px;
     /* 标签和内容之间的间距 */
+    min-width: 200px;
+    /* 每个项目的最小宽度 */
 }
 
-.info-col .el-tag {
+.info-row .el-tag {
     margin-left: 4px;
 }
 
