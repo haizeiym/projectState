@@ -12,7 +12,20 @@
                 <StateSelect v-model="form.state" />
             </el-form-item>
             <el-form-item label="节点ID">
-                <el-input v-model="form.node_id" />
+                <el-input 
+                    v-model="form.node_id" 
+                    disabled 
+                    placeholder="节点ID不可修改"
+                >
+                    <template #append>
+                        <el-tooltip 
+                            content="节点ID与项目关联，不可直接修改" 
+                            placement="top"
+                        >
+                            <el-icon><InfoFilled /></el-icon>
+                        </el-tooltip>
+                    </template>
+                </el-input>
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="handleSubmit">保存</el-button>
@@ -26,6 +39,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { InfoFilled } from '@element-plus/icons-vue'
 import axios from 'axios'
 import StateSelect from '../components/StateSelect.vue'
 
@@ -71,5 +85,14 @@ onMounted(() => {
 <style scoped>
 .project-edit {
     padding: 20px;
+}
+
+:deep(.el-input.is-disabled .el-input__wrapper) {
+    background-color: var(--el-fill-color-light);
+}
+
+:deep(.el-input-group__append) {
+    padding: 0 8px;
+    color: var(--el-text-color-secondary);
 }
 </style> 

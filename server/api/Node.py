@@ -201,7 +201,7 @@ class Node:
     @staticmethod
     def delete(request=None, node_id=None):
         """
-        删除节点
+        删除节点及其所有子节点
         :param request: HTTP请求对象（可选）
         :param node_id: 节点ID
         :return: JsonResponse 或 bool
@@ -211,30 +211,40 @@ class Node:
             if node_id is None and request is not None:
                 node_id = request.resolver_match.kwargs.get("node_id")
 
-            with transaction.atomic():
+            def delete_node_and_children(node_id):
                 node_model = Node._get_node_model(node_id)
                 if not node_model:
-                    if request:
-                        return JsonResponse({"error": "Node not found"}, status=404)
-                    return False
+                    return
+
+                # 递归删除所有子节点
+                childrens = node_model.get_childrens()
+                for child_id in childrens:
+                    delete_node_and_children(child_id)
 
                 # 更新父节点的 childrens
                 if node_model.parent_id:
                     parent = Node._get_node_model(node_model.parent_id)
                     if parent:
-                        childrens = parent.get_childrens()
-                        if node_id in childrens:
-                            childrens.remove(node_id)
-                            parent.set_childrens(childrens)
+                        parent_childrens = parent.get_childrens()
+                        if node_id in parent_childrens:
+                            parent_childrens.remove(node_id)
+                            parent.set_childrens(parent_childrens)
                             parent.save()
 
+                # 删除当前节点
                 node_model.delete()
 
+            with transaction.atomic():
+                delete_node_and_children(node_id)
                 if request:
                     return JsonResponse({"status": "success"})
                 return True
 
         except Exception as e:
+            import traceback
+
+            print(f"Error in delete: {str(e)}")
+            print(traceback.format_exc())
             if request:
                 return JsonResponse({"error": str(e)}, status=500)
             return False

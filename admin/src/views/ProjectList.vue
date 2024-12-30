@@ -60,25 +60,41 @@ const fetchProjects = async () => {
 
 const handleDelete = async (projectId) => {
     try {
-        await ElMessageBox.confirm('确认要删除该项目吗？', '提示', {
+        await ElMessageBox.confirm('确认要删除该项目及其所有相关节点吗？', '提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
-            type: 'warning'
+            type: 'warning',
+            message: '此操作将永久删除该项目及其所有相关节点，是否继续？'
         })
 
         loading.value = true
+
+        // 1. 先获取项目信息，获取node_id
+        const projectResponse = await axios.get(`/api/project/get/${projectId}`)
+        const nodeId = projectResponse.data.node_id
+
+        // 2. 如果有关联节点，先删除节点及其子节点
+        if (nodeId) {
+            try {
+                await axios.delete(`/api/node/delete/${nodeId}`)
+            } catch (error) {
+                console.error('删除节点失败:', error)
+                throw new Error('删除节点失败：' + (error.response?.data?.message || error.message))
+            }
+        }
+
+        // 3. 删除项目
         const response = await axios.delete(`/api/project/delete/${projectId}`)
-        console.log(response.data)
         if (response.data.status === 'success') {
-            ElMessage.success('删除成功')
+            ElMessage.success('删除项目及相关节点成功')
             await fetchProjects() // 重新加载项目列表
         } else {
-            ElMessage.error('删除失败：' + response.data.message)
+            throw new Error(response.data.message || '删除项目失败')
         }
     } catch (error) {
-        console.log(error)
+        console.error(error)
         if (error !== 'cancel') {
-            ElMessage.error('删除失败：' + (error.response?.data?.message || error.message))
+            ElMessage.error(error.message || '删除失败')
         }
     } finally {
         loading.value = false
