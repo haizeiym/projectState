@@ -38,9 +38,6 @@ class NodeModel(models.Model):
         verbose_name="父节点ID",
         help_text="父节点的ID，0表示根节点",
     )
-    childrens = models.TextField(
-        default="", verbose_name="子节点列表", help_text="子节点ID列表，以逗号分隔"
-    )
 
     class Meta:
         db_table = "node"
@@ -70,17 +67,11 @@ class NodeModel(models.Model):
         Returns:
             list: 子节点ID列表
         """
-        return (
-            [int(x) for x in self.childrens.split(",") if x] if self.childrens else []
+        return list(
+            NodeModel.objects.filter(parent_id=self.node_id).values_list(
+                "node_id", flat=True
+            )
         )
-
-    def set_childrens(self, ids):
-        """设置子节点ID列表
-
-        Args:
-            ids (list): 子节点ID列表
-        """
-        self.childrens = ",".join(str(x) for x in ids)
 
     def add_child(self, child_id):
         """添加子节点
@@ -88,10 +79,10 @@ class NodeModel(models.Model):
         Args:
             child_id (int): 要添加的子节点ID
         """
-        children = self.get_childrens()
-        if child_id not in children:
-            children.append(child_id)
-            self.set_childrens(children)
+        child_node = NodeModel.objects.filter(node_id=child_id).first()
+        if child_node and child_node.parent_id != self.node_id:
+            child_node.parent_id = self.node_id
+            child_node.save()
 
     def remove_child(self, child_id):
         """移除子节点
@@ -99,10 +90,12 @@ class NodeModel(models.Model):
         Args:
             child_id (int): 要移除的子节点ID
         """
-        children = self.get_childrens()
-        if child_id in children:
-            children.remove(child_id)
-            self.set_childrens(children)
+        child_node = NodeModel.objects.filter(
+            node_id=child_id, parent_id=self.node_id
+        ).first()
+        if child_node:
+            child_node.parent_id = 0
+            child_node.save()
 
 
 class ProjectModel(models.Model):

@@ -17,7 +17,7 @@
                     <div class="info-col">
                         <p><strong>节点ID:</strong>{{ currentNode.node_id }}</p>
                         <p><strong>节点名称:</strong>{{ currentNode.node_name }}</p>
-                        <p><strong>描述：</strong>{{ currentNode.description }}</p>
+                        <p><strong>描述:</strong>{{ currentNode.description }}</p>
                     </div>
                     <div class="info-col">
                         <p><strong>状态:</strong>
