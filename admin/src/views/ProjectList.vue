@@ -13,7 +13,6 @@
                     <StateSelect v-model="scope.row.state" disabled />
                 </template>
             </el-table-column>
-            <el-table-column prop="node_id" label="节点ID" width="180" />
             <el-table-column label="操作" width="280">
                 <template #default="scope">
                     <el-button type="primary" size="small" @click="handleViewNodes(scope.row.node_id)"

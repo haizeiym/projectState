@@ -11,6 +11,9 @@
             <el-form-item label="状态">
                 <StateSelect v-model="form.state" />
             </el-form-item>
+            <el-form-item label="节点ID">
+                <el-input v-model="form.node_id" />
+            </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="handleSubmit">保存</el-button>
                 <el-button @click="handleCancel">取消</el-button>
