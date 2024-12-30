@@ -17,4 +17,5 @@ urlpatterns = [
     path("api/project/update/<int:project_id>", Project.update, name="project_update"),
     path("api/project/get/<int:project_id>", Project.get, name="project_get"),
     path("api/project/list", Project.list, name="project_list"),
+    path("api/node/tree/<int:node_id>", Node.get_tree, name="node_tree"),
 ]

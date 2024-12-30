@@ -1,6 +1,7 @@
 from ..models import NodeModel
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
+from django.http import JsonResponse
 
 
 class Node:
@@ -138,3 +139,48 @@ class Node:
             state=node_model.state,
             parent_id=node_model.parent_id,
         )
+
+    @staticmethod
+    def get_tree(request=None, node_id=None):
+        """
+        获取节点及其所有子节点
+        :param request: HTTP请求对象（可选）
+        :param node_id: 节点ID
+        :return: JsonResponse 或 dict
+        """
+        try:
+            # 如果是通过 URL 参数传入的 node_id
+            if node_id is None and request is not None:
+                node_id = request.resolver_match.kwargs.get("node_id")
+
+            def get_node_with_children(node_id):
+                node = NodeModel.objects.get(node_id=node_id)
+                children = NodeModel.objects.filter(parent_id=node_id)
+
+                node_data = {
+                    "node_id": node.node_id,
+                    "node_name": node.node_name,
+                    "description": node.description,
+                    "state": node.state,
+                    "children": [
+                        get_node_with_children(child.node_id) for child in children
+                    ],
+                }
+                return node_data
+
+            result = get_node_with_children(node_id)
+
+            # 如果是 HTTP 请求，返回 JsonResponse
+            if request:
+                return JsonResponse(result)
+            # 如果是直接调用，返回字典
+            return result
+
+        except NodeModel.DoesNotExist:
+            if request:
+                return JsonResponse({"error": "Node not found"}, status=404)
+            return None
+        except Exception as e:
+            if request:
+                return JsonResponse({"error": str(e)}, status=500)
+            raise e

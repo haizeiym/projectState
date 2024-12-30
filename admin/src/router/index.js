@@ -3,6 +3,7 @@ import axios from 'axios'
 import ProjectList from '../views/ProjectList.vue'
 import ProjectAdd from '../views/ProjectAdd.vue'
 import NodeAdd from '../views/NodeAdd.vue'
+import NodeTree from '../views/NodeTree.vue'
 
 // 设置 axios 默认配置
 axios.defaults.baseURL = 'http://localhost:8000'  // 假设后端运行在 8000 端口
@@ -27,6 +28,12 @@ const routes = [
         path: '/node/add',
         name: 'NodeAdd',
         component: NodeAdd
+    },
+    {
+        path: '/node/:nodeId',
+        name: 'nodeTree',
+        component: NodeTree,
+        props: true
     }
 ]
 

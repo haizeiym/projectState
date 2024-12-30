@@ -62,9 +62,14 @@ class Command(BaseCommand):
         #     self.stdout.write(self.style.ERROR(f"获取项目列表失败: {str(e)}"))
         # project = Project.create(project_name="测试项目100")
         # self.stdout.write(self.style.SUCCESS(f"创建项目成功: {project.project_id}"))
-        # 删除项目
-        success = Project.delete(100000014)
-        if success:
-            self.stdout.write(self.style.SUCCESS("删除项目成功"))
+        # # 删除项目
+        # success = Project.delete(100000014)
+        # if success:
+        #     self.stdout.write(self.style.SUCCESS("删除项目成功"))
+        # else:
+        #     self.stdout.write(self.style.ERROR("删除项目失败"))
+        node_tree = Node.get_tree(node_id=100000007)
+        if node_tree:
+            self.stdout.write(self.style.SUCCESS(f"获取节点树成功: {node_tree}"))
         else:
-            self.stdout.write(self.style.ERROR("删除项目失败"))
+            self.stdout.write(self.style.ERROR("获取节点树失败"))

@@ -10,8 +10,12 @@
             <el-table-column prop="description" label="描述" width="180" />
             <el-table-column prop="state" label="状态" width="180" />
             <el-table-column prop="node_id" label="节点ID" width="180" />
-            <el-table-column label="操作" width="120">
+            <el-table-column label="操作" width="200">
                 <template #default="scope">
+                    <el-button type="primary" size="small" @click="handleViewNodes(scope.row.node_id)"
+                        :disabled="!scope.row.node_id">
+                        查看节点
+                    </el-button>
                     <el-button type="danger" size="small" @click="handleDelete(scope.row.project_id)">
                         删除
                     </el-button>
@@ -25,9 +29,11 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useRouter } from 'vue-router'
 
 const projects = ref([])
 const loading = ref(false)
+const router = useRouter()
 
 const fetchProjects = async () => {
     loading.value = true
@@ -69,6 +75,12 @@ const handleDelete = async (projectId) => {
         }
     } finally {
         loading.value = false
+    }
+}
+
+const handleViewNodes = (nodeId) => {
+    if (nodeId) {
+        router.push(`/node/${nodeId}`)
     }
 }
 
