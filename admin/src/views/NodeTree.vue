@@ -14,21 +14,17 @@
             </template>
             <div class="node-info">
                 <div class="info-row">
-                    <p><strong>节点ID：</strong>{{ currentNode.node_id }}</p>
-                    <p><strong>节点名称：</strong>{{ currentNode.node_name }}</p>
-                    <p><strong>描述：</strong>{{ currentNode.description }}</p>
-                    <p><strong>状态：</strong>
-                        <el-tag :type="getStateType(currentNode.state)">
-                            {{ getStateLabel(currentNode.state) }}
-                        </el-tag>
-                    </p>
-                    <p><strong>父节点ID：</strong>{{ currentNode.parent_id }}</p>
-                    <p><strong>子节点状态：</strong>
-                        <el-tag :type="getStateType(currentNode.children_state)">
-                            {{ getStateLabel(currentNode.children_state) }}
-                        </el-tag>
-                    </p>
-                    <p><strong>子节点列表：</strong>{{ currentNode.childrens.join(', ') || '无' }}</p>
+                    <div class="info-col">
+                        <p><strong>节点ID:</strong>{{ currentNode.node_id }}</p>
+                        <p><strong>节点名称:</strong>{{ currentNode.node_name }}</p>
+                        <p><strong>描述：</strong>{{ currentNode.description }}</p>
+                    </div>
+                    <div class="info-col">
+                        <p><strong>状态:</strong>
+                            <StateSelect v-model="currentNode.state" disabled />
+                        </p>
+                        <p><strong>父节点ID:</strong>{{ currentNode.parent_id }}</p>
+                    </div>
                 </div>
             </div>
         </el-card>
@@ -41,9 +37,7 @@
             <el-table-column prop="description" label="描述" width="180" />
             <el-table-column prop="state" label="状态" width="180">
                 <template #default="scope">
-                    <el-tag :type="getStateType(scope.row.state)">
-                        {{ getStateLabel(scope.row.state) }}
-                    </el-tag>
+                    <StateSelect v-model="scope.row.state" disabled />
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="180">
@@ -65,6 +59,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { ElMessageBox, ElMessage } from 'element-plus'
+import StateSelect from '../components/StateSelect.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -117,27 +112,6 @@ const handleClose = () => {
     router.push('/projects')
 }
 
-// 获取状态标签
-const getStateLabel = (state) => {
-    const states = {
-        0: '未开始',
-        1: '进行中',
-        2: '已完成',
-        3: '已取消'
-    }
-    return states[state] || '未知'
-}
-
-// 获取状态类型
-const getStateType = (state) => {
-    const types = {
-        0: 'info',
-        1: 'warning',
-        2: 'success',
-        3: 'danger'
-    }
-    return types[state] || ''
-}
 
 onMounted(() => {
     if (route.params.nodeId) {
@@ -174,9 +148,12 @@ onMounted(() => {
 
 .info-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    /* 项目之间的间距 */
+    gap: 40px;
+}
+
+.info-col {
+    flex: 1;
+    /* 每列占据相等空间 */
 }
 
 .info-row p {
@@ -184,9 +161,6 @@ onMounted(() => {
     display: flex;
     align-items: center;
     gap: 8px;
-    /* 标签和内容之间的间距 */
-    min-width: 200px;
-    /* 每个项目的最小宽度 */
 }
 
 .info-row .el-tag {

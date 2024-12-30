@@ -57,11 +57,13 @@ watch(() => props.modelValue, (newVal) => {
 
 <style scoped>
 .el-select {
-    width: 100%;
+    width: 150px;
+    display: inline-block;
 }
 
 .el-tag {
-    width: 100%;
+    min-width: 60px;
     text-align: center;
+    white-space: nowrap;
 }
 </style> 
