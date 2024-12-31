@@ -1,4 +1,4 @@
-from ..models import ProjectModel, NodeModel
+from ..models import ProjectModel
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import JsonResponse
@@ -242,22 +242,12 @@ class Project:
             projects = ProjectModel.objects.all()
             result = []
             for project in projects:
-                # 如果项目关联了节点，获取节点状态
-                if project.node_id:
-                    try:
-                        node = NodeModel.objects.get(node_id=project.node_id)
-                        state = node.state
-                    except NodeModel.DoesNotExist:
-                        state = 0
-                else:
-                    state = 0
-
                 result.append(
                     {
                         "project_id": project.project_id,
                         "project_name": project.project_name,
                         "description": project.description,
-                        "state": state,  # 使用节点状态
+                        "state": project.state,
                         "node_id": project.node_id,
                     }
                 )

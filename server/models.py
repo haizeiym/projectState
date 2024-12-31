@@ -1,6 +1,8 @@
 from django.db import models
 from django.db import transaction
 from django.core.validators import MinValueValidator
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class NodeModel(models.Model):
@@ -166,3 +168,42 @@ class ProjectModel(models.Model):
             node_id (int): 要关联的节点ID
         """
         self.node_id = node_id
+
+    def sync_state_from_node(self):
+        """从关联节点同步状态"""
+        if self.node_id:
+            try:
+                node = NodeModel.objects.get(node_id=self.node_id)
+                if self.state != node.state:
+                    self.state = node.state
+                    self.save()
+            except NodeModel.DoesNotExist:
+                pass
+
+    def save(self, *args, **kwargs):
+        """重写保存方法，在保存时同步节点状态"""
+        if not self.pk:  # 新建项目时
+            super().save(*args, **kwargs)
+            self.sync_state_from_node()
+        else:  # 更新项目时
+            super().save(*args, **kwargs)
+
+
+@receiver(post_save, sender=NodeModel)
+def sync_project_states(sender, instance, **kwargs):
+    """
+    当节点保存时，同步关联项目的状态
+    """
+    from .models import ProjectModel  # 避免循环导入
+
+    # 确保 node_id 是整数类型
+    try:
+        node_id = int(instance.node_id)
+    except (TypeError, ValueError):
+        print(f"Warning: Invalid node_id type: {type(instance.node_id)}")
+        return
+
+    # 查找关联到此节点的所有项目
+    projects = ProjectModel.objects.filter(node_id=node_id)
+    for project in projects:
+        project.sync_state_from_node()

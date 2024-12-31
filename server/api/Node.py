@@ -186,7 +186,7 @@ class Node:
                             updated = True
 
                     if updated:
-                        node_model.save()
+                        node_model.save()  # 触发信号，自动同步项目状态
                         # 如果更新了状态，检查父节点状态
                         if "state" in kwargs:
                             Node._check_parent_state(node_model.parent_id)
