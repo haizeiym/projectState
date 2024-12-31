@@ -3,6 +3,8 @@
         <div class="header">
             <h2>节点树形展示</h2>
             <div class="header-buttons">
+                <el-switch v-model="showNodeId" class="show-id-switch" inline-prompt :active-text="'显示ID'"
+                    :inactive-text="'隐藏ID'" />
                 <el-button type="primary" @click="handleAddNode">添加节点</el-button>
                 <el-button type="default" @click="handleClose">关闭</el-button>
             </div>
@@ -18,7 +20,7 @@
             <div class="node-info">
                 <div class="info-row">
                     <div class="info-col">
-                        <!-- <p><strong>节点ID:</strong>{{ currentNode.node_id }}</p> -->
+                        <p v-if="showNodeId"><strong>节点ID:</strong>{{ currentNode.node_id }}</p>
                         <p><strong>节点名称:</strong>{{ currentNode.node_name }}</p>
                         <p><strong>描述:</strong>{{ currentNode.description }}</p>
                         <p>
@@ -36,7 +38,7 @@
         <!-- 子节点列表 -->
         <h3 class="subtitle">子节点列表</h3>
         <el-table v-loading="loading" :data="nodes" row-key="node_id" style="width: 100%; margin-top: 20px;">
-            <el-table-column prop="node_id" label="节点ID" width="180" />
+            <el-table-column v-if="showNodeId" prop="node_id" label="节点ID" width="180" />
             <el-table-column prop="node_name" label="节点名称" width="180" />
             <el-table-column prop="description" label="描述" width="180" />
             <el-table-column prop="state" label="状态" width="180">
@@ -86,6 +88,7 @@ const currentNode = ref(null)
 const nodeAddRef = ref(null)
 const selectedParentId = ref(0)
 const nodeEditRef = ref(null)
+const showNodeId = ref(false)
 
 // 获取节点及其子节点数据
 const fetchNodes = async (nodeId) => {
@@ -171,6 +174,11 @@ onMounted(() => {
 .header-buttons {
     display: flex;
     gap: 10px;
+    align-items: center;
+}
+
+.show-id-switch {
+    margin-right: 10px;
 }
 
 .current-node {

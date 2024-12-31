@@ -23,7 +23,7 @@
                     <el-button-group>
                         <el-button type="primary" size="small" @click="handleViewNodes(scope.row.node_id)"
                             :disabled="!scope.row.node_id">
-                            查看节点
+                            节点管理
                         </el-button>
                         <el-button type="warning" size="small" @click="handleEdit(scope.row.project_id)">
                             修改
