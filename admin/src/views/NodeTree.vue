@@ -65,7 +65,7 @@
         <NodeAdd ref="nodeAddRef" :parent-id="selectedParentId" @success="fetchNodes(route.params.nodeId)" />
 
         <!-- 添加节点编辑弹窗 -->
-        <NodeEdit ref="nodeEditRef" :node-id="selectedNodeId" @success="fetchNodes(route.params.nodeId)" />
+        <NodeEdit ref="nodeEditRef" @success="fetchNodes(route.params.nodeId)" />
     </div>
 </template>
 
@@ -86,7 +86,6 @@ const currentNode = ref(null)
 const nodeAddRef = ref(null)
 const selectedParentId = ref(0)
 const nodeEditRef = ref(null)
-const selectedNodeId = ref(0)
 
 // 获取节点及其子节点数据
 const fetchNodes = async (nodeId) => {
@@ -147,8 +146,7 @@ const handleEdit = (nodeId) => {
         ElMessage.error('节点ID不能为空')
         return
     }
-    selectedNodeId.value = nodeId
-    nodeEditRef.value.open()
+    nodeEditRef.value.open(nodeId)
 }
 
 onMounted(() => {

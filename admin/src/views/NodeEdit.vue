@@ -26,20 +26,12 @@ import { ElMessage } from 'element-plus'
 import axios from 'axios'
 import StateTag from '../components/StateTag.vue'
 
-const props = defineProps({
-    nodeId: {
-        type: Number,
-        required: true,
-        validator: (value) => {
-            return value > 0 || value === null
-        }
-    }
-})
 
 const emit = defineEmits(['success'])
 
 const dialogVisible = ref(false)
 const form = ref({
+    node_id: 0,
     node_name: '',
     description: '',
     state: 0
@@ -48,8 +40,9 @@ const form = ref({
 // 获取节点信息
 const fetchNode = async () => {
     try {
-        const response = await axios.get(`/api/node/get/${props.nodeId}`)
+        const response = await axios.get(`/api/node/get/${form.value.node_id}`)
         form.value = {
+            node_id: form.value.node_id,
             node_name: response.data.node_name,
             description: response.data.description,
             state: response.data.state
@@ -64,7 +57,7 @@ const fetchNode = async () => {
 const handleStateChange = async (newState) => {
     try {
         // 更新所有子节点的状态
-        const response = await axios.get(`/api/node/tree/${props.nodeId}`)
+        const response = await axios.get(`/api/node/tree/${form.value.node_id}`)
         const updateChildrenState = async (node) => {
             if (node.children && node.children.length > 0) {
                 for (const child of node.children) {
@@ -83,12 +76,13 @@ const handleStateChange = async (newState) => {
 // 提交表单
 const handleSubmit = async () => {
     try {
-        await axios.post(`/api/node/update/${props.nodeId}`, form.value)
+        await axios.post(`/api/node/update/${form.value.node_id}`, form.value)
         ElMessage.success('修改成功')
         dialogVisible.value = false
         emit('success')
         // 重置表单
         form.value = {
+            node_id: 0,
             node_name: '',
             description: '',
             state: 0
@@ -103,6 +97,7 @@ const handleCancel = () => {
     dialogVisible.value = false
     // 重置表单
     form.value = {
+        node_id: 0,
         node_name: '',
         description: '',
         state: 0
@@ -110,13 +105,14 @@ const handleCancel = () => {
 }
 
 // 对外暴露打开弹窗的方法
-const open = async () => {
-    if (!props.nodeId || props.nodeId <= 0) {
+const open = (nodeId) => {
+    if (!nodeId || nodeId <= 0) {
         ElMessage.error('节点ID不能为空')
         return
     }
+    form.value.node_id = nodeId
     dialogVisible.value = true
-    await fetchNode()
+    fetchNode()
 }
 
 defineExpose({
