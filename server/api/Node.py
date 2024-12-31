@@ -30,7 +30,6 @@ class Node:
         self.description = description
         self.state = state
         self.parent_id = parent_id
-        self.children_state = 0
 
     @staticmethod
     def _get_node_model(node_id):
@@ -111,7 +110,6 @@ class Node:
                     description=data.get("description"),
                     state=data.get("state", 0),
                     parent_id=data.get("parent_id", 0),
-                    children_state=data.get("children_state", 0),
                 )
                 node_model.save()
                 # 如果有父节点，检查父节点状态
@@ -344,7 +342,6 @@ class Node:
                     "description": node.description,
                     "state": node.state,
                     "parent_id": node.parent_id,
-                    "children_state": node.children_state,
                     "children": [
                         get_node_with_children(child.node_id) for child in children
                     ],

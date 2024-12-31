@@ -25,11 +25,6 @@ class NodeModel(models.Model):
         verbose_name="状态",
         help_text="节点的当前状态",
     )
-    children_state = models.IntegerField(
-        default=0,
-        verbose_name="子节点状态",
-        help_text="子节点的统一状态，如果子节点状态不一致则为默认值",
-    )
 
     # 树形结构字段
     parent_id = models.IntegerField(

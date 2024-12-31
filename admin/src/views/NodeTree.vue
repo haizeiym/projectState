@@ -21,7 +21,7 @@
                         <!-- <p><strong>节点ID:</strong>{{ currentNode.node_id }}</p> -->
                         <p><strong>节点名称:</strong>{{ currentNode.node_name }}</p>
                         <p><strong>描述:</strong>{{ currentNode.description }}</p>
-                        <p><strong>状态:</strong>
+                        <p><strong>状态(所有子节点上一次统一状态):</strong>
                             <StateTag :modelValue="currentNode.state" />
                         </p>
                     </div>
