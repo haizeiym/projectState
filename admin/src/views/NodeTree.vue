@@ -21,8 +21,12 @@
                         <!-- <p><strong>节点ID:</strong>{{ currentNode.node_id }}</p> -->
                         <p><strong>节点名称:</strong>{{ currentNode.node_name }}</p>
                         <p><strong>描述:</strong>{{ currentNode.description }}</p>
-                        <p><strong>状态(所有子节点上一次统一状态):</strong>
+                        <p>
+                            <strong>状态:</strong>
                             <StateTag :modelValue="currentNode.state" />
+                            <span class="state-info">
+                                (所有子节点上一次统一状态)
+                            </span>
                         </p>
                     </div>
                 </div>
@@ -214,5 +218,11 @@ onMounted(() => {
 .el-tag {
     min-width: 60px;
     text-align: center;
+}
+
+.state-info {
+    color: var(--el-text-color-secondary);
+    font-size: 13px;
+    margin-left: 8px;
 }
 </style>
