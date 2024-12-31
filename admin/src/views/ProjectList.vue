@@ -1,13 +1,15 @@
 <template>
     <PageLayout title="项目列表">
         <template #actions>
+            <el-switch v-model="showProjectId" class="id-switch" inline-prompt :active-text="'显示ID'"
+                :inactive-text="'隐藏ID'" />
             <el-button type="primary" @click="$router.push('/project/add')">
                 添加项目
             </el-button>
         </template>
 
         <el-table v-loading="loading" :data="projects" style="width: 100%">
-            <!-- <el-table-column prop="project_id" label="项目ID" width="180" /> -->
+            <el-table-column v-if="showProjectId" prop="project_id" label="项目ID" width="180" />
             <el-table-column prop="project_name" label="项目名称" width="180" />
             <el-table-column prop="description" label="描述" width="180" />
             <el-table-column prop="state" label="状态" width="180">
@@ -55,6 +57,7 @@ import PageLayout from '../components/PageLayout.vue'
 const projects = ref([])
 const loading = ref(false)
 const router = useRouter()
+const showProjectId = ref(false)
 
 const fetchProjects = async () => {
     loading.value = true
@@ -131,6 +134,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.id-switch {
+    margin-right: 12px;
+}
+
 .status-header {
     display: flex;
     align-items: center;
