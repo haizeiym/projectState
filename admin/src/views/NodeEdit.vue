@@ -59,8 +59,12 @@ const handleStateChange = async (newState) => {
         // 更新所有子节点的状态
         const response = await axios.get(`/api/node/tree/${form.value.node_id}`)
         const updateChildrenState = async (node) => {
+            console.log(node.children)
             if (node.children && node.children.length > 0) {
                 for (const child of node.children) {
+                    if (child.children && child.children.length > 0) {
+                        await updateChildrenState(child)
+                    }
                     await axios.post(`/api/node/update/${child.node_id}`, {
                         state: newState
                     })
