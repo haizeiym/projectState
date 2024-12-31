@@ -11,6 +11,12 @@
             <el-table-column prop="project_name" label="项目名称" width="180" />
             <el-table-column prop="description" label="描述" width="180" />
             <el-table-column prop="state" label="状态" width="180">
+                <template #header>
+                    <div class="status-header">
+                        状态
+                        <span class="status-info">(非实时状态)</span>
+                    </div>
+                </template>
                 <template #default="scope">
                     <template v-if="scope.row.node_id">
                         <StateTag :modelValue="scope.row.state" />
@@ -125,6 +131,17 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.status-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.status-info {
+    color: var(--el-text-color-secondary);
+    font-size: 13px;
+}
+
 .no-node-state {
     color: var(--el-text-color-secondary);
     font-size: 13px;
