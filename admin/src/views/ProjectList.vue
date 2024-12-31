@@ -1,6 +1,31 @@
 <template>
     <PageLayout title="项目列表">
         <template #actions>
+            <div class="refresh-controls">
+                <el-button-group>
+                    <el-button size="small" :type="refreshInterval === 0 ? 'primary' : ''"
+                        @click="setRefreshInterval(0)">
+                        不限制
+                    </el-button>
+                    <el-button size="small" :type="refreshInterval === 10 ? 'primary' : ''"
+                        @click="setRefreshInterval(10)">
+                        10秒间隔
+                    </el-button>
+                    <el-button size="small" :type="refreshInterval === 30 ? 'primary' : ''"
+                        @click="setRefreshInterval(30)">
+                        30秒间隔
+                    </el-button>
+                    <el-button size="small" :type="refreshInterval === 60 ? 'primary' : ''"
+                        @click="setRefreshInterval(60)">
+                        1分钟间隔
+                    </el-button>
+                </el-button-group>
+                <el-button :loading="loading" size="small" @click="fetchProjectsWithInterval">
+                    <el-icon>
+                        <Refresh />
+                    </el-icon>
+                </el-button>
+            </div>
             <el-switch v-model="showProjectId" class="id-switch" inline-prompt :active-text="'显示ID'"
                 :inactive-text="'隐藏ID'" />
             <el-button type="primary" @click="$router.push('/project/add')">
@@ -51,6 +76,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
+import { Refresh } from '@element-plus/icons-vue'
 import StateTag from '../components/StateTag.vue'
 import PageLayout from '../components/PageLayout.vue'
 
@@ -58,6 +84,27 @@ const projects = ref([])
 const loading = ref(false)
 const router = useRouter()
 const showProjectId = ref(false)
+const refreshInterval = ref(10)
+let lastFetchTime = 0
+
+// 设置请求间隔
+const setRefreshInterval = (interval) => {
+    refreshInterval.value = interval
+}
+
+// 带有间隔限制的请求函数
+const fetchProjectsWithInterval = async () => {
+    const now = Date.now()
+    const timeSinceLastFetch = now - lastFetchTime
+
+    if (refreshInterval.value > 0 && timeSinceLastFetch < refreshInterval.value * 1000) {
+        ElMessage.warning(`请求过于频繁，请等待 ${Math.ceil((refreshInterval.value * 1000 - timeSinceLastFetch) / 1000)} 秒后再试`)
+        return
+    }
+
+    lastFetchTime = now
+    await fetchProjects()
+}
 
 const fetchProjects = async () => {
     loading.value = true
@@ -134,6 +181,13 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.refresh-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 12px;
+}
+
 .id-switch {
     margin-right: 12px;
 }
