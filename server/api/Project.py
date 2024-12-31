@@ -1,4 +1,4 @@
-from ..models import ProjectModel
+from ..models import ProjectModel, NodeModel
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import JsonResponse
@@ -236,33 +236,31 @@ class Project:
         )
 
     @staticmethod
-    def list(request=None):
-        """
-        获取所有项目列表
-        :param request: HTTP请求对象（可选）
-        :return: 项目列表或JsonResponse
-        """
+    def list(request):
+        """获取项目列表"""
         try:
             projects = ProjectModel.objects.all()
-            project_list = []
-
+            result = []
             for project in projects:
-                project_data = {
-                    "project_id": project.project_id,
-                    "project_name": project.project_name,
-                    "description": project.description,
-                    "state": project.state,
-                    "node_id": project.node_id,
-                }
-                project_list.append(project_data)
+                # 如果项目关联了节点，获取节点状态
+                if project.node_id:
+                    try:
+                        node = NodeModel.objects.get(node_id=project.node_id)
+                        state = node.state
+                    except NodeModel.DoesNotExist:
+                        state = 0
+                else:
+                    state = 0
 
-            # 如果是HTTP请求，返回JsonResponse
-            if request:
-                return JsonResponse(project_list, safe=False)
-            # 如果是直接调用，返回列表
-            return project_list
-
+                result.append(
+                    {
+                        "project_id": project.project_id,
+                        "project_name": project.project_name,
+                        "description": project.description,
+                        "state": state,  # 使用节点状态
+                        "node_id": project.node_id,
+                    }
+                )
+            return JsonResponse(result, safe=False)
         except Exception as e:
-            if request:
-                return JsonResponse({"error": str(e)}, status=500)
-            raise e
+            return JsonResponse({"error": str(e)}, status=500)

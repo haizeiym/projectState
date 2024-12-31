@@ -12,7 +12,10 @@
             <el-table-column prop="description" label="描述" width="180" />
             <el-table-column prop="state" label="状态" width="180">
                 <template #default="scope">
-                    <StateTag :modelValue="scope.row.state" />
+                    <template v-if="scope.row.node_id">
+                        <StateTag :modelValue="scope.row.state" />
+                    </template>
+                    <span v-else class="no-node-state">未关联节点</span>
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="280">
@@ -120,3 +123,10 @@ onMounted(() => {
     fetchProjects()
 })
 </script>
+
+<style scoped>
+.no-node-state {
+    color: var(--el-text-color-secondary);
+    font-size: 13px;
+}
+</style>
