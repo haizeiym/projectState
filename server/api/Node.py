@@ -46,14 +46,41 @@ class Node:
             return None
 
     @staticmethod
-    def get(node_id):
+    def get(request=None, node_id=None):
         """
         获取节点信息
+        :param request: HTTP请求对象（可选）
         :param node_id: 节点ID
-        :return: Node对象或None
+        :return: JsonResponse 或 Node对象
         """
-        node_model = Node._get_node_model(node_id)
-        return Node.create_from_db(node_model)
+        try:
+            # 如果是通过 URL 参数传入的 node_id
+            if node_id is None and request is not None:
+                node_id = request.resolver_match.kwargs.get("node_id")
+
+            node_model = Node._get_node_model(node_id)
+            if not node_model:
+                if request:
+                    return JsonResponse({"error": "Node not found"}, status=404)
+                return None
+
+            node = Node.create_from_db(node_model)
+            if request:
+                return JsonResponse(
+                    {
+                        "node_id": node.node_id,
+                        "node_name": node.node_name,
+                        "description": node.description,
+                        "state": node.state,
+                        "parent_id": node.parent_id,
+                    }
+                )
+            return node
+
+        except Exception as e:
+            if request:
+                return JsonResponse({"error": str(e)}, status=500)
+            return None
 
     @staticmethod
     def create(request=None, **kwargs):

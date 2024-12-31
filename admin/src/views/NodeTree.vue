@@ -21,8 +21,6 @@
                         <!-- <p><strong>节点ID:</strong>{{ currentNode.node_id }}</p> -->
                         <p><strong>节点名称:</strong>{{ currentNode.node_name }}</p>
                         <p><strong>描述:</strong>{{ currentNode.description }}</p>
-                    </div>
-                    <div class="info-col">
                         <p><strong>状态:</strong>
                             <StateSelect v-model="currentNode.state" disabled />
                         </p>
@@ -34,7 +32,7 @@
         <!-- 子节点列表 -->
         <h3 class="subtitle">子节点列表</h3>
         <el-table v-loading="loading" :data="nodes" row-key="node_id" style="width: 100%; margin-top: 20px;">
-            <!-- <el-table-column prop="node_id" label="节点ID" width="180" /> -->
+            <el-table-column prop="node_id" label="节点ID" width="180" />
             <el-table-column prop="node_name" label="节点名称" width="180" />
             <el-table-column prop="description" label="描述" width="180" />
             <el-table-column prop="state" label="状态" width="180">
@@ -45,6 +43,9 @@
             <el-table-column label="操作" width="280">
                 <template #default="scope">
                     <el-button-group>
+                        <el-button type="warning" size="small" @click="handleEdit(scope.row.node_id)">
+                            修改
+                        </el-button>
                         <el-button type="primary" size="small" @click="handleAddSubNode(scope.row.node_id)">
                             添加子节点
                         </el-button>
@@ -58,6 +59,9 @@
 
         <!-- 添加节点弹窗 -->
         <NodeAdd ref="nodeAddRef" :parent-id="selectedParentId" @success="fetchNodes(route.params.nodeId)" />
+
+        <!-- 添加节点编辑弹窗 -->
+        <NodeEdit ref="nodeEditRef" :node-id="selectedNodeId" @success="fetchNodes(route.params.nodeId)" />
     </div>
 </template>
 
@@ -68,6 +72,7 @@ import axios from 'axios'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import StateSelect from '../components/StateSelect.vue'
 import NodeAdd from './NodeAdd.vue'
+import NodeEdit from './NodeEdit.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -76,6 +81,8 @@ const loading = ref(false)
 const currentNode = ref(null)
 const nodeAddRef = ref(null)
 const selectedParentId = ref(0)
+const nodeEditRef = ref(null)
+const selectedNodeId = ref(0)
 
 // 获取节点及其子节点数据
 const fetchNodes = async (nodeId) => {
@@ -128,6 +135,16 @@ const handleAddNode = () => {
 const handleAddSubNode = (parentId) => {
     selectedParentId.value = parentId
     nodeAddRef.value.open()
+}
+
+// 处理编辑
+const handleEdit = (nodeId) => {
+    if (!nodeId) {
+        ElMessage.error('节点ID不能为空')
+        return
+    }
+    selectedNodeId.value = nodeId
+    nodeEditRef.value.open()
 }
 
 onMounted(() => {
