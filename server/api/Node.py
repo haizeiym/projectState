@@ -147,46 +147,65 @@ class Node:
         :return: JsonResponse 或 bool
         """
         try:
+            # 如果是通过 URL 参数传入的 node_id
             if node_id is None and request is not None:
                 node_id = request.resolver_match.kwargs.get("node_id")
 
+            print(f"Updating node {node_id} with data:", kwargs)  # 添加调试日志
+
+            # 获取节点
             node_model = Node._get_node_model(node_id)
             if node_model is None:
                 if request:
                     return JsonResponse({"error": "Node not found"}, status=404)
                 return False
 
-            field_mapping = {
-                "node_name": "node_name",
-                "description": "description",
-                "state": "state",
-                "parent_id": "parent_id",
-                "children_state": "children_state",
-            }
-
+            # 获取请求数据
             if request and request.method == "POST":
                 try:
                     data = json.loads(request.body)
-                    kwargs.update(data)
-                except json.JSONDecodeError:
+                    print(f"Received request data:", data)  # 添加调试日志
+                    kwargs = data
+                except json.JSONDecodeError as e:
+                    print(f"JSON decode error:", str(e))  # 添加调试日志
                     return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-            with transaction.atomic():
-                # 更新字段
-                for key, value in kwargs.items():
-                    if key in field_mapping:
-                        setattr(node_model, field_mapping[key], value)
+            # 定义可更新的字段
+            allowed_fields = ["node_name", "description", "state"]
 
-                node_model.save()
-                Node._check_children_states(node_id)
+            try:
+                with transaction.atomic():
+                    # 更新字段
+                    updated = False
+                    for field in allowed_fields:
+                        if field in kwargs:
+                            print(f"Setting {field} to {kwargs[field]}")  # 添加调试日志
+                            setattr(node_model, field, kwargs[field])
+                            updated = True
 
-                if request:
-                    return JsonResponse({"status": "success"})
-                return True
+                    if updated:
+                        node_model.save()
+                        # 如果更新了状态，检查子节点状态
+                        if "state" in kwargs:
+                            Node._check_children_states(node_id)
+
+                    if request:
+                        return JsonResponse({"status": "success"})
+                    return True
+
+            except Exception as e:
+                print(f"Transaction error:", str(e))  # 添加调试日志
+                raise
 
         except Exception as e:
+            import traceback
+
+            print(f"Error in update: {str(e)}")
+            print(traceback.format_exc())
             if request:
-                return JsonResponse({"error": str(e)}, status=500)
+                return JsonResponse(
+                    {"error": str(e), "details": traceback.format_exc()}, status=500
+                )
             return False
 
     @staticmethod
@@ -244,19 +263,24 @@ class Node:
 
     @staticmethod
     def _check_children_states(node_id):
-        """
-        检查子节点状态一致性
-        :param node_id: 节点ID
-        """
-        children = NodeModel.objects.filter(parent_id=node_id)
-        if not children.exists():
-            return
+        """检查子节点状态一致性"""
+        try:
+            children = NodeModel.objects.filter(parent_id=node_id)
+            if not children.exists():
+                return
 
-        first_state = children.first().state
-        all_same = all(child.state == first_state for child in children)
+            first_state = children.first().state
+            all_same = all(child.state == first_state for child in children)
 
-        if all_same:
-            NodeModel.objects.filter(node_id=node_id).update(children_state=first_state)
+            if all_same:
+                NodeModel.objects.filter(node_id=node_id).update(
+                    children_state=first_state
+                )
+        except Exception as e:
+            print(f"Error checking children states: {str(e)}")
+            import traceback
+
+            print(traceback.format_exc())
 
     @staticmethod
     def create_from_db(node_model):

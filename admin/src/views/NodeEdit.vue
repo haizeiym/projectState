@@ -8,12 +8,7 @@
                 <el-input v-model="form.description" type="textarea" />
             </el-form-item>
             <el-form-item label="状态">
-                <StateSelect v-model="form.state" :disabled="hasParent" @change="handleStateChange" />
-                <div v-if="hasParent" class="state-info">
-                    <el-alert type="info" :closable="false" show-icon>
-                        该节点有父节点，状态由父节点统一管理
-                    </el-alert>
-                </div>
+                <StateTag v-model="form.state" editable @change="handleStateChange" />
             </el-form-item>
         </el-form>
         <template #footer>
@@ -26,10 +21,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
-import StateSelect from '../components/StateSelect.vue'
+import StateTag from '../components/StateTag.vue'
 
 const props = defineProps({
     nodeId: {
@@ -47,33 +42,21 @@ const dialogVisible = ref(false)
 const form = ref({
     node_name: '',
     description: '',
-    state: 0,
-    parent_id: 0
+    state: 0
 })
-
-const hasParent = computed(() => form.value.parent_id > 0)
 
 // 获取节点信息
 const fetchNode = async () => {
     try {
         const response = await axios.get(`/api/node/get/${props.nodeId}`)
-        form.value = response.data
+        form.value = {
+            node_name: response.data.node_name,
+            description: response.data.description,
+            state: response.data.state
+        }
     } catch (error) {
         ElMessage.error('获取节点信息失败：' + (error.response?.data?.message || error.message))
         dialogVisible.value = false
-    }
-}
-
-// 更新父节点状态
-const updateParentState = async () => {
-    if (form.value.parent_id) {
-        try {
-            await axios.post(`/api/node/update/${form.value.parent_id}`, {
-                children_state: form.value.state
-            })
-        } catch (error) {
-            console.error('更新父节点状态失败:', error)
-        }
     }
 }
 
@@ -102,10 +85,15 @@ const handleStateChange = async (newState) => {
 const handleSubmit = async () => {
     try {
         await axios.post(`/api/node/update/${props.nodeId}`, form.value)
-        await updateParentState()
         ElMessage.success('修改成功')
         dialogVisible.value = false
         emit('success')
+        // 重置表单
+        form.value = {
+            node_name: '',
+            description: '',
+            state: 0
+        }
     } catch (error) {
         ElMessage.error('修改失败：' + (error.response?.data?.message || error.message))
     }
@@ -114,11 +102,16 @@ const handleSubmit = async () => {
 // 取消
 const handleCancel = () => {
     dialogVisible.value = false
+    // 重置表单
+    form.value = {
+        node_name: '',
+        description: '',
+        state: 0
+    }
 }
 
 // 对外暴露打开弹窗的方法
 const open = async () => {
-    console.log('open', props.nodeId)
     if (!props.nodeId || props.nodeId <= 0) {
         ElMessage.error('节点ID不能为空')
         return
@@ -137,13 +130,5 @@ defineExpose({
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-}
-
-.state-info {
-    margin-top: 8px;
-}
-
-:deep(.el-alert) {
-    padding: 8px 16px;
 }
 </style>

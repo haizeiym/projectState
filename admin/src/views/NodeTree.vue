@@ -22,7 +22,7 @@
                         <p><strong>节点名称:</strong>{{ currentNode.node_name }}</p>
                         <p><strong>描述:</strong>{{ currentNode.description }}</p>
                         <p><strong>状态:</strong>
-                            <StateSelect v-model="currentNode.state" disabled />
+                            <StateTag :modelValue="currentNode.state" />
                         </p>
                     </div>
                 </div>
@@ -37,7 +37,7 @@
             <el-table-column prop="description" label="描述" width="180" />
             <el-table-column prop="state" label="状态" width="180">
                 <template #default="scope">
-                    <StateSelect v-model="scope.row.state" disabled />
+                    <StateTag :modelValue="scope.row.state" />
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="280">
@@ -70,9 +70,9 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import StateSelect from '../components/StateSelect.vue'
 import NodeAdd from './NodeAdd.vue'
 import NodeEdit from './NodeEdit.vue'
+import StateTag from '../components/StateTag.vue'
 
 const route = useRoute()
 const router = useRouter()

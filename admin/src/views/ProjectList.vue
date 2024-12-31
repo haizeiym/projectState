@@ -12,7 +12,7 @@
             <el-table-column prop="description" label="描述" width="180" />
             <el-table-column prop="state" label="状态" width="180">
                 <template #default="scope">
-                    <StateSelect v-model="scope.row.state" disabled />
+                    <StateTag :modelValue="scope.row.state" />
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="280">
@@ -40,7 +40,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
-import StateSelect from '../components/StateSelect.vue'
+import StateTag from '../components/StateTag.vue'
 import PageLayout from '../components/PageLayout.vue'
 
 const projects = ref([])

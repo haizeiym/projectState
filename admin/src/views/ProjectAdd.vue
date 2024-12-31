@@ -2,12 +2,7 @@
     <div class="project-add">
         <h2>添加项目</h2>
         <div class="description-text">
-            <el-alert
-                title="默认添加节点，名称，描述，状态相同"
-                type="info"
-                :closable="false"
-                class="mb-20"
-            />
+            <el-alert title="默认添加节点，名称，描述，状态相同" type="info" :closable="false" class="mb-20" />
         </div>
         <el-form :model="form" label-width="120px">
             <el-form-item label="项目名称">
@@ -64,11 +59,11 @@ const handleSubmit = async () => {
     try {
         // 先创建节点
         const nodeId = await createNode()
-        
+
         // 设置节点ID并创建项目
         form.value.node_id = nodeId
         await axios.post('/api/project/create', form.value)
-        
+
         ElMessage.success('创建成功')
         router.push('/projects')
     } catch (error) {
