@@ -71,7 +71,6 @@ const handleStateChange = async (newState) => {
                     await axios.post(`/api/node/update/${child.node_id}`, {
                         state: newState
                     })
-                    await updateChildrenState(child)
                 }
             }
         }

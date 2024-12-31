@@ -114,6 +114,10 @@ class Node:
                     children_state=data.get("children_state", 0),
                 )
                 node_model.save()
+                # 如果有父节点，检查父节点状态
+                if node_model.parent_id:
+                    Node._check_parent_state(node_model.parent_id)
+
                 node = Node.create_from_db(node_model)
                 node.node_id = node_id
                 if request is not None:
@@ -179,22 +183,22 @@ class Node:
                     updated = False
                     for field in allowed_fields:
                         if field in kwargs:
-                            print(f"Setting {field} to {kwargs[field]}")  # 添加调试日志
+                            print(f"Setting {field} to {kwargs[field]}")
                             setattr(node_model, field, kwargs[field])
                             updated = True
 
                     if updated:
                         node_model.save()
-                        # 如果更新了状态，检查子节点状态
+                        # 如果更新了状态，检查父节点状态
                         if "state" in kwargs:
-                            Node._check_children_states(node_id)
+                            Node._check_parent_state(node_model.parent_id)
 
                     if request:
                         return JsonResponse({"status": "success"})
                     return True
 
             except Exception as e:
-                print(f"Transaction error:", str(e))  # 添加调试日志
+                print(f"Transaction error:", str(e))
                 raise
 
         except Exception as e:
@@ -226,25 +230,20 @@ class Node:
                 if not node_model:
                     return
 
+                # 保存父节点ID，用于后续检查状态
+                parent_id = node_model.parent_id
+
                 # 递归删除所有子节点
                 children = list(NodeModel.objects.filter(parent_id=node_id))
                 for child in children:
                     delete_node_and_children(child.node_id)
 
-                # 更新父节点的 childrens
-                if node_model.parent_id:
-                    parent = Node._get_node_model(node_model.parent_id)
-                    if parent:
-                        parent_childrens = list(
-                            NodeModel.objects.filter(parent_id=node_model.parent_id)
-                        )
-                        if node_id in parent_childrens:
-                            parent_childrens.remove(node_id)
-                            parent.set_childrens(parent_childrens)
-                            parent.save()
-
                 # 删除当前节点
                 node_model.delete()
+
+                # 删除完成后检查父节点状态
+                if parent_id:
+                    Node._check_parent_state(parent_id)
 
             with transaction.atomic():
                 delete_node_and_children(node_id)
@@ -262,22 +261,46 @@ class Node:
             return False
 
     @staticmethod
-    def _check_children_states(node_id):
-        """检查子节点状态一致性"""
+    def _check_parent_state(parent_id):
+        """
+        递归检查父节点状态
+        :param parent_id: 父节点ID
+        """
+        if not parent_id:
+            return
+
         try:
-            children = NodeModel.objects.filter(parent_id=node_id)
-            if not children.exists():
+            # 获取父节点
+            parent = NodeModel.objects.get(node_id=parent_id)
+            if not parent:
                 return
 
-            first_state = children.first().state
-            all_same = all(child.state == first_state for child in children)
+            # 使用 values_list 直接获取子节点状态列表
+            children_states = list(
+                NodeModel.objects.filter(parent_id=parent_id).values_list(
+                    "state", flat=True
+                )
+            )
+
+            if not children_states:
+                return
+
+            # 检查所有子节点状态是否一致
+            first_state = children_states[0]
+            all_same = all(state == first_state for state in children_states)
 
             if all_same:
-                NodeModel.objects.filter(node_id=node_id).update(
-                    children_state=first_state
-                )
+                # 只有当状态不同时才更新
+                if parent.state != first_state:
+                    parent.state = first_state
+                    parent.save()
+
+                    # 递归检查上层父节点
+                    if parent.parent_id:
+                        Node._check_parent_state(parent.parent_id)
+
         except Exception as e:
-            print(f"Error checking children states: {str(e)}")
+            print(f"Error checking parent state: {str(e)}")
             import traceback
 
             print(traceback.format_exc())
