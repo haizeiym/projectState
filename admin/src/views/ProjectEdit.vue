@@ -8,20 +8,15 @@
                 <el-input v-model="form.description" type="textarea" />
             </el-form-item>
             <el-form-item label="状态">
-                <StateSelect v-model="form.state" />
+                <StateTag :modelValue="form.state" />
             </el-form-item>
             <el-form-item label="节点ID">
-                <el-input 
-                    v-model="form.node_id" 
-                    disabled 
-                    placeholder="节点ID不可修改"
-                >
+                <el-input v-model="form.node_id" disabled placeholder="节点ID不可修改">
                     <template #append>
-                        <el-tooltip 
-                            content="节点ID与项目关联，不可直接修改" 
-                            placement="top"
-                        >
-                            <el-icon><InfoFilled /></el-icon>
+                        <el-tooltip content="节点ID与项目关联，不可直接修改" placement="top">
+                            <el-icon>
+                                <InfoFilled />
+                            </el-icon>
                         </el-tooltip>
                     </template>
                 </el-input>
@@ -42,7 +37,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { InfoFilled } from '@element-plus/icons-vue'
 import axios from 'axios'
-import StateSelect from '../components/StateSelect.vue'
+import StateTag from '../components/StateTag.vue'
 import PageLayout from '../components/PageLayout.vue'
 
 const route = useRoute()
@@ -50,7 +45,8 @@ const router = useRouter()
 const form = ref({
     project_name: '',
     description: '',
-    state: 0
+    state: 0,
+    node_id: 0
 })
 
 // 获取项目信息
@@ -66,7 +62,10 @@ const fetchProject = async () => {
 // 提交表单
 const handleSubmit = async () => {
     try {
-        await axios.post(`/api/project/update/${route.params.projectId}`, form.value)
+        // 创建一个新的对象，去除 state 字段
+        const { state, ...formData } = form.value
+
+        await axios.post(`/api/project/update/${route.params.projectId}`, formData)
         ElMessage.success('修改成功')
         router.push('/projects')
     } catch (error) {
@@ -93,4 +92,4 @@ onMounted(() => {
     padding: 0 8px;
     color: var(--el-text-color-secondary);
 }
-</style> 
+</style>
