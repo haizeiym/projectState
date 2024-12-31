@@ -56,22 +56,29 @@ const fetchNode = async () => {
 // 处理状态变化
 const handleStateChange = async (newState) => {
     try {
-        // 更新所有子节点的状态
+        // 获取所有子节点ID
         const response = await axios.get(`/api/node/tree/${form.value.node_id}`)
-        const updateChildrenState = async (node) => {
-            console.log(node.children)
+
+        // 收集所有子节点ID
+        const collectNodeIds = (node, ids = []) => {
             if (node.children && node.children.length > 0) {
-                for (const child of node.children) {
-                    if (child.children && child.children.length > 0) {
-                        await updateChildrenState(child)
-                    }
-                    await axios.post(`/api/node/update/${child.node_id}`, {
-                        state: newState
-                    })
-                }
+                node.children.forEach(child => {
+                    ids.push(child.node_id)
+                    collectNodeIds(child, ids)
+                })
             }
+            return ids
         }
-        await updateChildrenState(response.data)
+
+        const nodeIds = collectNodeIds(response.data)
+
+        // 批量更新所有子节点状态
+        if (nodeIds.length > 0) {
+            await axios.post('/api/node/batch_update', {
+                node_ids: nodeIds,
+                state: newState
+            })
+        }
     } catch (error) {
         ElMessage.error('更新子节点状态失败：' + (error.response?.data?.message || error.message))
     }

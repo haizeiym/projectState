@@ -11,6 +11,7 @@ urlpatterns = [
     path("api/node/update/<int:node_id>", Node.update, name="node_update"),
     path("api/node/get/<int:node_id>", Node.get, name="node_get"),
     path("api/node/tree/<int:node_id>", Node.get_tree, name="node_tree"),
+    path("api/node/batch_update", Node.batch_update, name="node_batch_update"),
     # Project API endpoints
     path("api/project/create", Project.create, name="project_create"),
     path("api/project/delete/<int:project_id>", Project.delete, name="project_delete"),

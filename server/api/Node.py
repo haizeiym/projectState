@@ -374,3 +374,44 @@ class Node:
             return [Node.create_from_db(child) for child in children]
         except Exception:
             return None
+
+    @staticmethod
+    def batch_update(request):
+        """
+        批量更新节点状态
+        :param request: HTTP请求对象
+        :return: JsonResponse
+        """
+        try:
+            if request.method != "POST":
+                return JsonResponse({"error": "Method not allowed"}, status=405)
+
+            data = json.loads(request.body)
+            node_ids = data.get("node_ids", [])
+            new_state = data.get("state")
+
+            if not node_ids:
+                return JsonResponse({"error": "No node IDs provided"}, status=400)
+
+            with transaction.atomic():
+                # 批量更新节点状态
+                NodeModel.objects.filter(node_id__in=node_ids).update(state=new_state)
+
+                # 更新每个节点的父节点状态
+                parent_ids = set(
+                    NodeModel.objects.filter(node_id__in=node_ids).values_list(
+                        "parent_id", flat=True
+                    )
+                )
+                for parent_id in parent_ids:
+                    if parent_id:
+                        Node._check_parent_state(parent_id)
+
+            return JsonResponse({"status": "success"})
+
+        except Exception as e:
+            import traceback
+
+            print(f"Error in batch_update: {str(e)}")
+            print(traceback.format_exc())
+            return JsonResponse({"error": str(e)}, status=500)
