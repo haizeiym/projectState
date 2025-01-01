@@ -115,8 +115,7 @@ const fetchPNTGData = async (projectId) => {
         const response = await axios.get(`/api/pntg/get/${projectId}`)
         pntgData.value = response.data
     } catch (error) {
-        console.error('Error fetching PNTG data:', error)
-        ElMessage.error('获取 PNTG 数据失败')
+        ElMessage.error('消息数据未配置')
     }
 }
 
