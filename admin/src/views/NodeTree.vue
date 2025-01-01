@@ -92,6 +92,7 @@ const nodeEditRef = ref(null)
 const showNodeId = ref(false)
 const pntgData = ref({}) // 保存 PNTG 数据
 let isFirstLoad = true // 标志首次加载
+let lastState = null // 存储上次的状态
 
 // 获取节点及其子节点数据
 const fetchNodes = async (nodeId) => {
@@ -146,9 +147,10 @@ const sendMessage = async (botToken, chatId, message, openUrl) => {
 watch(() => currentNode.value?.state, (newState) => {
     if (isFirstLoad) {
         isFirstLoad = false
+        lastState = newState
         return
     }
-    if (pntgData.value.state_codes?.includes(newState)) {
+    if (newState !== lastState && pntgData.value.state_codes?.includes(newState)) {
         const stateLabel = getStateLabel(newState)
         const message = `${currentNode.value.node_name} 状态已更新为 ${stateLabel}`
         sendMessage(
@@ -158,6 +160,7 @@ watch(() => currentNode.value?.state, (newState) => {
             pntgData.value.url
         )
     }
+    lastState = newState
 })
 
 // 删除节点
