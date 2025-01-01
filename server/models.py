@@ -207,3 +207,40 @@ def sync_project_states(sender, instance, **kwargs):
     projects = ProjectModel.objects.filter(node_id=node_id)
     for project in projects:
         project.sync_state_from_node()
+
+
+class PNTGModel(models.Model):
+    project_id = models.IntegerField(
+        primary_key=True,
+        validators=[MinValueValidator(0)],
+        verbose_name="项目ID",
+        help_text="项目的ID",
+    )
+
+    state_codes = models.TextField(
+        verbose_name="状态码",
+        help_text="状态码",
+    )
+
+    bot_token = models.CharField(
+        max_length=255,
+        verbose_name="Telegram Bot Token",
+        help_text="Telegram Bot Token",
+    )
+
+    chat_id = models.CharField(
+        max_length=255,
+        verbose_name="Telegram Chat ID",
+        help_text="Telegram Chat ID",
+    )
+
+    url = models.TextField(
+        verbose_name="Telegram URL",
+        help_text="Telegram URL",
+    )
+
+    class Meta:
+        db_table = "pntg"
+        verbose_name = "PNTG"
+        verbose_name_plural = "PNTG"
+        ordering = ["project_id"]

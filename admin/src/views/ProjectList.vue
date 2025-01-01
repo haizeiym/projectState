@@ -54,7 +54,7 @@
             <el-table-column label="操作" width="280">
                 <template #default="scope">
                     <el-button-group>
-                        <el-button type="primary" size="small" @click="handleViewNodes(scope.row.node_id)"
+                        <el-button type="primary" size="small" @click="handleViewNodes(scope.row.node_id, scope.row.project_id)"
                             :disabled="!scope.row.node_id">
                             节点管理
                         </el-button>
@@ -147,7 +147,13 @@ const handleDelete = async (projectId) => {
             }
         }
 
-        // 3. 删除项目
+        // 3. 删除 PNTG 记录
+        const pntgResponse = await axios.delete(`/api/pntg/delete/${projectId}`)
+        if (pntgResponse.data.status !== 'success') {
+            throw new Error(pntgResponse.data.message || '删除 PNTG 记录失败')
+        }
+
+        // 4. 删除项目
         const response = await axios.delete(`/api/project/delete/${projectId}`)
         if (response.data.status === 'success') {
             ElMessage.success('删除项目及相关节点成功')
@@ -165,9 +171,9 @@ const handleDelete = async (projectId) => {
     }
 }
 
-const handleViewNodes = (nodeId) => {
+const handleViewNodes = (nodeId, projectId) => {
     if (nodeId) {
-        router.push(`/node/${nodeId}`)
+        router.push({ path: `/node/${nodeId}`, query: { projectId } })
     }
 }
 

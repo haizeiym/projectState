@@ -14,6 +14,19 @@
             <el-form-item label="状态">
                 <StateSelect v-model="form.state" />
             </el-form-item>
+            <!-- PNTGModel Fields -->
+            <el-form-item label="Bot Token">
+                <el-input v-model="form.bot_token" />
+            </el-form-item>
+            <el-form-item label="Chat ID">
+                <el-input v-model="form.chat_id" />
+            </el-form-item>
+            <el-form-item label="URL">
+                <el-input v-model="form.url" />
+            </el-form-item>
+            <el-form-item label="状态码">
+                <el-input v-model="form.state_codes" />
+            </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="handleSubmit">创建</el-button>
                 <el-button @click="handleCancel">取消</el-button>
@@ -34,7 +47,11 @@ const form = ref({
     project_name: '',
     description: '',
     state: 0,
-    node_id: ''
+    node_id: '',
+    bot_token: '',
+    chat_id: '',
+    url: '',
+    state_codes: ''
 })
 
 // 创建节点
@@ -62,7 +79,18 @@ const handleSubmit = async () => {
 
         // 设置节点ID并创建项目
         form.value.node_id = nodeId
-        await axios.post('/api/project/create', form.value)
+        const projectResponse = await axios.post('/api/project/create', form.value)
+
+        if (projectResponse.data && projectResponse.data.project_id) {
+            // 使用创建成功后的 project_id 创建 PNTG 记录
+            await axios.post('/api/pntg/create', {
+                project_id: projectResponse.data.project_id,
+                bot_token: form.value.bot_token,
+                chat_id: form.value.chat_id,
+                url: form.value.url,
+                state_codes: form.value.state_codes
+            })
+        }
 
         ElMessage.success('创建成功')
         router.push('/projects')

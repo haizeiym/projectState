@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from server.api.Node import Node
 from server.api.Project import Project
+from server.api.PNTG import PNTG
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -18,4 +19,9 @@ urlpatterns = [
     path("api/project/update/<int:project_id>", Project.update, name="project_update"),
     path("api/project/get/<int:project_id>", Project.get, name="project_get"),
     path("api/project/list", Project.list, name="project_list"),
+    # PNTG API endpoints
+    path("api/pntg/create", PNTG.create, name="pntg_create"),
+    path("api/pntg/delete/<int:project_id>", PNTG.delete, name="pntg_delete"),
+    path("api/pntg/update/<int:project_id>", PNTG.update, name="pntg_update"),
+    path("api/pntg/get/<int:project_id>", PNTG.get, name="pntg_get"),
 ]

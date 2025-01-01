@@ -72,7 +72,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { ElMessageBox, ElMessage } from 'element-plus'
@@ -89,6 +89,7 @@ const nodeAddRef = ref(null)
 const selectedParentId = ref(0)
 const nodeEditRef = ref(null)
 const showNodeId = ref(false)
+const pntgData = ref({}) // 保存 PNTG 数据
 
 // 获取节点及其子节点数据
 const fetchNodes = async (nodeId) => {
@@ -104,6 +105,30 @@ const fetchNodes = async (nodeId) => {
         loading.value = false
     }
 }
+
+// 获取 PNTG 数据
+const fetchPNTGData = async (projectId) => {
+    try {
+        const response = await axios.get(`/api/pntg/get/${projectId}`)
+        pntgData.value = response.data
+    } catch (error) {
+        console.error('Error fetching PNTG data:', error)
+        ElMessage.error('获取 PNTG 数据失败')
+    }
+}
+
+// 发送消息的方法
+const sendMessage = () => {
+    // 这里实现发送消息的逻辑
+    console.log('发送消息')
+}
+
+// 监听 currentNode.state 的变化
+watch(() => currentNode.value?.state, (newState) => {
+    if (pntgData.value.state_codes?.includes(newState)) {
+        sendMessage()
+    }
+})
 
 // 删除节点
 const handleDelete = async (nodeId) => {
@@ -155,6 +180,10 @@ const handleEdit = (nodeId) => {
 onMounted(() => {
     if (route.params.nodeId) {
         fetchNodes(route.params.nodeId)
+    }
+    const projectId = route.query.projectId
+    if (projectId) {
+        fetchPNTGData(projectId)
     }
 })
 </script>

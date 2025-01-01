@@ -21,6 +21,18 @@
                     </template>
                 </el-input>
             </el-form-item>
+            <el-form-item label="Bot Token">
+                <el-input v-model="form.bot_token" />
+            </el-form-item>
+            <el-form-item label="Chat ID">
+                <el-input v-model="form.chat_id" />
+            </el-form-item>
+            <el-form-item label="URL">
+                <el-input v-model="form.url" />
+            </el-form-item>
+            <el-form-item label="状态码">
+                <el-input v-model="form.state_codes" />
+            </el-form-item>
             <el-form-item>
                 <el-button-group>
                     <el-button type="primary" @click="handleSubmit">保存</el-button>
@@ -46,7 +58,11 @@ const form = ref({
     project_name: '',
     description: '',
     state: 0,
-    node_id: 0
+    node_id: 0,
+    bot_token: '',
+    chat_id: '',
+    url: '',
+    state_codes: ''
 })
 
 // 获取项目信息
@@ -54,6 +70,10 @@ const fetchProject = async () => {
     try {
         const response = await axios.get(`/api/project/get/${route.params.projectId}`)
         form.value = response.data
+
+        // 获取 PNTG 信息
+        const pntgResponse = await axios.get(`/api/pntg/get/${route.params.projectId}`)
+        Object.assign(form.value, pntgResponse.data)
     } catch (error) {
         ElMessage.error('获取项目信息失败')
     }
@@ -66,6 +86,15 @@ const handleSubmit = async () => {
         const { state, ...formData } = form.value
 
         await axios.post(`/api/project/update/${route.params.projectId}`, formData)
+
+        // 更新 PNTG 记录
+        await axios.post(`/api/pntg/update/${route.params.projectId}`, {
+            bot_token: form.value.bot_token,
+            chat_id: form.value.chat_id,
+            url: form.value.url,
+            state_codes: form.value.state_codes
+        })
+
         ElMessage.success('修改成功')
         router.push('/projects')
     } catch (error) {
