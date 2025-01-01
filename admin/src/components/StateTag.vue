@@ -14,6 +14,7 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue'
 import StateSelect from './StateSelect.vue'
+import { getStateLabel } from '../utils/stateUtils'
 
 const props = defineProps({
     modelValue: {
@@ -41,17 +42,6 @@ const getStateType = (state) => {
         3: 'danger'   // 已取消
     }
     return types[state] || 'info'
-}
-
-// 状态标签映射
-const getStateLabel = (state) => {
-    const labels = {
-        0: '未开始',
-        1: '进行中',
-        2: '已完成',
-        3: '已取消'
-    }
-    return labels[state] || '未知状态'
 }
 
 // 处理状态变化

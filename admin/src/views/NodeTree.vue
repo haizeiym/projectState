@@ -78,6 +78,7 @@ import axios from 'axios'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import NodeAdd from './NodeAdd.vue'
 import NodeEdit from './NodeEdit.vue'
+import { getStateLabel } from '../utils/stateUtils'
 import StateTag from '../components/StateTag.vue'
 
 const route = useRoute()
@@ -90,6 +91,7 @@ const selectedParentId = ref(0)
 const nodeEditRef = ref(null)
 const showNodeId = ref(false)
 const pntgData = ref({}) // 保存 PNTG 数据
+let isFirstLoad = true // 标志首次加载
 
 // 获取节点及其子节点数据
 const fetchNodes = async (nodeId) => {
@@ -118,15 +120,43 @@ const fetchPNTGData = async (projectId) => {
 }
 
 // 发送消息的方法
-const sendMessage = () => {
-    // 这里实现发送消息的逻辑
-    console.log('发送消息')
+const sendMessage = async (botToken, chatId, message, openUrl) => {
+    const url = `https://api.telegram.org/bot${botToken}/sendMessage`
+    const payload = {
+        chat_id: chatId,
+        text: message,
+        reply_markup: {
+            inline_keyboard: [[{ text: "打开查看", url: openUrl }]]
+        }
+    }
+
+    try {
+        const response = await axios.post(url, payload)
+        if (response.status === 200) {
+            ElMessage.success('消息发送成功')
+        } else {
+            ElMessage.error('消息发送失败')
+        }
+    } catch (error) {
+        ElMessage.error('消息发送失败：' + error.message)
+    }
 }
 
 // 监听 currentNode.state 的变化
 watch(() => currentNode.value?.state, (newState) => {
+    if (isFirstLoad) {
+        isFirstLoad = false
+        return
+    }
     if (pntgData.value.state_codes?.includes(newState)) {
-        sendMessage()
+        const stateLabel = getStateLabel(newState)
+        const message = `${currentNode.value.node_name} 状态已更新为 ${stateLabel}`
+        sendMessage(
+            pntgData.value.bot_token,
+            pntgData.value.chat_id,
+            message,
+            pntgData.value.url
+        )
     }
 })
 
