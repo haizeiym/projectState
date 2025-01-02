@@ -20,7 +20,11 @@
                 <el-input v-model="form.url" />
             </el-form-item>
             <el-form-item label="发送消息状态码">
-                <el-input v-model="form.state_codes" />
+                <el-select v-model="selectedStateCodes" multiple placeholder="选择状态码">
+                    <el-option v-for="(label, value) in stateOptions" :key="value" :label="label" :value="value">
+                        <el-tag :type="getStateType(value)">{{ label }}</el-tag>
+                    </el-option>
+                </el-select>
             </el-form-item>
             <el-form-item>
                 <el-button-group>
@@ -39,6 +43,7 @@ import { ElMessage } from 'element-plus'
 import axios from 'axios'
 import StateTag from '../components/StateTag.vue'
 import PageLayout from '../components/PageLayout.vue'
+import { getStateCache, getStateType } from '../utils/stateUtils'
 
 const route = useRoute()
 const router = useRouter()
@@ -53,6 +58,9 @@ const form = ref({
     state_codes: ''
 })
 
+const selectedStateCodes = ref([])
+const stateOptions = ref({})
+
 // 获取项目信息
 const fetchProject = async () => {
     try {
@@ -62,6 +70,14 @@ const fetchProject = async () => {
         // 获取 PNTG 信息
         const pntgResponse = await axios.get(`/api/pntg/get/${route.params.projectId}`)
         Object.assign(form.value, pntgResponse.data)
+
+        // Initialize selectedStateCodes from form.state_codes
+        let stateCodes = await getStateCache()
+        console.log(form.value.state_codes)
+        selectedStateCodes.value = form.value.state_codes.split(',').map((item) => {
+            return stateCodes[item]
+        })
+        console.log(selectedStateCodes.value)
     } catch (error) {
         ElMessage.error('获取项目信息失败')
     }
@@ -70,6 +86,9 @@ const fetchProject = async () => {
 // 提交表单
 const handleSubmit = async () => {
     try {
+        // Update form.state_codes with selectedStateCodes
+        form.value.state_codes = selectedStateCodes.value.join(',')
+
         // 创建一个新的对象，去除 state 字段
         const { state, ...formData } = form.value
 
@@ -95,7 +114,9 @@ const handleCancel = () => {
     router.push('/projects')
 }
 
-onMounted(() => {
+// Fetch state options on component mount
+onMounted(async () => {
+    stateOptions.value = await getStateCache()
     fetchProject()
 })
 </script>

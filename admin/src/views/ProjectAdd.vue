@@ -25,7 +25,11 @@
                 <el-input v-model="form.url" />
             </el-form-item>
             <el-form-item label="发送消息状态码">
-                <el-input v-model="form.state_codes" />
+                <el-select v-model="selectedStateCodes" multiple placeholder="选择状态码">
+                    <el-option v-for="(label, value) in stateOptions" :key="value" :label="label" :value="value">
+                        <el-tag :type="getStateType(value)">{{ label }}</el-tag>
+                    </el-option>
+                </el-select>
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="handleSubmit">创建</el-button>
@@ -36,11 +40,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 import StateSelect from '../components/StateSelect.vue'
+import { getStateCache, getStateType } from '../utils/stateUtils'
 
 const router = useRouter()
 const form = ref({
@@ -53,6 +58,9 @@ const form = ref({
     url: '',
     state_codes: ''
 })
+
+const selectedStateCodes = ref([])
+const stateOptions = ref({})
 
 // 创建节点
 const createNode = async () => {
@@ -74,6 +82,9 @@ const createNode = async () => {
 // 提交表单
 const handleSubmit = async () => {
     try {
+        // Update form.state_codes with selectedStateCodes
+        form.value.state_codes = selectedStateCodes.value.join(',')
+
         // 先创建节点
         const nodeId = await createNode()
 
@@ -111,6 +122,11 @@ const handleSubmit = async () => {
 const handleCancel = () => {
     router.push('/projects')
 }
+
+// Fetch state options on component mount
+onMounted(async () => {
+    stateOptions.value = await getStateCache()
+})
 </script>
 
 <style scoped>
