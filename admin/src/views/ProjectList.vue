@@ -148,9 +148,17 @@ const handleDelete = async (projectId) => {
         }
 
         // 3. 删除 PNTG 记录
-        const pntgResponse = await axios.delete(`/api/pntg/delete/${projectId}`)
-        if (pntgResponse.data.status !== 'success') {
-            throw new Error(pntgResponse.data.message || '删除 PNTG 记录失败')
+        try {
+            const pntgResponse = await axios.delete(`/api/pntg/delete/${projectId}`)
+            if (pntgResponse.data.status !== 'success') {
+                throw new Error(pntgResponse.data.message || '删除 PNTG 记录失败')
+            }
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                ElMessage.warning('PNTG 记录未找到，继续删除项目')
+            } else {
+                throw error
+            }
         }
 
         // 4. 删除项目
