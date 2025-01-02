@@ -38,7 +38,6 @@ const stateLabel = ref('未知状态')
 // Fetch the state label when the component is mounted or when modelValue changes
 const fetchStateLabel = async () => {
     stateLabel.value = await getStateLabel(props.modelValue)
-    console.log(stateLabel.value)
 }
 
 watch(() => props.modelValue, fetchStateLabel, { immediate: true })

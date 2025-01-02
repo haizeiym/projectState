@@ -2,12 +2,6 @@
     <PageLayout title="项目列表">
         <template #actions>
             <div class="refresh-controls">
-                <el-select v-model="refreshInterval" placeholder="选择刷新间隔" size="small" @change="setRefreshInterval">
-                    <el-option label="不限制" :value="0"></el-option>
-                    <el-option label="10秒间隔" :value="10"></el-option>
-                    <el-option label="30秒间隔" :value="30"></el-option>
-                    <el-option label="1分钟间隔" :value="60"></el-option>
-                </el-select>
                 <el-button :loading="loading" size="small" @click="fetchProjectsWithInterval">
                     <el-icon>
                         <Refresh />
@@ -79,11 +73,6 @@ const showProjectId = ref(false)
 const refreshInterval = ref(10)
 let lastFetchTime = 0
 const stateCodes = ref([])
-
-// 设置请求间隔
-const setRefreshInterval = (interval) => {
-    refreshInterval.value = interval
-}
 
 // 带有间隔限制的请求函数
 const fetchProjectsWithInterval = async () => {
