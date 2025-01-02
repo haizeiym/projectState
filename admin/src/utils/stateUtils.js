@@ -57,6 +57,9 @@ export const updateStateLabel = async (stateData) => {
 
 // 状态类型映射
 export const getStateType = (state) => {
+    if (typeof state === 'string') {
+        state = Number(state)
+    }
     if (state >= 1000 && state < 2000) {
         return 'info'
     } else if (state >= 2000 && state < 3000) {

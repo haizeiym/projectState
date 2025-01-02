@@ -72,12 +72,7 @@ const fetchProject = async () => {
         Object.assign(form.value, pntgResponse.data)
 
         // Initialize selectedStateCodes from form.state_codes
-        let stateCodes = await getStateCache()
-        console.log(form.value.state_codes)
-        selectedStateCodes.value = form.value.state_codes.split(',').map((item) => {
-            return stateCodes[item]
-        })
-        console.log(selectedStateCodes.value)
+        selectedStateCodes.value = form.value.state_codes.split(',').map(Number)
     } catch (error) {
         ElMessage.error('获取项目信息失败')
     }
