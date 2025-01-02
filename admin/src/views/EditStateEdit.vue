@@ -4,7 +4,8 @@
             <el-form-item label="状态码">
                 <el-input v-model="stateForm.state_code" type="number" disabled />
             </el-form-item>
-            <el-form-item label="状态名称" prop="state_name" :rules="[{ required: true, message: '请输入状态名称', trigger: 'blur' }]">
+            <el-form-item label="状态名称" prop="state_name"
+                :rules="[{ required: true, message: '请输入状态名称', trigger: 'blur' }]">
                 <el-input v-model="stateForm.state_name" />
             </el-form-item>
         </el-form>
@@ -16,7 +17,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 const dialogVisible = ref(false)
@@ -26,6 +27,7 @@ const stateForm = ref({
 })
 
 const emit = defineEmits(['state-updated'])
+
 const stateFormRef = ref(null)
 
 const open = async (stateCode) => {
@@ -65,4 +67,4 @@ const cancel = () => {
 .dialog-footer {
     text-align: right;
 }
-</style> 
+</style>

@@ -7,25 +7,17 @@
         <el-table :data="filteredStateCodes" style="width: 100%" v-loading="loading">
             <el-table-column prop="state_code" label="状态码" width="180" />
             <el-table-column prop="state_name" label="状态名称" width="180" />
-            <el-table-column label="操作" width="120">
+            <el-table-column label="操作" width="160">
                 <template #default="scope">
-                    <el-button type="text" @click="openEditDialog(scope.row.state_code)">修改</el-button>
-                    <el-button type="text" @click="confirmDeleteState(scope.row.state_code)">删除</el-button>
+                    <el-button type="warning" size="small" @click="openEditDialog(scope.row.state_code)">修改</el-button>
+                    <el-button type="danger" size="small"
+                        @click="confirmDeleteState(scope.row.state_code)">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
-        <el-pagination
-            v-if="pagination.total > pagination.pageSize"
-            background
-            layout="prev, pager, next"
-            :total="pagination.total"
-            :page-size="pagination.pageSize"
-            @current-change="handlePageChange"
-        />
-        <EditStateDialog
-            ref="editStateDialog"
-            @state-updated="fetchStateCodes"
-        />
+        <el-pagination v-if="pagination.total > pagination.pageSize" background layout="prev, pager, next"
+            :total="pagination.total" :page-size="pagination.pageSize" @current-change="handlePageChange" />
+        <EditStateDialog ref="editStateDialog" @state-updated="fetchStateCodes" />
     </PageLayout>
 </template>
 
@@ -58,7 +50,7 @@ const fetchStateCodes = async () => {
         pagination.value.total = stateCodes.value.length
         filterStateCodes()
     } catch (error) {
-        ElMessage.error('获取状态码失败：' + (error.response?.data?.message || error.message))  
+        ElMessage.error('获取状态码失败：' + (error.response?.data?.message || error.message))
     } finally {
         loading.value = false
     }
@@ -125,4 +117,4 @@ onMounted(() => {
 .el-table {
     margin-bottom: 20px;
 }
-</style> 
+</style>
