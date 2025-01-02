@@ -244,3 +244,23 @@ class PNTGModel(models.Model):
         verbose_name = "PNTG"
         verbose_name_plural = "PNTG"
         ordering = ["project_id"]
+
+
+class StateCodeModel(models.Model):
+    state_code = models.IntegerField(
+        primary_key=True,
+        verbose_name="状态码",
+        help_text="状态码",
+    )
+
+    state_name = models.CharField(
+        max_length=255,
+        verbose_name="状态名称",
+        help_text="状态名称",
+    )
+
+    class Meta:
+        db_table = "state_code"
+        verbose_name = "状态码"
+        verbose_name_plural = "状态码"
+        ordering = ["state_code"]

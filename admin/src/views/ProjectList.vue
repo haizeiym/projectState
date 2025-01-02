@@ -2,24 +2,12 @@
     <PageLayout title="项目列表">
         <template #actions>
             <div class="refresh-controls">
-                <el-button-group>
-                    <el-button size="small" :type="refreshInterval === 0 ? 'primary' : ''"
-                        @click="setRefreshInterval(0)">
-                        不限制
-                    </el-button>
-                    <el-button size="small" :type="refreshInterval === 10 ? 'primary' : ''"
-                        @click="setRefreshInterval(10)">
-                        10秒间隔
-                    </el-button>
-                    <el-button size="small" :type="refreshInterval === 30 ? 'primary' : ''"
-                        @click="setRefreshInterval(30)">
-                        30秒间隔
-                    </el-button>
-                    <el-button size="small" :type="refreshInterval === 60 ? 'primary' : ''"
-                        @click="setRefreshInterval(60)">
-                        1分钟间隔
-                    </el-button>
-                </el-button-group>
+                <el-select v-model="refreshInterval" placeholder="选择刷新间隔" size="small" @change="setRefreshInterval">
+                    <el-option label="不限制" :value="0"></el-option>
+                    <el-option label="10秒间隔" :value="10"></el-option>
+                    <el-option label="30秒间隔" :value="30"></el-option>
+                    <el-option label="1分钟间隔" :value="60"></el-option>
+                </el-select>
                 <el-button :loading="loading" size="small" @click="fetchProjectsWithInterval">
                     <el-icon>
                         <Refresh />
@@ -30,6 +18,9 @@
                 :inactive-text="'隐藏ID'" />
             <el-button type="primary" @click="$router.push('/project/add')">
                 添加项目
+            </el-button>
+            <el-button type="default" @click="openStateManagement">
+                状态管理
             </el-button>
         </template>
 
@@ -86,6 +77,7 @@ const router = useRouter()
 const showProjectId = ref(false)
 const refreshInterval = ref(10)
 let lastFetchTime = 0
+const stateCodes = ref([])
 
 // 设置请求间隔
 const setRefreshInterval = (interval) => {
@@ -119,6 +111,15 @@ const fetchProjects = async () => {
         ElMessage.error('获取项目列表失败：' + (error.response?.data?.message || error.message))
     } finally {
         loading.value = false
+    }
+}
+
+const fetchStateCodes = async () => {
+    try {
+        const response = await axios.get('/api/statecode/list')
+        stateCodes.value = response.data
+    } catch (error) {
+        ElMessage.error('获取状态码失败：' + (error.response?.data?.message || error.message))
     }
 }
 
@@ -189,8 +190,13 @@ const handleEdit = (projectId) => {
     router.push(`/project/edit/${projectId}`)
 }
 
+const openStateManagement = () => {
+    router.push('/state-management')
+}
+
 onMounted(() => {
     fetchProjects()
+    fetchStateCodes()
 })
 </script>
 

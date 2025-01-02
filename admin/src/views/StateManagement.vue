@@ -1,0 +1,119 @@
+<template>
+    <PageLayout title="状态管理">
+        <div class="toolbar">
+            <el-button type="primary" @click="openAddState">添加状态</el-button>
+            <el-button type="default" @click="closeStateManagement">关闭</el-button>
+        </div>
+        <el-table :data="filteredStateCodes" style="width: 100%" v-loading="loading">
+            <el-table-column prop="state_code" label="状态码" width="180" />
+            <el-table-column prop="state_name" label="状态名称" width="180" />
+            <el-table-column label="操作" width="120">
+                <template #default="scope">
+                    <el-button type="text" @click="openEditDialog(scope.row.state_code)">修改</el-button>
+                    <el-button type="text" @click="deleteState(scope.row.state_code)">删除</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination
+            v-if="pagination.total > pagination.pageSize"
+            background
+            layout="prev, pager, next"
+            :total="pagination.total"
+            :page-size="pagination.pageSize"
+            @current-change="handlePageChange"
+        />
+        <EditStateDialog
+            :visible.sync="editDialogVisible"
+            :stateCode="selectedStateCode"
+            @state-updated="fetchStateCodes"
+        />
+    </PageLayout>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import axios from 'axios'
+import PageLayout from '../components/PageLayout.vue'
+import EditStateDialog from '../components/EditStateDialog.vue'
+
+const stateCodes = ref([])
+const filteredStateCodes = ref([])
+const loading = ref(false)
+const router = useRouter()
+
+const pagination = ref({
+    currentPage: 1,
+    pageSize: 10,
+    total: 0
+})
+
+const editDialogVisible = ref(false)
+const selectedStateCode = ref(null)
+
+const fetchStateCodes = async () => {
+    loading.value = true
+    try {
+        const response = await axios.get('/api/statecode/list')
+        stateCodes.value = response.data
+        pagination.value.total = stateCodes.value.length
+        filterStateCodes()
+    } catch (error) {
+        console.error('获取状态码失败：', error)
+    } finally {
+        loading.value = false
+    }
+}
+
+const filterStateCodes = () => {
+    filteredStateCodes.value = stateCodes.value.slice(0, pagination.value.pageSize)
+}
+
+const handlePageChange = (page) => {
+    pagination.value.currentPage = page
+    const start = (page - 1) * pagination.value.pageSize
+    const end = start + pagination.value.pageSize
+    filteredStateCodes.value = stateCodes.value.slice(start, end)
+}
+
+const closeStateManagement = () => {
+    router.push('/projects')
+}
+
+const openAddState = () => {
+    router.push('/add-state')
+}
+
+const openEditDialog = (stateCode) => {
+    selectedStateCode.value = stateCode
+    editDialogVisible.value = true
+}
+
+const deleteState = async (stateCode) => {
+    try {
+        await axios.delete(`/api/statecode/delete/${stateCode}`)
+        ElMessage.success('状态删除成功')
+        fetchStateCodes()
+    } catch (error) {
+        ElMessage.error('状态删除失败：' + (error.response?.data?.message || error.message))
+    }
+}
+
+onMounted(() => {
+    fetchStateCodes()
+})
+</script>
+
+<style scoped>
+.toolbar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.el-table {
+    margin-bottom: 20px;
+}
+</style> 

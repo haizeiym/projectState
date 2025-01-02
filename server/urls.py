@@ -3,6 +3,7 @@ from django.urls import path
 from server.api.Node import Node
 from server.api.Project import Project
 from server.api.PNTG import PNTG
+from server.api.StateCode import StateCode
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -24,4 +25,18 @@ urlpatterns = [
     path("api/pntg/delete/<int:project_id>", PNTG.delete, name="pntg_delete"),
     path("api/pntg/update/<int:project_id>", PNTG.update, name="pntg_update"),
     path("api/pntg/get/<int:project_id>", PNTG.get, name="pntg_get"),
+    # StateCode API endpoints
+    path("api/statecode/create", StateCode.create, name="statecode_create"),
+    path(
+        "api/statecode/delete/<int:state_code>",
+        StateCode.delete,
+        name="statecode_delete",
+    ),
+    path(
+        "api/statecode/update/<int:state_code>",
+        StateCode.update,
+        name="statecode_update",
+    ),
+    path("api/statecode/get/<int:state_code>", StateCode.get, name="statecode_get"),
+    path("api/statecode/list", StateCode.list, name="statecode_list"),
 ]
