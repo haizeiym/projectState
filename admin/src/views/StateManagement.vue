@@ -9,8 +9,8 @@
             <el-table-column prop="state_name" label="状态名称" width="180" />
             <el-table-column label="操作" width="120">
                 <template #default="scope">
-                    <el-button  @click="openEditDialog(scope.row.state_code)">修改</el-button>
-                    <el-button  @click="confirmDeleteState(scope.row.state_code)">删除</el-button>
+                    <el-button type="text" @click="openEditDialog(scope.row.state_code)">修改</el-button>
+                    <el-button type="text" @click="confirmDeleteState(scope.row.state_code)">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
