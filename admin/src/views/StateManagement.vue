@@ -10,7 +10,7 @@
             <el-table-column label="操作" width="120">
                 <template #default="scope">
                     <el-button type="text" @click="openEditDialog(scope.row.state_code)">修改</el-button>
-                    <el-button type="text" @click="deleteState(scope.row.state_code)">删除</el-button>
+                    <el-button type="text" @click="confirmDeleteState(scope.row.state_code)">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -33,7 +33,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from 'axios'
 import PageLayout from '../components/PageLayout.vue'
 import EditStateDialog from '../components/EditStateDialog.vue'
@@ -60,7 +60,7 @@ const fetchStateCodes = async () => {
         pagination.value.total = stateCodes.value.length
         filterStateCodes()
     } catch (error) {
-        console.error('获取状态码失败：', error)
+        ElMessage.error('获取状态码失败：' + (error.response?.data?.message || error.message))  
     } finally {
         loading.value = false
     }
@@ -88,6 +88,18 @@ const openAddState = () => {
 const openEditDialog = (stateCode) => {
     selectedStateCode.value = stateCode
     editDialogVisible.value = true
+}
+
+const confirmDeleteState = (stateCode) => {
+    ElMessageBox.confirm('此操作将永久删除该状态, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+    }).then(() => {
+        deleteState(stateCode)
+    }).catch(() => {
+        ElMessage.info('已取消删除')
+    })
 }
 
 const deleteState = async (stateCode) => {
