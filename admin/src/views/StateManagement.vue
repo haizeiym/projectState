@@ -9,8 +9,8 @@
             <el-table-column prop="state_name" label="状态名称" width="180" />
             <el-table-column label="操作" width="120">
                 <template #default="scope">
-                    <el-button type="text" @click="openEditDialog(scope.row.state_code)">修改</el-button>
-                    <el-button type="text" @click="confirmDeleteState(scope.row.state_code)">删除</el-button>
+                    <el-button  @click="openEditDialog(scope.row.state_code)">修改</el-button>
+                    <el-button  @click="confirmDeleteState(scope.row.state_code)">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -23,8 +23,7 @@
             @current-change="handlePageChange"
         />
         <EditStateDialog
-            :visible.sync="editDialogVisible"
-            :stateCode="selectedStateCode"
+            ref="editStateDialog"
             @state-updated="fetchStateCodes"
         />
     </PageLayout>
@@ -36,7 +35,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from 'axios'
 import PageLayout from '../components/PageLayout.vue'
-import EditStateDialog from '../components/EditStateDialog.vue'
+import EditStateDialog from './EditStateEdit.vue'
 
 const stateCodes = ref([])
 const filteredStateCodes = ref([])
@@ -49,8 +48,7 @@ const pagination = ref({
     total: 0
 })
 
-const editDialogVisible = ref(false)
-const selectedStateCode = ref(null)
+const editStateDialog = ref(null)
 
 const fetchStateCodes = async () => {
     loading.value = true
@@ -86,8 +84,7 @@ const openAddState = () => {
 }
 
 const openEditDialog = (stateCode) => {
-    selectedStateCode.value = stateCode
-    editDialogVisible.value = true
+    editStateDialog.value.open(stateCode)
 }
 
 const confirmDeleteState = (stateCode) => {
