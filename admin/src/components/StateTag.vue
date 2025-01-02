@@ -5,16 +5,16 @@
         </template>
         <template v-else>
             <el-tag :type="getStateType(modelValue)" effect="light" class="state-tag">
-                {{ getStateLabel(modelValue) }}
+                {{ stateLabel }}
             </el-tag>
         </template>
     </div>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { ref, watch } from 'vue'
 import StateSelect from './StateSelect.vue'
-import { getStateLabel } from '../utils/stateUtils'
+import { getStateLabel, getStateType } from '../utils/stateUtils'
 
 const props = defineProps({
     modelValue: {
@@ -33,16 +33,15 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
-// 状态类型映射
-const getStateType = (state) => {
-    const types = {
-        0: 'info',    // 未开始
-        1: 'warning', // 进行中
-        2: 'success', // 已完成
-        3: 'danger'   // 已取消
-    }
-    return types[state] || 'info'
+const stateLabel = ref('未知状态')
+
+// Fetch the state label when the component is mounted or when modelValue changes
+const fetchStateLabel = async () => {
+    stateLabel.value = await getStateLabel(props.modelValue)
+    console.log(stateLabel.value)
 }
+
+watch(() => props.modelValue, fetchStateLabel, { immediate: true })
 
 // 处理状态变化
 const handleChange = (value) => {

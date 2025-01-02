@@ -28,7 +28,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from 'axios'
 import PageLayout from '../components/PageLayout.vue'
 import EditStateDialog from './EditStateEdit.vue'
-
+import { updateStateLabel } from '../utils/stateUtils'
 const stateCodes = ref([])
 const filteredStateCodes = ref([])
 const loading = ref(false)
@@ -47,6 +47,7 @@ const fetchStateCodes = async () => {
     try {
         const response = await axios.get('/api/statecode/list')
         stateCodes.value = response.data
+        updateStateLabel(response.data)
         pagination.value.total = stateCodes.value.length
         filterStateCodes()
     } catch (error) {
