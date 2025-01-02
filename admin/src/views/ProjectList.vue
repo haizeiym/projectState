@@ -45,7 +45,8 @@
             <el-table-column label="操作" width="280">
                 <template #default="scope">
                     <el-button-group>
-                        <el-button type="primary" size="small" @click="handleViewNodes(scope.row.node_id, scope.row.project_id)"
+                        <el-button type="primary" size="small"
+                            @click="handleViewNodes(scope.row.node_id, scope.row.project_id)"
                             :disabled="!scope.row.node_id">
                             节点管理
                         </el-button>

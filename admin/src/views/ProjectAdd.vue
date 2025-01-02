@@ -24,7 +24,7 @@
             <el-form-item label="URL">
                 <el-input v-model="form.url" />
             </el-form-item>
-            <el-form-item label="状态码">
+            <el-form-item label="发送消息状态码">
                 <el-input v-model="form.state_codes" />
             </el-form-item>
             <el-form-item>

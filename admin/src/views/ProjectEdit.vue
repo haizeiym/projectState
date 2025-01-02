@@ -1,25 +1,14 @@
 <template>
     <PageLayout title="修改项目">
         <el-form :model="form" label-width="120px">
+            <el-form-item label="状态">
+                <StateTag :modelValue="form.state" />
+            </el-form-item>
             <el-form-item label="项目名称">
                 <el-input v-model="form.project_name" />
             </el-form-item>
             <el-form-item label="描述">
                 <el-input v-model="form.description" type="textarea" />
-            </el-form-item>
-            <el-form-item label="状态">
-                <StateTag :modelValue="form.state" />
-            </el-form-item>
-            <el-form-item label="节点ID">
-                <el-input v-model="form.node_id" disabled placeholder="节点ID不可修改">
-                    <template #append>
-                        <el-tooltip content="节点ID与项目关联，不可直接修改" placement="top">
-                            <el-icon>
-                                <InfoFilled />
-                            </el-icon>
-                        </el-tooltip>
-                    </template>
-                </el-input>
             </el-form-item>
             <el-form-item label="Bot Token">
                 <el-input v-model="form.bot_token" />
@@ -30,7 +19,7 @@
             <el-form-item label="URL">
                 <el-input v-model="form.url" />
             </el-form-item>
-            <el-form-item label="状态码">
+            <el-form-item label="发送消息状态码">
                 <el-input v-model="form.state_codes" />
             </el-form-item>
             <el-form-item>
@@ -47,7 +36,6 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { InfoFilled } from '@element-plus/icons-vue'
 import axios from 'axios'
 import StateTag from '../components/StateTag.vue'
 import PageLayout from '../components/PageLayout.vue'
