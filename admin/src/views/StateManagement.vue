@@ -6,7 +6,13 @@
         </div>
         <el-table :data="filteredStateCodes" style="width: 100%" v-loading="loading">
             <el-table-column prop="state_code" label="状态码" width="180" />
-            <el-table-column prop="state_name" label="状态名称" width="180" />
+            <el-table-column label="状态名称" width="180">
+                <template #default="scope">
+                    <el-tag :type="getStateType(scope.row.state_code)">
+                        {{ scope.row.state_name }}
+                    </el-tag>
+                </template>
+            </el-table-column>
             <el-table-column label="操作" width="160">
                 <template #default="scope">
                     <el-button type="warning" size="small" @click="openEditDialog(scope.row.state_code)">修改</el-button>
@@ -28,7 +34,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from 'axios'
 import PageLayout from '../components/PageLayout.vue'
 import EditStateDialog from './EditStateEdit.vue'
-import { updateStateLabel } from '../utils/stateUtils'
+import { updateStateLabel, getStateType } from '../utils/stateUtils'
+
 const stateCodes = ref([])
 const filteredStateCodes = ref([])
 const loading = ref(false)
