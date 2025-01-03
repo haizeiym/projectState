@@ -26,8 +26,9 @@
             </el-form-item>
             <el-form-item label="发送消息状态码">
                 <el-select v-model="selectedStateCodes" multiple placeholder="选择状态码">
-                    <el-option v-for="(label, value) in stateOptions" :key="value" :label="label" :value="value">
-                        <el-tag :type="getStateType(value)">{{ label }}</el-tag>
+                    <el-option v-for="value in Object.keys(stateOptions)" :key="value" :label="stateOptions[value]"
+                        :value="Number(value)">
+                        <el-tag :type="getStateType(Number(value))">{{ stateOptions[value] }}</el-tag>
                     </el-option>
                 </el-select>
             </el-form-item>
@@ -126,6 +127,11 @@ const handleCancel = () => {
 // Fetch state options on component mount
 onMounted(async () => {
     stateOptions.value = await getStateCache()
+    // Set default state to the first available state code
+    const firstStateCode = Object.keys(stateOptions.value)[0]
+    if (firstStateCode) {
+        form.value.state = Number(firstStateCode)
+    }
 })
 </script>
 
