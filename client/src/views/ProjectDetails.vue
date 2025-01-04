@@ -2,10 +2,10 @@
   <div class="project-details">
     <el-input v-model="projectId" placeholder="Enter Project ID" @change="fetchProjectDetails" />
     <div v-if="project">
-      <h2>{{ project.project_name }}</h2>
-      <p>{{ project.description }}</p>
-      <h3>Child Nodes</h3>
-      <ul>
+      <h2 class="project-title">{{ project.project_name }}</h2>
+      <p class="project-description">{{ project.description }}</p>
+      <h3 class="child-nodes-title">Child Nodes</h3>
+      <ul class="node-list">
         <NodeItem v-for="node in nodes" :key="node.node_id" :node="node" />
       </ul>
     </div>
@@ -37,6 +37,36 @@ const fetchProjectDetails = async () => {
 <style scoped>
 .project-details {
   padding: 20px;
+  background-color: #f7f9fc;
+  /* Light background for contrast */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.project-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.project-description {
+  font-size: 1em;
+  color: #7f8c8d;
+  margin-bottom: 20px;
+}
+
+.child-nodes-title {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #34495e;
+  margin-bottom: 10px;
+}
+
+.node-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
 }
 
 @media (max-width: 600px) {
