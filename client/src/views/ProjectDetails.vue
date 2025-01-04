@@ -20,12 +20,16 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import axios from 'axios'
 import NodeItem from '../components/NodeItem.vue'
 import { getStateType, getStateLabel } from '../utils/stateUtils'
 import { ElMessage } from 'element-plus'
 
-const projectId = ref('')
+const route = useRoute()
+
+const projectId = ref(route.query.projectId || '')
+
 const project = ref(null)
 const nodes = ref([])
 const projectStateLabel = ref('')

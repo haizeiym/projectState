@@ -20,5 +20,5 @@ const router = createRouter({
     routes
 })
 
-export default router 
+export default router
 export { axios }  // 导出配置好的 axios 实例

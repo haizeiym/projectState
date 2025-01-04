@@ -78,5 +78,6 @@ AUTH_PASSWORD_VALIDATORS = []
 # CORS 设置
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Vue 开发服务器地址
+    "http://localhost:8000",  # Django 开发服务器地址
 ]
 CORS_ALLOW_CREDENTIALS = True
