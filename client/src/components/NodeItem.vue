@@ -62,19 +62,22 @@ ul {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 10px;
 }
 
 .node-name {
     font-size: 1em;
     font-weight: bold;
-    margin-right: 5px;
     color: #2c3e50;
+    white-space: nowrap;
 }
 
 .node-description {
     font-size: 0.9em;
     color: #7f8c8d;
-    margin-right: 5px;
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .node-state {
@@ -82,6 +85,7 @@ ul {
     color: #fff;
     padding: 1px 3px;
     border-radius: 2px;
+    white-space: nowrap;
 }
 
 .node-state.info {

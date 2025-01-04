@@ -1,6 +1,9 @@
 <template>
   <div class="project-details">
-    <el-input v-model="projectId" placeholder="Enter Project ID" @change="fetchProjectDetails" />
+    <div class="search-bar">
+      <el-input v-model="projectId" placeholder="请输入项目ID" />
+      <el-button type="primary" @click="fetchProjectDetails">搜索</el-button>
+    </div>
     <div v-if="project">
       <h2 class="project-title">{{ project.project_name }}</h2>
       <p class="project-description">{{ project.description }}</p>
@@ -28,7 +31,10 @@ const nodes = ref([])
 const projectStateLabel = ref('')
 
 const fetchProjectDetails = async () => {
-  if (projectId.value === '') return
+  if (projectId.value === '') {
+    ElMessage.warning('请输入项目ID')
+    return
+  }
   try {
     const projectResponse = await axios.get(`/api/project/get/${projectId.value}`)
     project.value = projectResponse.data
@@ -54,6 +60,17 @@ onMounted(fetchProjectDetails)
   background-color: #f7f9fc;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.search-bar .el-input {
+  flex: 1;
+  margin-right: 10px;
 }
 
 .project-title {
