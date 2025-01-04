@@ -4,14 +4,9 @@
     <div v-if="project">
       <h2>{{ project.project_name }}</h2>
       <p>{{ project.description }}</p>
-      <StateTag :modelValue="project.state" />
       <h3>Child Nodes</h3>
       <ul>
-        <li v-for="node in nodes" :key="node.node_id">
-          <h4>{{ node.node_name }}</h4>
-          <p>{{ node.description }}</p>
-          <StateTag :modelValue="node.state" />
-        </li>
+        <NodeItem v-for="node in nodes" :key="node.node_id" :node="node" />
       </ul>
     </div>
   </div>
@@ -20,7 +15,7 @@
 <script setup>
 import { ref } from 'vue'
 import axios from 'axios'
-import StateTag from '../components/StateTag.vue'
+import NodeItem from '../components/NodeItem.vue'
 
 const projectId = ref('')
 const project = ref(null)
@@ -31,8 +26,8 @@ const fetchProjectDetails = async () => {
     const projectResponse = await axios.get(`/api/project/get/${projectId.value}`)
     project.value = projectResponse.data
 
-    const nodesResponse = await axios.get(`/api/node/tree/${projectId.value}`)
-    nodes.value = nodesResponse.data
+    const nodesResponse = await axios.get(`/api/node/tree/${project.value.node_id}`)
+    nodes.value = nodesResponse.data.children || []
   } catch (error) {
     console.error('Failed to fetch project details:', error)
   }
@@ -49,4 +44,4 @@ const fetchProjectDetails = async () => {
     padding: 10px;
   }
 }
-</style> 
+</style>

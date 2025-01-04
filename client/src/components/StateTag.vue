@@ -1,7 +1,6 @@
 <template>
     <div class="state-wrapper">
         <template v-if="editable">
-            <StateSelect :modelValue="modelValue" @update:modelValue="handleChange" :disabled="disabled" />
         </template>
         <template v-else>
             <el-tag :type="getStateType(modelValue)" effect="light" class="state-tag">
@@ -13,7 +12,6 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import StateSelect from './StateSelect.vue'
 import { getStateLabel, getStateType } from '../utils/stateUtils'
 
 const props = defineProps({
