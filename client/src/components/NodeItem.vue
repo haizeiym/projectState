@@ -3,7 +3,9 @@
         <div class="node-info">
             <h4 class="node-name">{{ node.node_name }}</h4>
             <p class="node-description">{{ node.description }}</p>
-            <span class="node-state">{{ node.state }}</span>
+            <span :class="['node-state', getStateType(node.state)]">
+                {{ stateLabel }}
+            </span>
         </div>
         <ul v-if="node.children && node.children.length" class="child-nodes">
             <NodeItem v-for="child in node.children" :key="child.node_id" :node="child" />
@@ -12,7 +14,8 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
+import { defineProps, ref, onMounted } from 'vue';
+import { getStateType, getStateLabel } from '../utils/stateUtils';
 
 const props = defineProps({
     node: {
@@ -20,6 +23,14 @@ const props = defineProps({
         required: true
     }
 })
+
+const stateLabel = ref('')
+
+const fetchStateLabel = async () => {
+    stateLabel.value = await getStateLabel(props.node.state)
+}
+
+onMounted(fetchStateLabel)
 </script>
 
 <style scoped>
@@ -69,8 +80,23 @@ ul {
 .node-state {
     font-size: 0.9em;
     color: #fff;
-    background-color: #3498db;
     padding: 1px 3px;
     border-radius: 2px;
+}
+
+.node-state.info {
+    background-color: #3498db;
+}
+
+.node-state.warning {
+    background-color: #f39c12;
+}
+
+.node-state.success {
+    background-color: #2ecc71;
+}
+
+.node-state.danger {
+    background-color: #e74c3c;
 }
 </style>
