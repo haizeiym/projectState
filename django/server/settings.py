@@ -5,7 +5,7 @@ SECRET_KEY = "project-state-fuck-QWET-DFXX-!@#$"  # 在生产环境中应该使�
 DEBUG = True
 
 # 允许的主机
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -53,7 +53,7 @@ DATABASES = {
         "ENGINE": "djongo",
         "NAME": "nodes",
         "CLIENT": {
-            "host": "db",
+            "host": "localhost",
             "port": 27017,
             "username": "root",
             "password": "root",
@@ -74,6 +74,7 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_PASSWORD_VALIDATORS = []
+AUTH_USER_MODEL = "server.UMModel"
 
 # CORS 设置
 CORS_ALLOWED_ORIGINS = [
