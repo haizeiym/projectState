@@ -3,6 +3,7 @@ from django.db import transaction
 from django.core.validators import MinValueValidator
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.auth.models import AbstractUser
 
 
 class NodeModel(models.Model):
@@ -264,3 +265,7 @@ class StateCodeModel(models.Model):
         verbose_name = "状态码"
         verbose_name_plural = "状态码"
         ordering = ["state_code"]
+
+
+class UMModel(AbstractUser):
+    project_id = models.IntegerField(verbose_name="项目ID", help_text="关联的项目ID")
