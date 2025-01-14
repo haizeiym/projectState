@@ -332,32 +332,69 @@ class Node:
             if node_id is None and request is not None:
                 node_id = request.resolver_match.kwargs.get("node_id")
 
-            def get_node_with_children(node_id):
-                node = NodeModel.objects.get(node_id=node_id)
-                children = list(NodeModel.objects.filter(parent_id=node_id))
+            def get_node_with_children(node_id, depth=0, visited=None):
+                # 防止递归过深
+                if depth > 100:
+                    print(f"Maximum depth reached for node {node_id}")
+                    return None
 
-                node_data = {
-                    "node_id": node.node_id,
-                    "node_name": node.node_name,
-                    "description": node.description,
-                    "state": node.state,
-                    "parent_id": node.parent_id,
-                    "children": [
-                        get_node_with_children(child.node_id) for child in children
-                    ],
-                }
-                return node_data
+                # 防止循环引用
+                if visited is None:
+                    visited = set()
+                if node_id in visited:
+                    print(f"Circular reference detected for node {node_id}")
+                    return None
+                visited.add(node_id)
+
+                try:
+                    # 使用 filter().first() 替代 get()
+                    node = NodeModel.objects.filter(node_id=node_id).first()
+                    if not node:
+                        print(f"Node not found: {node_id}")
+                        return None
+
+                    node_data = {
+                        "node_id": node.node_id,
+                        "node_name": node.node_name,
+                        "description": node.description,
+                        "state": node.state,
+                        "parent_id": node.parent_id,
+                        "children": [],
+                    }
+
+                    # 获取子节点
+                    children = NodeModel.objects.filter(parent_id=node_id)
+                    for child in children:
+                        child_data = get_node_with_children(
+                            child.node_id, depth + 1, visited
+                        )
+                        if child_data:
+                            node_data["children"].append(child_data)
+
+                    return node_data
+
+                except Exception as e:
+                    print(f"Error processing node {node_id}: {str(e)}")
+                    return None
 
             result = get_node_with_children(node_id)
+            if result is None:
+                if request:
+                    return JsonResponse(
+                        {"error": "Node not found or invalid tree structure"},
+                        status=404,
+                    )
+                return None
+
             if request:
-                return JsonResponse(result, encoder=NodeJSONEncoder)
+                return JsonResponse(result, safe=False)
             return result
 
-        except NodeModel.DoesNotExist:
-            if request:
-                return JsonResponse({"error": "Node not found"}, status=404)
-            return None
         except Exception as e:
+            import traceback
+
+            print(f"Error in get_tree: {str(e)}")
+            print(traceback.format_exc())
             if request:
                 return JsonResponse({"error": str(e)}, status=500)
             raise e
