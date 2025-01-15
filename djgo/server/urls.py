@@ -4,6 +4,7 @@ from server.api.Node import Node
 from server.api.Project import Project
 from server.api.PNTG import PNTG
 from server.api.StateCode import StateCode
+from .api import auth_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -39,4 +40,11 @@ urlpatterns = [
     ),
     path("api/statecode/get/<int:state_code>", StateCode.get, name="statecode_get"),
     path("api/statecode/list", StateCode.list, name="statecode_list"),
+    # 认证相关的 URL
+    path("api/csrf-token/", auth_views.get_csrf_token, name="csrf_token"),
+    path("admin/login/", auth_views.login_view, name="login"),
+    path("admin/register/", auth_views.register_view, name="register"),
+    path("admin/logout/", auth_views.logout_view, name="logout"),
+    path("api/user/info", auth_views.get_user_info, name="user_info"),
+    path("api/captcha/", auth_views.get_captcha, name="captcha"),
 ]
