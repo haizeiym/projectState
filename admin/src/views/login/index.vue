@@ -63,7 +63,8 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock, View, Hide, Key } from '@element-plus/icons-vue'
-import { getCSRFToken, login as loginApi } from '../../api/auth'
+import { getCSRFToken } from '../../api/auth'
+import { userStore } from '../../stores/user'
 import type { FormInstance } from 'element-plus'
 import config from '../../config'
 
@@ -99,7 +100,7 @@ const handleLogin = async () => {
         const csrfResponse: any = await getCSRFToken()
         const csrfToken = csrfResponse.csrfToken
 
-        const loginResponse: any = await loginApi({
+        const loginResponse: any = await userStore.login({
             username: loginForm.username,
             password: loginForm.password,
             captcha: loginForm.captcha,

@@ -1,14 +1,14 @@
-import { defineStore } from 'pinia'
 import { login, logout, getInfo } from '../api/auth'
 import { ref } from 'vue'
 
-export const useUserStore = defineStore('user', () => {
-    const token = ref(localStorage.getItem('Admin-Token') || '')
-    const userInfo = ref<any>(null)
+// 创建用户状态管理
+const token = ref(localStorage.getItem('Admin-Token') || '')
+const userInfo = ref<any>(null)
 
+export const useUser = () => {
     async function loginAction(userInfo: any) {
         try {
-            const response:any = await login(userInfo)
+            const response: any = await login(userInfo)
             if (response && response.id) {
                 token.value = response.id.toString()
                 localStorage.setItem('Admin-Token', token.value)
@@ -51,4 +51,7 @@ export const useUserStore = defineStore('user', () => {
         getInfo: getInfoAction,
         logout: logoutAction
     }
-}) 
+}
+
+// 导出一个全局实例
+export const userStore = useUser() 
