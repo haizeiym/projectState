@@ -11,17 +11,24 @@ export function login(data: any) {
     })
 }
 
-export function getInfo() {
-    return request({
-        url: '/api/user/info',
-        method: 'get'
-    })
-}
-
 export function logout() {
     return request({
         url: '/admin/auth/logout/',
         method: 'post'
+    })
+}
+
+export function getCSRFToken() {
+    return request({
+        url: '/api/csrf-token/',
+        method: 'get'
+    })
+}
+
+export function getInfo() {
+    return request({
+        url: '/api/user/info',
+        method: 'get'
     })
 }
 
@@ -33,12 +40,5 @@ export function register(data: any) {
         headers: {
             'Content-Type': 'application/json'
         }
-    })
-}
-
-export function getCSRFToken() {
-    return request({
-        url: '/api/csrf-token/',
-        method: 'get'
     })
 } 

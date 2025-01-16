@@ -63,8 +63,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock, View, Hide, Key } from '@element-plus/icons-vue'
-import { getCSRFToken } from '../../api/auth'
-import { useUserStore } from '../../stores/user'
+import { getCSRFToken, login as loginApi } from '../../api/auth'
 import type { FormInstance } from 'element-plus'
 import config from '../../config'
 
@@ -97,20 +96,29 @@ const handleLogin = async () => {
         loading.value = true
         await loginFormRef.value.validate()
 
-        const csrfResponse = await getCSRFToken()
+        const csrfResponse: any = await getCSRFToken()
         const csrfToken = csrfResponse.csrfToken
 
-        const userStore = useUserStore()
-        await userStore.login({
-            ...loginForm,
+        const loginResponse: any = await loginApi({
+            username: loginForm.username,
+            password: loginForm.password,
+            captcha: loginForm.captcha,
             csrfmiddlewaretoken: csrfToken
         })
 
-        const redirect = (router.currentRoute.value.query.redirect as string) || '/main/projects'
-        router.push(redirect)
+        if (loginResponse && loginResponse.id) {
+            // 保存用户信息到 localStorage
+            localStorage.setItem('Admin-Token', loginResponse.id.toString())
+            localStorage.setItem('userInfo', JSON.stringify(loginResponse))
 
-        ElMessage.success('登录成功')
+            // 等待下一个 tick 再进行路由跳转
+            await router.push((router.currentRoute.value.query.redirect as string) || '/main/projects')
+            ElMessage.success('登录成功')
+        } else {
+            throw new Error('Login failed')
+        }
     } catch (error: any) {
+        console.error('Login Error:', error)
         ElMessage.error(error.response?.data?.message || '登录失败')
     } finally {
         loading.value = false
