@@ -11,16 +11,20 @@ let stateCache: Record<number, string> | null = null
 
 // 获取状态码列表
 export async function getStateList() {
-    return request({
+    const response = await request({
         url: '/api/statecode/list',
         method: 'get'
     })
+    return response
 }
 
 // 获取状态标签
 export async function getStateLabel(state: number) {
     const cache = await getStateCache()
-    if (!cache) return '未知状态'
+    if (!cache || Object.keys(cache).length === 0) {
+        console.warn('State cache is empty')
+        return '未知状态'
+    }
     return cache[state] || '未知状态'
 }
 
@@ -29,13 +33,14 @@ export async function getStateCache() {
     if (!stateCache) {
         try {
             const response = await getStateList()
-            if (Array.isArray(response.data)) {
-                stateCache = response.data.reduce((acc: Record<number, string>, item: StateCode) => {
+            // 检查响应格式
+            if (response && Array.isArray(response)) {
+                stateCache = response.reduce((acc: Record<number, string>, item: StateCode) => {
                     acc[item.state_code] = item.state_name
                     return acc
                 }, {})
             } else {
-                console.error('Invalid state codes data:', response.data)
+                console.error('Invalid state codes data:', response)
                 stateCache = {}
             }
         } catch (error) {
