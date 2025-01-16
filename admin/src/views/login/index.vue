@@ -97,26 +97,21 @@ const handleLogin = async () => {
         loading.value = true
         await loginFormRef.value.validate()
 
-        // 获取 CSRF token
         const csrfResponse = await getCSRFToken()
-        const csrfToken = csrfResponse.data.csrfToken
+        const csrfToken = csrfResponse.csrfToken
 
-        // 获取 store 实例
         const userStore = useUserStore()
-
-        // 添加 CSRF token 到登录数据
         await userStore.login({
             ...loginForm,
             csrfmiddlewaretoken: csrfToken
         })
 
-        // 获取重定向地址
         const redirect = (router.currentRoute.value.query.redirect as string) || '/main/projects'
         router.push(redirect)
 
         ElMessage.success('登录成功')
     } catch (error: any) {
-        ElMessage.error(error.message || '登录失败')
+        ElMessage.error(error.response?.data?.message || '登录失败')
     } finally {
         loading.value = false
     }

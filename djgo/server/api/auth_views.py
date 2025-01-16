@@ -9,6 +9,9 @@ import random
 import string
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @ensure_csrf_cookie
@@ -56,15 +59,18 @@ def login_view(request):
 
 
 @require_http_methods(["POST"])
+@ensure_csrf_cookie
 def register_view(request):
     """用户注册"""
     try:
         data = json.loads(request.body)
         username = data.get("username")
         password = data.get("password")
-        email = data.get("email")
+        email = data.get("email", "")  # 设置默认值
         project_id = data.get("project_id")
         captcha = data.get("captcha")
+
+        logger.info(f"Registering user: {username}, project_id: {project_id}")
 
         if not username or not password or not project_id or not captcha:
             return JsonResponse({"error": "Missing required fields"}, status=400)
@@ -75,22 +81,30 @@ def register_view(request):
         if UMModel.objects.filter(username=username).exists():
             return JsonResponse({"error": "Username already exists"}, status=400)
 
-        user = UMModel.objects.create_user(
-            username=username, password=password, email=email, project_id=project_id
-        )
+        try:
+            user = UMModel.objects.create_user(
+                username=username, password=password, email=email, project_id=project_id
+            )
+            logger.info(f"User created successfully: {user.id}")
 
-        return JsonResponse(
-            {
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-                "project_id": user.project_id,
-            },
-            status=201,
-        )
+            return JsonResponse(
+                {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "project_id": user.project_id,
+                },
+                status=201,
+            )
+        except Exception as e:
+            logger.error(f"Error creating user: {str(e)}")
+            return JsonResponse({"error": f"Error creating user: {str(e)}"}, status=500)
 
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON data"}, status=400)
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=400)
+        logger.error(f"Unexpected error: {str(e)}")
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 @require_http_methods(["POST"])

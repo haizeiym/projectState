@@ -117,13 +117,22 @@ const handleRegister = async () => {
 
     try {
         loading.value = true
-        console.log(registerForm)
         await registerFormRef.value.validate()
-        await register(registerForm)
+
+        const response = await register({
+            username: registerForm.username,
+            password: registerForm.password,
+            email: registerForm.email,
+            project_id: registerForm.project_id,
+            captcha: registerForm.captcha
+        })
+
+        console.log(response.data)
+
         ElMessage.success('注册成功')
         router.push('/login')
     } catch (error: any) {
-        ElMessage.error(error.message || '注册失败')
+        ElMessage.error(error.response?.data?.message || '注册失败')
     } finally {
         loading.value = false
     }

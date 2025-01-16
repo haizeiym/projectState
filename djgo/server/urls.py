@@ -1,13 +1,26 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from server.api.Node import Node
 from server.api.Project import Project
 from server.api.PNTG import PNTG
 from server.api.StateCode import StateCode
 from .api import auth_views
 
+# 认证相关的 URL patterns
+auth_patterns = [
+    path("login/", auth_views.login_view, name="login"),
+    path("register/", auth_views.register_view, name="register"),
+    path("logout/", auth_views.logout_view, name="logout"),
+]
+
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    # 认证相关路由 - 放在 Django admin 之前
+    path("admin/auth/", include(auth_patterns)),  # 修改认证路由前缀
+    path("django-admin/", admin.site.urls),  # 修改 Django admin 路由
+    # API 路由
+    path("api/csrf-token/", auth_views.get_csrf_token, name="csrf_token"),
+    path("api/user/info", auth_views.get_user_info, name="user_info"),
+    path("api/captcha/", auth_views.get_captcha, name="captcha"),
     # Node API endpoints
     path("api/node/create", Node.create, name="node_create"),
     path("api/node/delete/<int:node_id>", Node.delete, name="node_delete"),
@@ -40,11 +53,4 @@ urlpatterns = [
     ),
     path("api/statecode/get/<int:state_code>", StateCode.get, name="statecode_get"),
     path("api/statecode/list", StateCode.list, name="statecode_list"),
-    # 认证相关的 URL
-    path("api/csrf-token/", auth_views.get_csrf_token, name="csrf_token"),
-    path("admin/login/", auth_views.login_view, name="login"),
-    path("admin/register/", auth_views.register_view, name="register"),
-    path("admin/logout/", auth_views.logout_view, name="logout"),
-    path("api/user/info", auth_views.get_user_info, name="user_info"),
-    path("api/captcha/", auth_views.get_captcha, name="captcha"),
 ]

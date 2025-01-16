@@ -269,3 +269,8 @@ class StateCodeModel(models.Model):
 
 class UMModel(AbstractUser):
     project_id = models.IntegerField(verbose_name="项目ID", help_text="关联的项目ID")
+
+    class Meta:
+        db_table = "auth_user"  # 使用默认的 auth_user 表名
+        verbose_name = "用户"
+        verbose_name_plural = "用户"

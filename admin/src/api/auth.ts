@@ -2,9 +2,12 @@ import request from '../utils/request'
 
 export function login(data: any) {
     return request({
-        url: '/admin/login/',
+        url: '/admin/auth/login/',
         method: 'post',
-        data
+        data,
+        headers: {
+            'Content-Type': 'application/json'
+        }
     })
 }
 
@@ -17,16 +20,19 @@ export function getInfo() {
 
 export function logout() {
     return request({
-        url: '/admin/logout/',
+        url: '/admin/auth/logout/',
         method: 'post'
     })
 }
 
 export function register(data: any) {
     return request({
-        url: '/admin/register/',
+        url: '/admin/auth/register/',
         method: 'post',
-        data
+        data,
+        headers: {
+            'Content-Type': 'application/json'
+        }
     })
 }
 

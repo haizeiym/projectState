@@ -79,26 +79,27 @@ AUTH_USER_MODEL = "server.UMModel"
 
 # CORS 设置
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Vue 开发服务器地址
-    "http://localhost:5174",  # Vue 开发服务器地址
-    "http://localhost:8000",  # Django 开发服务器地址
+    "http://localhost:5173",
+    "http://localhost:8080",
 ]
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
 
 # 认证相关设置
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
-
-# CSRF 设置
-CSRF_COOKIE_SAMESITE = "Lax"
-CSRF_COOKIE_HTTPONLY = False  # 允许 JavaScript 访问
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:8080",
-]
-CSRF_USE_SESSIONS = False
-CSRF_COOKIE_NAME = "csrftoken"
 
 # Session 设置
 SESSION_COOKIE_SAMESITE = "Lax"
@@ -114,4 +115,19 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+}
+
+# 添加日志配置
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
 }
