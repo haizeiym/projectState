@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
-import config from '../config'
+import config from '../config/index.ts'
 
 const service = axios.create({
     baseURL: config.API_URL,

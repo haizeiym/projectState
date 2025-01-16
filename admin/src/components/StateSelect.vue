@@ -1,43 +1,51 @@
 <template>
-    <el-select v-model="selectedState" @change="handleChange">
-        <el-option v-for="(label, value) in stateOptions" :key="value" :label="label" :value="Number(value)">
-            <el-tag :type="getStateType(Number(value))">{{ label }}</el-tag>
+    <el-select :model-value="modelValue" placeholder="请选择状态" clearable :loading="loading"
+        @update:model-value="handleChange">
+        <el-option v-for="option in stateOptions" :key="option.value" :value="option.value" :label="option.label">
+            <el-tag :type="getTagType(option.value)" size="small">{{ option.label }}</el-tag>
         </el-option>
     </el-select>
 </template>
 
-<script setup>
-import { ref, watch, onMounted } from 'vue'
-import { getStateType, getStateCache } from '../utils/stateUtils'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { getStateCache, getStateColor } from '../utils/stateUtils';
 
-const props = defineProps({
-    modelValue: {
-        type: Number,
-        default: 0
+
+const emit = defineEmits<{
+    'update:modelValue': [value: number | null]
+}>()
+
+const stateOptions = ref<Array<{ value: number, label: string }>>([])
+const loading = ref(false)
+
+const loadStates = async () => {
+    loading.value = true
+    try {
+        const stateMap = await getStateCache()
+        if (stateMap) {
+            stateOptions.value = Object.entries(stateMap).map(([code, name]) => ({
+                value: Number(code),
+                label: name
+            }))
+        }
+    } catch (error) {
+        console.error('Failed to load states:', error)
+    } finally {
+        loading.value = false
     }
-})
-
-const emit = defineEmits(['update:modelValue'])
-
-const selectedState = ref(props.modelValue)
-const stateOptions = ref({})
-
-// Fetch state options dynamically
-const fetchStateOptions = async () => {
-    stateOptions.value = await getStateCache()
 }
 
-// Fetch state options on component mount
-onMounted(fetchStateOptions)
+const getTagType = (value: number) => {
+    return getStateColor(value)
+}
 
-// Handle selection change
-const handleChange = (value) => {
+const handleChange = (value: number | null) => {
     emit('update:modelValue', value)
 }
 
-// Watch for external value changes
-watch(() => props.modelValue, (newVal) => {
-    selectedState.value = newVal
+onMounted(() => {
+    loadStates()
 })
 </script>
 

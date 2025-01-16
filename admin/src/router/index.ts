@@ -41,7 +41,7 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
     const token = localStorage.getItem('Admin-Token')
     if (to.path !== '/login' && to.path !== '/register' && !token) {
         next('/login')
