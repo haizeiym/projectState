@@ -80,6 +80,7 @@ import NodeAdd from './NodeAdd.vue'
 import NodeEdit from './NodeEdit.vue'
 import { getStateLabel } from '../utils/stateUtils'
 import StateTag from '../components/StateTag.vue'
+import { getNodeTree, deleteNode, batchUpdateNodes } from '../api/node'
 
 const route = useRoute()
 const router = useRouter()
@@ -94,16 +95,26 @@ const pntgData = ref({}) // 保存 PNTG 数据
 let isFirstLoad = true // 标志首次加载
 let lastState = null // 存储上次的状态
 
-// 获取节点及其子节点数据
-const fetchNodes = async (nodeId) => {
+const props = defineProps({
+    nodeId: {
+        type: Number,
+        required: true
+    },
+    projectId: {
+        type: Number,
+        required: true
+    }
+})
+
+const nodeData = ref(null)
+
+const fetchNodeTree = async () => {
     loading.value = true
     try {
-        const response = await axios.get(`/api/node/tree/${nodeId}`)
-        currentNode.value = response.data
-        nodes.value = response.data.children
+        const response = await getNodeTree(props.nodeId)
+        nodeData.value = response
     } catch (error) {
-        console.error('Error fetching nodes:', error)
-        ElMessage.error('获取节点数据失败')
+        ElMessage.error('获取节点树失败：' + (error.response?.data?.message || error.message))
     } finally {
         loading.value = false
     }
@@ -163,23 +174,16 @@ watch(() => currentNode.value?.state, (newState) => {
 })
 
 // 删除节点
-const handleDelete = async (nodeId) => {
+const handleDelete = async (node) => {
     try {
-        await ElMessageBox.confirm('确认要删除该节点及其所有子节点吗？', '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning',
-            message: '此操作将永久删除该节点及其所有子节点，是否继续？'
+        await ElMessageBox.confirm('确定要删除该节点吗？', '提示', {
+            type: 'warning'
         })
-
-        await axios.delete(`/api/node/delete/${nodeId}`)
+        await deleteNode(node.node_id)
         ElMessage.success('删除成功')
-        await fetchNodes(route.params.nodeId)
-    } catch (error) {
-        if (error !== 'cancel') {
-            console.error('Error deleting node:', error)
-            ElMessage.error('删除节点失败')
-        }
+        await fetchNodeTree()
+    } catch {
+        // 用户取消删除
     }
 }
 
@@ -209,10 +213,21 @@ const handleEdit = (nodeId) => {
     nodeEditRef.value.open(nodeId)
 }
 
-onMounted(() => {
-    if (route.params.nodeId) {
-        fetchNodes(route.params.nodeId)
+const handleBatchUpdate = async (nodeIds, newState) => {
+    try {
+        await batchUpdateNodes({
+            node_ids: nodeIds,
+            state: newState
+        })
+        ElMessage.success('状态更新成功')
+        await fetchNodeTree()
+    } catch (error) {
+        ElMessage.error('状态更新失败：' + (error.response?.data?.message || error.message))
     }
+}
+
+onMounted(() => {
+    fetchNodeTree()
     const projectId = route.query.projectId
     if (projectId) {
         fetchPNTGData(projectId)

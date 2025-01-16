@@ -1,10 +1,12 @@
 <template>
     <PageLayout title="添加状态">
         <el-form :model="stateForm" ref="stateFormRef" label-width="80px">
-            <el-form-item label="状态码" prop="state_code" :rules="[{ required: true, message: '请输入状态码', trigger: 'blur' }]">
+            <el-form-item label="状态码" prop="state_code"
+                :rules="[{ required: true, message: '请输入状态码', trigger: 'blur' }]">
                 <el-input v-model="stateForm.state_code" type="number" />
             </el-form-item>
-            <el-form-item label="状态名称" prop="state_name" :rules="[{ required: true, message: '请输入状态名称', trigger: 'blur' }]">
+            <el-form-item label="状态名称" prop="state_name"
+                :rules="[{ required: true, message: '请输入状态名称', trigger: 'blur' }]">
                 <el-input v-model="stateForm.state_name" />
             </el-form-item>
             <el-form-item>
@@ -18,7 +20,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { addState } from '../utils/stateUtils'
 import PageLayout from '../components/PageLayout.vue'
 import { ElMessage } from 'element-plus'
 
@@ -33,7 +35,7 @@ const router = useRouter()
 const createState = async () => {
     try {
         await stateFormRef.value.validate()
-        const response = await axios.post('/api/statecode/create', stateForm.value)
+        const response = await addState(stateForm.value)
         if (response.status === 201) {
             ElMessage.success('状态创建成功')
             router.push('/state-management')
@@ -54,4 +56,4 @@ const cancel = () => {
 
 <style scoped>
 /* 添加样式 */
-</style> 
+</style>

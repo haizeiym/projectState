@@ -21,10 +21,10 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue'
+import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import axios from 'axios'
 import StateSelect from '../components/StateSelect.vue'
+import { createNode } from '../api/node'
 
 const props = defineProps({
     parentId: {
@@ -33,8 +33,7 @@ const props = defineProps({
     }
 })
 
-const emit = defineEmits(['success'])
-
+const emit = defineEmits(['node-added'])
 const dialogVisible = ref(false)
 const form = ref({
     node_name: '',
@@ -43,17 +42,12 @@ const form = ref({
     parent_id: props.parentId
 })
 
-// 提交表单
 const handleSubmit = async () => {
     try {
-        await axios.post('/api/node/create', {
-            ...form.value,
-            parent_id: props.parentId
-        })
+        await createNode(form.value)
         ElMessage.success('创建成功')
         dialogVisible.value = false
-        emit('success')
-        // 重置表单
+        emit('node-added')
         form.value = {
             node_name: '',
             description: '',

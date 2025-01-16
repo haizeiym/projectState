@@ -1,9 +1,18 @@
 import request from '../utils/request'
 
-export function getProjectList() {
+export function createProject(data: any) {
     return request({
-        url: '/api/project/list',
-        method: 'get'
+        url: '/api/project/create',
+        method: 'post',
+        data
+    })
+}
+
+export function updateProject(projectId: number, data: any) {
+    return request({
+        url: `/api/project/update/${projectId}`,
+        method: 'put',
+        data
     })
 }
 
@@ -14,10 +23,16 @@ export function deleteProject(projectId: number) {
     })
 }
 
-export function updateProject(projectId: number, data: any) {
+export function getProjectById(projectId: number) {
     return request({
-        url: `/api/project/update/${projectId}`,
-        method: 'put',
-        data
+        url: `/api/project/get/${projectId}`,
+        method: 'get'
+    })
+}
+
+export function getProjectList() {
+    return request({
+        url: '/api/project/list',
+        method: 'get'
     })
 } 

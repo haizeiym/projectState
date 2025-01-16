@@ -18,8 +18,9 @@
 
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import { getStateById, updateState } from '../api/state'
+
 const dialogVisible = ref(false)
 const stateForm = ref({
     state_code: '',
@@ -27,13 +28,12 @@ const stateForm = ref({
 })
 
 const emit = defineEmits(['state-updated'])
-
 const stateFormRef = ref(null)
 
 const open = async (stateCode) => {
     try {
-        const response = await axios.get(`/api/statecode/get/${stateCode}`)
-        stateForm.value = response.data
+        const response = await getStateById(stateCode)
+        stateForm.value = response
         dialogVisible.value = true
     } catch (error) {
         ElMessage.error('获取状态信息失败：' + (error.response?.data?.message || error.message))
@@ -44,15 +44,13 @@ defineExpose({
     open
 })
 
-const updateState = async () => {
+const handleUpdateState = async () => {
     try {
         await stateFormRef.value.validate()
-        const response = await axios.post(`/api/statecode/update/${stateForm.value.state_code}`, stateForm.value)
-        if (response.status === 200) {
-            ElMessage.success('状态更新成功')
-            dialogVisible.value = false
-            emit('state-updated')
-        }
+        await updateState(stateForm.value.state_code, stateForm.value)
+        ElMessage.success('状态更新成功')
+        dialogVisible.value = false
+        emit('state-updated')
     } catch (error) {
         ElMessage.error('状态更新失败：' + (error.response?.data?.message || error.message))
     }

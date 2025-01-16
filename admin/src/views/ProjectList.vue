@@ -37,7 +37,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-import { getProjectList } from '../api/project'
+import { getProjectList, deleteProject } from '../api/project'
 
 const router = useRouter()
 const loading = ref(false)
@@ -69,7 +69,7 @@ const handleDelete = async (row: any) => {
         await ElMessageBox.confirm('确定要删除该项目吗？', '提示', {
             type: 'warning'
         })
-        // TODO: 实现删除逻辑
+        await deleteProject(row.project_id)
         ElMessage.success('删除成功')
         await fetchProjects()
     } catch {

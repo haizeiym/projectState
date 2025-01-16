@@ -31,10 +31,10 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import axios from 'axios'
 import PageLayout from '../components/PageLayout.vue'
 import EditStateDialog from './EditStateEdit.vue'
-import { updateStateLabel, getStateType } from '../utils/stateUtils'
+import { getStateList, deleteState } from '../api/state'
+import { getStateType } from '../utils/stateUtils'
 
 const stateCodes = ref([])
 const filteredStateCodes = ref([])
@@ -52,9 +52,8 @@ const editStateDialog = ref(null)
 const fetchStateCodes = async () => {
     loading.value = true
     try {
-        const response = await axios.get('/api/statecode/list')
-        stateCodes.value = response.data
-        updateStateLabel(response.data)
+        const response = await getStateList()
+        stateCodes.value = response
         pagination.value.total = stateCodes.value.length
         filterStateCodes()
     } catch (error) {
@@ -93,15 +92,15 @@ const confirmDeleteState = (stateCode) => {
         cancelButtonText: '取消',
         type: 'warning',
     }).then(() => {
-        deleteState(stateCode)
+        handleDeleteState(stateCode)
     }).catch(() => {
         ElMessage.info('已取消删除')
     })
 }
 
-const deleteState = async (stateCode) => {
+const handleDeleteState = async (stateCode) => {
     try {
-        await axios.delete(`/api/statecode/delete/${stateCode}`)
+        await deleteState(stateCode)
         ElMessage.success('状态删除成功')
         fetchStateCodes()
     } catch (error) {

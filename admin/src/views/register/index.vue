@@ -85,7 +85,7 @@ import { ElMessage } from 'element-plus'
 import { User, Lock, Message, Folder, View, Hide, Key } from '@element-plus/icons-vue'
 import { register } from '../../api/auth'
 import type { FormInstance } from 'element-plus'
-import config from '../../config'
+import config from '../../config/index.ts'
 
 const router = useRouter()
 const loading = ref(false)

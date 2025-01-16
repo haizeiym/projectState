@@ -25,31 +25,41 @@ import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 import StateTag from '../components/StateTag.vue'
+import { getNodeById, updateNode } from '../api/node'
 
+const props = defineProps({
+    nodeId: {
+        type: Number,
+        required: true
+    }
+})
 
-const emit = defineEmits(['success'])
-
+const emit = defineEmits(['node-updated'])
 const dialogVisible = ref(false)
 const form = ref({
-    node_id: 0,
     node_name: '',
     description: '',
     state: 0
 })
 
-// 获取节点信息
-const fetchNode = async () => {
+const open = async () => {
     try {
-        const response = await axios.get(`/api/node/get/${form.value.node_id}`)
-        form.value = {
-            node_id: form.value.node_id,
-            node_name: response.data.node_name,
-            description: response.data.description,
-            state: response.data.state
-        }
+        const response = await getNodeById(props.nodeId)
+        form.value = response
+        dialogVisible.value = true
     } catch (error) {
         ElMessage.error('获取节点信息失败：' + (error.response?.data?.message || error.message))
+    }
+}
+
+const handleSubmit = async () => {
+    try {
+        await updateNode(props.nodeId, form.value)
+        ElMessage.success('更新成功')
         dialogVisible.value = false
+        emit('node-updated')
+    } catch (error) {
+        ElMessage.error('更新失败：' + (error.response?.data?.message || error.message))
     }
 }
 
@@ -57,7 +67,7 @@ const fetchNode = async () => {
 const handleStateChange = async (newState) => {
     try {
         // 获取所有子节点ID
-        const response = await axios.get(`/api/node/tree/${form.value.node_id}`)
+        const response = await axios.get(`/api/node/tree/${props.nodeId}`)
 
         // 收集所有子节点ID
         const collectNodeIds = (node, ids = []) => {
@@ -84,46 +94,15 @@ const handleStateChange = async (newState) => {
     }
 }
 
-// 提交表单
-const handleSubmit = async () => {
-    try {
-        await axios.post(`/api/node/update/${form.value.node_id}`, form.value)
-        ElMessage.success('修改成功')
-        dialogVisible.value = false
-        emit('success')
-        // 重置表单
-        form.value = {
-            node_id: 0,
-            node_name: '',
-            description: '',
-            state: 0
-        }
-    } catch (error) {
-        ElMessage.error('修改失败：' + (error.response?.data?.message || error.message))
-    }
-}
-
 // 取消
 const handleCancel = () => {
     dialogVisible.value = false
     // 重置表单
     form.value = {
-        node_id: 0,
         node_name: '',
         description: '',
         state: 0
     }
-}
-
-// 对外暴露打开弹窗的方法
-const open = (nodeId) => {
-    if (!nodeId || nodeId <= 0) {
-        ElMessage.error('节点ID不能为空')
-        return
-    }
-    form.value.node_id = nodeId
-    dialogVisible.value = true
-    fetchNode()
 }
 
 defineExpose({

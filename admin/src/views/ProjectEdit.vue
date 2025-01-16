@@ -39,80 +39,69 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import axios from 'axios'
 import StateTag from '../components/StateTag.vue'
-import PageLayout from '../components/PageLayout.vue'
-import { getStateCache, getStateType } from '../utils/stateUtils'
+import { getProjectById, updateProject } from '../api/project'
+import { getPNTGByProjectId, updatePNTG } from '../api/pntg'
 
-const route = useRoute()
 const router = useRouter()
+const route = useRoute()
+const projectId = Number(route.params.id)
+
 const form = ref({
     project_name: '',
     description: '',
     state: 0,
-    node_id: 0,
     bot_token: '',
     chat_id: '',
-    url: '',
-    state_codes: ''
+    url: ''
 })
 
-const selectedStateCodes = ref([])
-const stateOptions = ref({})
-
-// 获取项目信息
 const fetchProject = async () => {
     try {
-        const response = await axios.get(`/api/project/get/${route.params.projectId}`)
-        form.value = response.data
+        const [projectResponse, pntgResponse] = await Promise.all([
+            getProjectById(projectId),
+            getPNTGByProjectId(projectId)
+        ])
 
-        // 获取 PNTG 信息
-        const pntgResponse = await axios.get(`/api/pntg/get/${route.params.projectId}`)
-        Object.assign(form.value, pntgResponse.data)
-
-        // Initialize selectedStateCodes from form.state_codes
-        selectedStateCodes.value = form.value.state_codes.split(',').map(Number)
+        form.value = {
+            ...projectResponse,
+            ...pntgResponse
+        }
     } catch (error) {
-        ElMessage.error('获取项目信息失败')
+        ElMessage.error('获取项目信息失败：' + (error.response?.data?.message || error.message))
     }
 }
 
-// 提交表单
 const handleSubmit = async () => {
     try {
-        // Update form.state_codes with selectedStateCodes
-        form.value.state_codes = selectedStateCodes.value.join(',')
-
-        // 创建一个新的对象，去除 state 字段
-        const { state, ...formData } = form.value
-
-        await axios.post(`/api/project/update/${route.params.projectId}`, formData)
-
-        // 更新 PNTG 记录
-        await axios.post(`/api/pntg/update/${route.params.projectId}`, {
-            bot_token: form.value.bot_token,
-            chat_id: form.value.chat_id,
-            url: form.value.url,
-            state_codes: form.value.state_codes
+        // 更新项目信息
+        await updateProject(projectId, {
+            project_name: form.value.project_name,
+            description: form.value.description,
+            state: form.value.state
         })
 
-        ElMessage.success('修改成功')
-        router.push('/projects')
+        // 更新 PNTG 配置
+        await updatePNTG(projectId, {
+            bot_token: form.value.bot_token,
+            chat_id: form.value.chat_id,
+            url: form.value.url
+        })
+
+        ElMessage.success('更新成功')
+        router.push('/main/projects')
     } catch (error) {
-        ElMessage.error('修改失败')
+        ElMessage.error('更新失败：' + (error.response?.data?.message || error.message))
     }
 }
 
-// 取消
 const handleCancel = () => {
-    router.push('/projects')
+    router.push('/main/projects')
 }
 
-// Fetch state options on component mount
-onMounted(async () => {
-    stateOptions.value = await getStateCache()
+onMounted(() => {
     fetchProject()
 })
 </script>
