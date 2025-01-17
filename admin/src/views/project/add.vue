@@ -47,6 +47,7 @@ import { ElMessage } from 'element-plus'
 import StateSelect from '../../components/StateSelect.vue'
 import { createProject } from '../../api/project'
 import { createPNTG } from '../../api/pntg'
+import { createNode } from '../../api/node'
 import { updateUserProjects } from '../../api/auth'
 import { userStore } from '../../stores/user'
 import { getStateCache, getStateType } from '../../utils/stateUtils'
@@ -66,8 +67,17 @@ const selectedStateCodes = ref([])
 
 const handleSubmit = async () => {
     try {
+
+        // 创建节点
+        const nodeResponse = await createNode({
+            node_name: form.value.project_name,
+            description: form.value.description,
+            state: form.value.state
+        })
+
         // 创建项目
         const projectResponse = await createProject({
+            node_id: nodeResponse.node_id,
             project_name: form.value.project_name,
             description: form.value.description,
             state: form.value.state
