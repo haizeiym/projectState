@@ -7,7 +7,7 @@
         <el-table :data="filteredProjects" style="width: 100%" v-loading="loading">
             <el-table-column prop="project_id" label="项目ID" width="100" />
             <el-table-column prop="project_name" label="项目名称" />
-            <el-table-column prop="project_desc" label="项目描述" />
+            <el-table-column prop="description" label="项目描述" />
             <el-table-column label="操作" width="200">
                 <template #default="scope">
                     <el-button type="primary" size="small" @click="handleEdit(scope.row)"
@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getProjectList, deleteProject } from '../api/project'
@@ -35,14 +35,7 @@ const router = useRouter()
 const loading = ref(false)
 const projects = ref([])
 
-const filteredProjects = computed(() => {
-    if (!userStore.userInfo.value) return []
-
-    const userProjectIds = userStore.userInfo.value?.projectIds ?? []
-    return projects.value.filter((project: any) =>
-        userProjectIds.includes(project.project_id)
-    )
-})
+const filteredProjects = computed(() => projects.value)
 
 const hasProjectPermission = (projectId: number) => {
     const userProjectIds = userStore.userInfo.value?.projectIds ?? []
@@ -57,17 +50,14 @@ const hasManagePermission = computed(() => {
 const fetchProjects = async () => {
     try {
         loading.value = true
-        if (!userStore.userInfo.value?.projectIds?.length) {
+        const projectIds = userStore.userInfo.value?.projectIds ?? []
+
+        if (projectIds.length > 0) {
+            const response = await getProjectList(projectIds)
+            projects.value = response.data || []
+        } else {
             projects.value = []
-            return
         }
-
-        const projectIds = Array.isArray(userStore.userInfo.value.projectIds)
-            ? userStore.userInfo.value.projectIds
-            : [userStore.userInfo.value.projectIds]
-
-        const response = await getProjectList(projectIds)
-        projects.value = response.data || []
     } catch (error: any) {
         ElMessage.error('获取项目列表失败')
         console.error('Error fetching projects:', error)
@@ -103,7 +93,17 @@ const handleDelete = (row: any) => {
 }
 
 onMounted(() => {
-    fetchProjects()
+    if (userStore.userInfo.value) {
+        fetchProjects()
+    }
+})
+
+watch(() => userStore.userInfo.value, (newVal) => {
+    if (newVal) {
+        fetchProjects()
+    } else {
+        projects.value = []
+    }
 })
 </script>
 
