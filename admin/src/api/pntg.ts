@@ -1,6 +1,11 @@
-import request from '../utils/request'
+import request from '../utils/request';
 
-export function createPNTG(data: any) {
+export function createPNTG(data: {
+    project_id: number;
+    bot_token: string;
+    chat_id: string;
+    url: string;
+}) {
     return request({
         url: '/api/pntg/create',
         method: 'post',
@@ -8,7 +13,11 @@ export function createPNTG(data: any) {
     })
 }
 
-export function updatePNTG(projectId: number, data: any) {
+export function updatePNTG(projectId: number, data: {
+    bot_token: string;
+    chat_id: string;
+    url: string;
+}) {
     return request({
         url: `/api/pntg/update/${projectId}`,
         method: 'put',
@@ -16,9 +25,16 @@ export function updatePNTG(projectId: number, data: any) {
     })
 }
 
-export function getPNTGByProjectId(projectId: number) {
+export function getPNTG(projectId: number) {
     return request({
         url: `/api/pntg/get/${projectId}`,
         method: 'get'
+    })
+}
+
+export function deletePNTG(projectId: number) {
+    return request({
+        url: `/api/pntg/delete/${projectId}`,
+        method: 'delete'
     })
 } 

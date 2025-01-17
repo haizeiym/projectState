@@ -90,6 +90,17 @@ const handleDelete = (row: any) => {
     }).then(async () => {
         try {
             await deleteProject(row.project_id)
+
+            // 更新用户的 project_ids
+            if (userStore.userInfo.value) {
+                const projectIds = userStore.userInfo.value.projectIds || []
+                const updatedProjectIds = projectIds.filter(id => id !== row.project_id)
+                userStore.updateUserInfo({
+                    ...userStore.userInfo.value,
+                    projectIds: updatedProjectIds
+                })
+            }
+
             ElMessage.success('删除成功')
             fetchProjects()
         } catch (error) {

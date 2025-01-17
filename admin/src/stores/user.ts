@@ -68,13 +68,19 @@ export const useUser = () => {
         return userInfo.value?.isSuper || userInfo.value?.projectIds.includes(projectId) || false;
     }
 
+    function updateUserInfo(newInfo: any) {
+        userInfo.value = newInfo;
+        localStorage.setItem('User-Info', JSON.stringify(newInfo));
+    }
+
     return {
         token,
         userInfo,
         login: loginAction,
         getInfo: getInfoAction,
         logout: logoutAction,
-        hasProjectAccess
+        hasProjectAccess,
+        updateUserInfo
     };
 };
 

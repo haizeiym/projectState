@@ -47,6 +47,7 @@ import { ElMessage } from 'element-plus'
 import StateSelect from '../../components/StateSelect.vue'
 import { createProject } from '../../api/project'
 import { createPNTG } from '../../api/pntg'
+import { userStore } from '../../stores/user'
 import { getStateCache, getStateType } from '../../utils/stateUtils'
 
 const router = useRouter()
@@ -78,6 +79,16 @@ const handleSubmit = async () => {
             chat_id: form.value.chat_id,
             url: form.value.url
         })
+
+        // 更新用户的 project_ids
+        if (userStore.userInfo.value) {
+            const projectIds = userStore.userInfo.value.projectIds || []
+            projectIds.push(projectResponse.project_id)
+            userStore.updateUserInfo({
+                ...userStore.userInfo.value,
+                projectIds
+            })
+        }
 
         ElMessage.success('项目创建成功')
         router.push('/main/projects')
