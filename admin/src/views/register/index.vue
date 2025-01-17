@@ -12,12 +12,10 @@
                 <el-input v-model="registerForm.confirmPassword" type="password" placeholder="确认密码" />
             </el-form-item>
             <el-form-item prop="captcha" class="captcha-item">
-                <el-input v-model="registerForm.captcha" placeholder="验证码">
-                    <template #append>
-                        <img :src="captchaUrl" @click="refreshCaptcha" alt="验证码" class="captcha-img"
-                            referrerpolicy="no-referrer" crossorigin="anonymous" />
-                    </template>
-                </el-input>
+                <el-input v-model="registerForm.captcha" placeholder="验证码" maxlength="4" />
+                <div class="captcha-container">
+                    <img :src="captchaUrl" @click="refreshCaptcha" alt="验证码" class="captcha-img">
+                </div>
             </el-form-item>
             <el-form-item>
                 <el-button :loading="loading" type="primary" @click="handleRegister" class="submit-btn">注册</el-button>
@@ -33,6 +31,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { register } from '../../api/auth'
+import config from '../../config/index.ts'
 
 const router = useRouter()
 const loading = ref(false)
@@ -90,7 +89,7 @@ const handleRegister = async () => {
 
 const refreshCaptcha = () => {
     const timestamp = Date.now()
-    captchaUrl.value = `/api/captcha/?t=${timestamp}`
+    captchaUrl.value = `${config.API_URL}/api/captcha/?t=${timestamp}`
 }
 
 const goToLogin = () => {
@@ -129,20 +128,47 @@ onMounted(() => {
     margin-top: 10px;
 }
 
-.captcha-item :deep(.el-input-group__append) {
-    padding: 0;
-    background-color: transparent;
-    border: 1px solid #dcdfe6;
-    border-left: none;
+.captcha-item {
+    position: relative;
+}
+
+.captcha-container {
+    position: absolute;
+    right: 1px;
+    top: 1px;
+    height: 32px;
+    cursor: pointer;
+    background: #fff;
+    border-radius: 0 4px 4px 0;
+    border-left: 1px solid #dcdfe6;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s;
+}
+
+.captcha-container:hover {
+    background-color: #f5f7fa;
 }
 
 .captcha-img {
-    height: 32px;
+    height: 28px;
     cursor: pointer;
-    vertical-align: middle;
-    margin: 0;
-    padding: 4px 8px;
-    border-radius: 0 4px 4px 0;
-    background-color: #fff;
+}
+
+.register-form :deep(.el-input__wrapper) {
+    box-shadow: 0 0 0 1px #dcdfe6;
+}
+
+.register-form :deep(.el-input__wrapper.is-focus) {
+    box-shadow: 0 0 0 1px #409eff;
+}
+
+.register-form :deep(.el-form-item.is-error .el-input__wrapper) {
+    box-shadow: 0 0 0 1px #f56c6c;
+}
+
+.captcha-item :deep(.el-input__wrapper) {
+    padding-right: 100px;
 }
 </style>
