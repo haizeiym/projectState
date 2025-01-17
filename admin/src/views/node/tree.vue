@@ -2,26 +2,48 @@
     <div class="node-tree">
         <div class="header">
             <h2>节点管理</h2>
-            <el-button type="primary" @click="handleAddNode">添加节点</el-button>
+            <div class="header-actions">
+                <el-button type="primary" @click="handleAddNode">
+                    <el-icon>
+                        <Plus />
+                    </el-icon>添加节点
+                </el-button>
+                <el-button @click="handleClose">
+                    <el-icon>
+                        <Back />
+                    </el-icon>返回项目列表
+                </el-button>
+            </div>
         </div>
         <el-tree ref="treeRef" :data="treeData" :props="defaultProps" node-key="node_id" default-expand-all
             :expand-on-click-node="false">
             <template #default="{ node, data }">
                 <div class="custom-tree-node">
                     <span>{{ node.label }}</span>
-                    <span class="node-state">
-                        <el-tag :type="getStateType(data.state)">
-                            {{ getStateName(data.state) }}
-                        </el-tag>
-                    </span>
-                    <span class="node-actions">
-                        <el-button type="primary" link @click="handleEdit(data)">
-                            编辑
-                        </el-button>
-                        <el-button type="danger" link @click="handleDelete(node, data)">
-                            删除
-                        </el-button>
-                    </span>
+                    <div class="node-operations">
+                        <span class="node-actions">
+                            <el-button type="success" link @click="handleAddChild(data)" class="action-button">
+                                <el-icon>
+                                    <Plus />
+                                </el-icon>添加子节点
+                            </el-button>
+                            <el-button type="primary" link @click="handleEdit(data)" class="action-button">
+                                <el-icon>
+                                    <Edit />
+                                </el-icon>编辑
+                            </el-button>
+                            <el-button type="danger" link @click="handleDelete(node, data)" class="action-button">
+                                <el-icon>
+                                    <Delete />
+                                </el-icon>删除
+                            </el-button>
+                            <span class="node-state">
+                                <el-tag :type="getStateType(data.state)">
+                                    {{ getStateName(data.state) }}
+                                </el-tag>
+                            </span>
+                        </span>
+                    </div>
                 </div>
             </template>
         </el-tree>
@@ -32,6 +54,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus, Back, Edit, Delete } from '@element-plus/icons-vue'
 import { getNodeTree, deleteNode } from '../../api/node'
 
 const route = useRoute()
@@ -58,6 +81,10 @@ const fetchNodeTree = async () => {
 const handleAddNode = () => {
     const projectId = route.params.projectId
     router.push(`/main/node/add/${projectId}`)
+}
+
+const handleAddChild = (data: any) => {
+    router.push(`/main/node/add/${route.params.nodeId}?parent_id=${data.node_id}`)
 }
 
 const handleEdit = (data: any) => {
@@ -100,6 +127,10 @@ const getStateName = (state: number) => {
     return stateMap[state] || '未知'
 }
 
+const handleClose = () => {
+    router.push('/main/projects')
+}
+
 onMounted(() => {
     fetchNodeTree()
 })
@@ -121,20 +152,44 @@ onMounted(() => {
     margin: 0;
 }
 
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
 .custom-tree-node {
     flex: 1;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     font-size: 14px;
     padding-right: 8px;
 }
 
+.node-operations {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
 .node-state {
-    margin: 0 20px;
+    margin-left: 16px;
+    display: flex;
+    align-items: center;
 }
 
 .node-actions {
-    margin-left: auto;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.action-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.action-button .el-icon {
+    margin-right: 2px;
 }
 </style>
