@@ -1,15 +1,20 @@
 <template>
-    <PageLayout title="修改项目">
+    <div class="project-add">
+        <h2>添加项目</h2>
+        <div class="description-text">
+            <el-alert title="默认添加节点，名称，描述，状态相同" type="info" :closable="false" class="mb-20" />
+        </div>
         <el-form :model="form" label-width="120px">
-            <el-form-item label="状态">
-                <StateTag :modelValue="form.state" />
-            </el-form-item>
             <el-form-item label="项目名称">
                 <el-input v-model="form.project_name" />
             </el-form-item>
             <el-form-item label="描述">
                 <el-input v-model="form.description" type="textarea" />
             </el-form-item>
+            <el-form-item label="状态">
+                <StateSelect v-model="form.state" />
+            </el-form-item>
+            <!-- PNTGModel Fields -->
             <el-form-item label="Bot Token">
                 <el-input v-model="form.bot_token" />
             </el-form-item>
@@ -28,27 +33,23 @@
                 </el-select>
             </el-form-item>
             <el-form-item>
-                <el-button-group>
-                    <el-button type="primary" @click="handleSubmit">保存</el-button>
-                    <el-button @click="handleCancel">取消</el-button>
-                </el-button-group>
+                <el-button type="primary" @click="handleSubmit">创建</el-button>
+                <el-button @click="handleCancel">取消</el-button>
             </el-form-item>
         </el-form>
-    </PageLayout>
+    </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import StateTag from '../components/StateTag.vue'
-import { getProjectById, updateProject } from '../api/project'
-import { getPNTGByProjectId, updatePNTG } from '../api/pntg'
+import StateSelect from '../../components/StateSelect.vue'
+import { createProject } from '../../api/project'
+import { createPNTG } from '../../api/pntg'
+import { getStateCache, getStateType } from '../../utils/stateUtils'
 
 const router = useRouter()
-const route = useRoute()
-const projectId = Number(route.params.id)
-
 const form = ref({
     project_name: '',
     description: '',
@@ -58,42 +59,30 @@ const form = ref({
     url: ''
 })
 
-const fetchProject = async () => {
-    try {
-        const [projectResponse, pntgResponse] = await Promise.all([
-            getProjectById(projectId),
-            getPNTGByProjectId(projectId)
-        ])
-
-        form.value = {
-            ...projectResponse,
-            ...pntgResponse
-        }
-    } catch (error) {
-        ElMessage.error('获取项目信息失败：' + (error.response?.data?.message || error.message))
-    }
-}
+const stateOptions = ref({})
+const selectedStateCodes = ref([])
 
 const handleSubmit = async () => {
     try {
-        // 更新项目信息
-        await updateProject(projectId, {
+        // 创建项目
+        const projectResponse = await createProject({
             project_name: form.value.project_name,
             description: form.value.description,
             state: form.value.state
         })
 
-        // 更新 PNTG 配置
-        await updatePNTG(projectId, {
+        // 创建 PNTG 配置
+        await createPNTG({
+            project_id: projectResponse.project_id,
             bot_token: form.value.bot_token,
             chat_id: form.value.chat_id,
             url: form.value.url
         })
 
-        ElMessage.success('更新成功')
+        ElMessage.success('项目创建成功')
         router.push('/main/projects')
     } catch (error) {
-        ElMessage.error('更新失败：' + (error.response?.data?.message || error.message))
+        ElMessage.error('项目创建失败：' + (error.response?.data?.message || error.message))
     }
 }
 
@@ -101,18 +90,25 @@ const handleCancel = () => {
     router.push('/main/projects')
 }
 
-onMounted(() => {
-    fetchProject()
+onMounted(async () => {
+    stateOptions.value = await getStateCache()
+    const firstStateCode = Object.keys(stateOptions.value)[0]
+    if (firstStateCode) {
+        form.value.state = Number(firstStateCode)
+    }
 })
 </script>
 
 <style scoped>
-:deep(.el-input.is-disabled .el-input__wrapper) {
-    background-color: var(--el-fill-color-light);
+.project-add {
+    padding: 20px;
 }
 
-:deep(.el-input-group__append) {
-    padding: 0 8px;
-    color: var(--el-text-color-secondary);
+.description-text {
+    margin-bottom: 20px;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
 }
 </style>

@@ -8,11 +8,15 @@
             <el-table-column prop="project_id" label="项目ID" width="100" />
             <el-table-column prop="project_name" label="项目名称" />
             <el-table-column prop="description" label="项目描述" />
-            <el-table-column label="操作" width="200">
+            <el-table-column label="操作" width="280">
                 <template #default="scope">
                     <el-button type="primary" size="small" @click="handleEdit(scope.row)"
                         v-if="hasProjectPermission(scope.row.project_id)">
                         编辑
+                    </el-button>
+                    <el-button type="success" size="small" @click="handleNodes(scope.row)"
+                        v-if="hasProjectPermission(scope.row.project_id)">
+                        节点
                     </el-button>
                     <el-button type="danger" size="small" @click="handleDelete(scope.row)"
                         v-if="hasProjectPermission(scope.row.project_id)">
@@ -28,8 +32,8 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getProjectList, deleteProject } from '../api/project'
-import { userStore } from '../stores/user'
+import { getProjectList, deleteProject } from '../../api/project'
+import { userStore } from '../../stores/user'
 
 const router = useRouter()
 const loading = ref(false)
@@ -72,6 +76,10 @@ const handleAdd = () => {
 
 const handleEdit = (row: any) => {
     router.push(`/main/project/edit/${row.project_id}`)
+}
+
+const handleNodes = (row: any) => {
+    router.push(`/main/node/tree/${row.node_id}`)
 }
 
 const handleDelete = (row: any) => {

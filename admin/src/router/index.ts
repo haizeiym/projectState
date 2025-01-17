@@ -17,19 +17,39 @@ const router = createRouter({
             children: [
                 {
                     path: 'projects',
-                    component: () => import('../views/ProjectList.vue')
+                    component: () => import('../views/project/list.vue'),
+                    name: 'Projects',
+                    meta: { title: '项目列表', icon: 'list' }
                 },
                 {
                     path: 'project/add',
-                    component: () => import('../views/ProjectAdd.vue')
+                    component: () => import('../views/project/add.vue'),
+                    name: 'ProjectAdd',
+                    meta: { title: '添加项目', icon: 'plus' },
+                },  
+                {
+                    path: 'project/edit/:id',
+                    component: () => import('../views/project/edit.vue'),
+                    name: 'ProjectEdit',
+                    meta: { title: '编辑项目', icon: 'edit' },
                 },
                 {
-                    path: 'node/:nodeId',
-                    component: () => import('../views/NodeTree.vue'),
-                    props: (route) => ({
-                        nodeId: Number(route.params.nodeId),
-                        projectId: Number(route.query.projectId)
-                    })
+                    path: 'node/tree/:projectId',
+                    component: () => import('../views/node/tree.vue'),
+                    name: 'NodeTree',
+                    meta: { title: '节点管理', icon: 'tree' }
+                },
+                {
+                    path: 'node/add/:projectId',
+                    component: () => import('../views/node/add.vue'),
+                    name: 'NodeAdd',
+                    meta: { title: '添加节点', icon: 'plus' }
+                },
+                {
+                    path: 'node/edit/:nodeId',
+                    component: () => import('../views/node/edit.vue'),
+                    name: 'NodeEdit',
+                    meta: { title: '编辑节点', icon: 'edit' }
                 }
             ]
         },
