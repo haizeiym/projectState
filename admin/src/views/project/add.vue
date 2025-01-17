@@ -47,6 +47,7 @@ import { ElMessage } from 'element-plus'
 import StateSelect from '../../components/StateSelect.vue'
 import { createProject } from '../../api/project'
 import { createPNTG } from '../../api/pntg'
+import { updateUserProjects } from '../../api/auth'
 import { userStore } from '../../stores/user'
 import { getStateCache, getStateType } from '../../utils/stateUtils'
 
@@ -84,6 +85,8 @@ const handleSubmit = async () => {
         if (userStore.userInfo.value) {
             const projectIds = userStore.userInfo.value.projectIds || []
             projectIds.push(projectResponse.project_id)
+            // 更新后端数据库
+            await updateUserProjects(userStore.userInfo.value.id, projectIds)
             userStore.updateUserInfo({
                 ...userStore.userInfo.value,
                 projectIds

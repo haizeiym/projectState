@@ -33,6 +33,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getProjectList, deleteProject } from '../../api/project'
+import { updateUserProjects } from '../../api/auth'
 import { userStore } from '../../stores/user'
 
 const router = useRouter()
@@ -92,9 +93,10 @@ const handleDelete = (row: any) => {
             await deleteProject(row.project_id)
 
             // 更新用户的 project_ids
-            if (userStore.userInfo.value) {
+            if (userStore.userInfo.value?.id) {
                 const projectIds = userStore.userInfo.value.projectIds || []
                 const updatedProjectIds = projectIds.filter(id => id !== row.project_id)
+                await updateUserProjects(userStore.userInfo.value.id, updatedProjectIds)
                 userStore.updateUserInfo({
                     ...userStore.userInfo.value,
                     projectIds: updatedProjectIds

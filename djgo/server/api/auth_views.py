@@ -189,3 +189,88 @@ def verify_captcha(request, captcha):
     """验证验证码"""
     stored_captcha = request.session.get("captcha", "").lower()
     return stored_captcha == captcha.lower()
+
+
+class AuthView:
+    @staticmethod
+    def update_projects(request, user_id):
+        """更新用户的项目ID列表"""
+        if request.method != "PUT":
+            return JsonResponse({"error": "Method not allowed"}, status=405)
+
+        try:
+            user = User.objects.get(id=user_id)
+            data = json.loads(request.body)
+            project_ids = data.get("project_ids", [])
+
+            # 更新用户的项目ID列表
+            user.project_ids = ",".join(map(str, project_ids))
+            user.save()
+
+            return JsonResponse({"message": "Projects updated successfully"})
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    @staticmethod
+    def login(request):
+        """用户登录"""
+        try:
+            data = json.loads(request.body)
+            username = data.get("username")
+            password = data.get("password")
+            captcha = data.get("captcha")
+
+            if not username or not password or not captcha:
+                return JsonResponse(
+                    {"error": "Please provide username, password and captcha"},
+                    status=400,
+                )
+
+            if not verify_captcha(request, captcha):
+                return JsonResponse({"error": "Invalid captcha"}, status=400)
+
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return JsonResponse(
+                        {
+                            "id": user.id,
+                            "username": user.username,
+                            "project_ids": user.project_ids,
+                            "is_superuser": user.is_superuser,
+                        }
+                    )
+                else:
+                    return JsonResponse({"error": "Account is disabled"}, status=403)
+            else:
+                return JsonResponse({"error": "Invalid credentials"}, status=401)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    @staticmethod
+    def logout(request):
+        """用户登出"""
+        logout(request)
+        return JsonResponse({"message": "Logged out successfully"})
+
+    @staticmethod
+    def info(request):
+        """获取用户信息"""
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Not authenticated"}, status=401)
+
+        return JsonResponse(
+            {
+                "id": request.user.id,
+                "username": request.user.username,
+                "email": request.user.email,
+                "project_ids": request.user.project_ids,
+                "is_active": request.user.is_active,
+                "is_staff": request.user.is_staff,
+                "is_superuser": request.user.is_superuser,
+            }
+        )

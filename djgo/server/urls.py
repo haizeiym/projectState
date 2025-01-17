@@ -5,6 +5,7 @@ from server.api.Project import Project
 from server.api.PNTG import PNTG
 from server.api.StateCode import StateCode
 from .api import auth_views
+from .api.auth_views import AuthView
 
 # 认证相关的 URL patterns
 auth_patterns = [
@@ -53,4 +54,8 @@ urlpatterns = [
     ),
     path("api/statecode/get/<int:state_code>", StateCode.get, name="statecode_get"),
     path("api/statecode/list", StateCode.list, name="statecode_list"),
+    path("api/auth/login", AuthView.login),
+    path("api/auth/logout", AuthView.logout),
+    path("api/auth/info", AuthView.info),
+    path("api/user/projects/<int:user_id>", AuthView.update_projects),
 ]

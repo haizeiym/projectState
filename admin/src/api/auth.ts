@@ -42,4 +42,14 @@ export function register(data: any) {
             captcha: data.captcha
         }
     })
+}
+
+export function updateUserProjects(userId: number, projectIds: number[]) {
+    return request({
+        url: `/api/user/projects/${userId}`,
+        method: 'put',
+        data: {
+            project_ids: projectIds
+        }
+    })
 } 
