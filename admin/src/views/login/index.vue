@@ -33,7 +33,6 @@ import config from '../../config/index.ts'
 
 const router = useRouter()
 const loading = ref(false)
-const passwordVisible = ref(false)
 const loginFormRef = ref<FormInstance>()
 const captchaUrl = ref('')
 
@@ -42,12 +41,6 @@ const loginForm = reactive({
     password: '',
     captcha: ''
 })
-
-const loginRules = {
-    username: [{ required: true, trigger: 'blur', message: '请输入用户名' }],
-    password: [{ required: true, trigger: 'blur', message: '请输入密码' }],
-    captcha: [{ required: true, trigger: 'blur', message: '请输入验证码' }]
-}
 
 const refreshCaptcha = () => {
     captchaUrl.value = `${config.API_URL}/api/captcha/?t=${Date.now()}`
