@@ -1,29 +1,21 @@
 <template>
     <div class="project-list">
-        <div class="page-header">
+        <div class="header">
             <h2>项目列表</h2>
-            <el-button type="primary" @click="router.push('/main/project/add')">
-                <el-icon>
-                    <Plus />
-                </el-icon>新增项目
-            </el-button>
+            <el-button type="primary" @click="handleAdd" v-if="hasManagePermission">添加项目</el-button>
         </div>
-
-        <el-table v-loading="loading" :data="projects" style="width: 100%">
+        <el-table :data="filteredProjects" style="width: 100%" v-loading="loading">
             <el-table-column prop="project_id" label="项目ID" width="100" />
             <el-table-column prop="project_name" label="项目名称" />
-            <el-table-column prop="description" label="描述" show-overflow-tooltip />
-            <el-table-column label="操作" width="250">
+            <el-table-column prop="project_desc" label="项目描述" />
+            <el-table-column label="操作" width="200">
                 <template #default="scope">
-                    <el-button type="primary" size="small"
-                        @click="handleViewNodes(scope.row.node_id, scope.row.project_id)"
-                        :disabled="!scope.row.node_id">
-                        节点管理
-                    </el-button>
-                    <el-button type="warning" size="small" @click="handleEdit(scope.row)">
+                    <el-button type="primary" size="small" @click="handleEdit(scope.row)"
+                        v-if="hasProjectPermission(scope.row.project_id)">
                         编辑
                     </el-button>
-                    <el-button type="danger" size="small" @click="handleDelete(scope.row)">
+                    <el-button type="danger" size="small" @click="handleDelete(scope.row)"
+                        v-if="hasProjectPermission(scope.row.project_id)">
                         删除
                     </el-button>
                 </template>
@@ -33,48 +25,72 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
 import { getProjectList, deleteProject } from '../api/project'
+import { userStore } from '../stores/user'
 
 const router = useRouter()
 const loading = ref(false)
 const projects = ref([])
 
+const filteredProjects = computed(() => {
+    if (!userStore.userInfo.value) return []
+
+    const userProjectIds = userStore.userInfo.value?.projectIds ?? []
+    return projects.value.filter((project: any) =>
+        userProjectIds.includes(project.project_id)
+    )
+})
+
+const hasProjectPermission = (projectId: number) => {
+    const userProjectIds = userStore.userInfo.value?.projectIds ?? []
+    return userProjectIds.includes(projectId)
+}
+
+const hasManagePermission = computed(() => {
+    const userProjectIds = userStore.userInfo.value?.projectIds ?? []
+    return userProjectIds.length > 0
+})
+
 const fetchProjects = async () => {
-    loading.value = true
     try {
+        loading.value = true
         const response = await getProjectList()
         projects.value = response.data || []
     } catch (error: any) {
-        projects.value = []
-        ElMessage.error('获取项目列表失败：' + (error.response?.data?.message || error.message))
+        ElMessage.error('获取项目列表失败')
+        console.error('Error fetching projects:', error)
     } finally {
         loading.value = false
     }
 }
 
-const handleViewNodes = (nodeId: number, projectId: number) => {
-    router.push({ path: `/main/node/${nodeId}`, query: { projectId } })
+const handleAdd = () => {
+    router.push('/main/project/add')
 }
 
 const handleEdit = (row: any) => {
     router.push(`/main/project/edit/${row.project_id}`)
 }
 
-const handleDelete = async (row: any) => {
-    try {
-        await ElMessageBox.confirm('确定要删除该项目吗？', '提示', {
-            type: 'warning'
-        })
-        await deleteProject(row.project_id)
-        ElMessage.success('删除成功')
-        await fetchProjects()
-    } catch {
-        // 用户取消删除
-    }
+const handleDelete = (row: any) => {
+    ElMessageBox.confirm('确定要删除该项目吗？', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+    }).then(async () => {
+        try {
+            await deleteProject(row.project_id)
+            ElMessage.success('删除成功')
+            fetchProjects()
+        } catch (error) {
+            ElMessage.error('删除失败')
+        }
+    }).catch(() => {
+        // 用户取消删除操作
+    })
 }
 
 onMounted(() => {
@@ -82,19 +98,19 @@ onMounted(() => {
 })
 </script>
 
-<style scoped lang="scss">
+<style scoped>
 .project-list {
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
+    padding: 20px;
+}
 
-        h2 {
-            margin: 0;
-            font-size: 20px;
-            color: #303133;
-        }
-    }
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header h2 {
+    margin: 0;
 }
 </style>
