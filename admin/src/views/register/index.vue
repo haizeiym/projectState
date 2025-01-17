@@ -1,141 +1,100 @@
 <template>
     <div class="register-container">
-        <el-form ref="registerFormRef" :model="registerForm" :rules="registerRules" class="register-form"
-            autocomplete="on" label-position="left">
-            <div class="title-container">
-                <h3 class="title">注册新账号</h3>
-            </div>
-
+        <el-form ref="registerFormRef" :model="registerForm" :rules="rules" class="register-form">
+            <h3 class="title">注册</h3>
             <el-form-item prop="username">
-                <span class="svg-container">
-                    <el-icon>
-                        <User />
-                    </el-icon>
-                </span>
-                <el-input v-model="registerForm.username" placeholder="用户名" name="username" type="text" tabindex="1"
-                    autocomplete="on" class="custom-input" />
+                <el-input v-model="registerForm.username" placeholder="用户名" />
             </el-form-item>
-
             <el-form-item prop="password">
-                <span class="svg-container">
-                    <el-icon>
-                        <Lock />
-                    </el-icon>
-                </span>
-                <el-input v-model="registerForm.password" :type="passwordVisible ? 'text' : 'password'" placeholder="密码"
-                    name="password" tabindex="2" autocomplete="on" class="custom-input">
-                    <template #suffix>
-                        <el-icon class="show-pwd" @click="passwordVisible = !passwordVisible">
-                            <View v-if="passwordVisible" />
-                            <Hide v-else />
-                        </el-icon>
+                <el-input v-model="registerForm.password" type="password" placeholder="密码" />
+            </el-form-item>
+            <el-form-item prop="confirmPassword">
+                <el-input v-model="registerForm.confirmPassword" type="password" placeholder="确认密码" />
+            </el-form-item>
+            <el-form-item prop="captcha" class="captcha-item">
+                <el-input v-model="registerForm.captcha" placeholder="验证码">
+                    <template #append>
+                        <img :src="captchaUrl" @click="refreshCaptcha" alt="验证码" class="captcha-img"
+                            referrerpolicy="no-referrer" crossorigin="anonymous" />
                     </template>
                 </el-input>
             </el-form-item>
-
-            <el-form-item prop="email">
-                <span class="svg-container">
-                    <el-icon>
-                        <Message />
-                    </el-icon>
-                </span>
-                <el-input v-model="registerForm.email" placeholder="邮箱（选填）" name="email" type="email" tabindex="3"
-                    autocomplete="on" class="custom-input" />
+            <el-form-item>
+                <el-button :loading="loading" type="primary" @click="handleRegister" class="submit-btn">注册</el-button>
+                <el-button @click="goToLogin" class="submit-btn">返回登录</el-button>
             </el-form-item>
-
-            <el-form-item prop="project_id">
-                <span class="svg-container">
-                    <el-icon>
-                        <Folder />
-                    </el-icon>
-                </span>
-                <el-input v-model.number="registerForm.project_id" placeholder="项目ID" name="project_id" type="number"
-                    tabindex="4" autocomplete="on" class="custom-input" />
-            </el-form-item>
-
-            <el-form-item prop="captcha">
-                <span class="svg-container">
-                    <el-icon>
-                        <Key />
-                    </el-icon>
-                </span>
-                <el-input v-model="registerForm.captcha" placeholder="验证码" name="captcha" type="text" tabindex="5"
-                    autocomplete="off" class="custom-input" style="width: 60%" />
-                <div class="captcha-container">
-                    <img :src="captchaUrl" @click="refreshCaptcha" alt="captcha" class="captcha-img">
-                </div>
-            </el-form-item>
-
-            <el-button :loading="loading" type="primary" style="width: 100%; margin-bottom: 30px; height: 47px;"
-                @click.prevent="handleRegister">
-                注册
-            </el-button>
-
-            <div class="login-link">
-                <router-link to="/login">返回登录</router-link>
-            </div>
         </el-form>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { User, Lock, Message, Folder, View, Hide, Key } from '@element-plus/icons-vue'
-import { register } from '../../api/auth'
 import type { FormInstance } from 'element-plus'
-import config from '../../config/index.ts'
+import { register } from '../../api/auth'
 
 const router = useRouter()
 const loading = ref(false)
-const passwordVisible = ref(false)
 const registerFormRef = ref<FormInstance>()
-const captchaUrl = ref('')
 
-const registerForm = reactive({
+const registerForm = ref({
     username: '',
     password: '',
-    email: '',
-    project_id: '',
+    confirmPassword: '',
     captcha: ''
 })
 
-const registerRules = {
-    username: [{ required: true, trigger: 'blur', message: '请输入用户名' }],
-    password: [{ required: true, trigger: 'blur', message: '请输入密码' }],
-    project_id: [{ required: true, trigger: 'blur', message: '请输入项目ID' }],
-    captcha: [{ required: true, trigger: 'blur', message: '请输入验证码' }]
-}
+const captchaUrl = ref('/api/captcha/' + '?t=' + Date.now())
 
-const refreshCaptcha = () => {
-    captchaUrl.value = `${config.API_URL}/api/captcha/?t=${Date.now()}`
+const rules = {
+    username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+    password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+    confirmPassword: [
+        { required: true, message: '请确认密码', trigger: 'blur' },
+        {
+            validator: (_rule: any, value: string, callback: Function) => {
+                if (value !== registerForm.value.password) {
+                    callback(new Error('两次输入的密码不一致'))
+                } else {
+                    callback()
+                }
+            },
+            trigger: 'blur'
+        }
+    ],
+    captcha: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
 }
 
 const handleRegister = async () => {
     if (!registerFormRef.value) return
 
     try {
-        loading.value = true
         await registerFormRef.value.validate()
+        loading.value = true
 
-        const response = await register({
-            username: registerForm.username,
-            password: registerForm.password,
-            email: registerForm.email,
-            project_id: registerForm.project_id,
-            captcha: registerForm.captcha
+        await register({
+            username: registerForm.value.username,
+            password: registerForm.value.password,
+            captcha: registerForm.value.captcha
         })
-
-        console.log(response.data)
 
         ElMessage.success('注册成功')
         router.push('/login')
     } catch (error: any) {
-        ElMessage.error(error.response?.data?.message || '注册失败')
+        ElMessage.error(error.response?.data?.error || '注册失败')
     } finally {
         loading.value = false
     }
+}
+
+const refreshCaptcha = () => {
+    const timestamp = Date.now()
+    captchaUrl.value = `/api/captcha/?t=${timestamp}`
+}
+
+const goToLogin = () => {
+    router.push('/login')
 }
 
 onMounted(() => {
@@ -143,119 +102,47 @@ onMounted(() => {
 })
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .register-container {
-    min-height: 100vh;
-    width: 100%;
-    background-color: #f0f2f5;
-    overflow: hidden;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f3f3f3;
+}
 
-    .register-form {
-        width: 520px;
-        max-width: 100%;
-        padding: 35px;
-        margin: 0 auto;
-        background: #ffffff;
-        border-radius: 4px;
-        box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-    }
+.register-form {
+    width: 400px;
+    padding: 30px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
 
-    .title-container {
-        .title {
-            font-size: 26px;
-            color: #333;
-            margin: 0 auto 40px auto;
-            text-align: center;
-            font-weight: bold;
-        }
-    }
+.title {
+    text-align: center;
+    margin-bottom: 30px;
+}
 
-    .svg-container {
-        padding: 6px 5px 6px 15px;
-        color: #889aa4;
-        vertical-align: middle;
-        display: inline-block;
-        width: 30px;
-        text-align: center;
-    }
+.submit-btn {
+    width: 100%;
+    margin-top: 10px;
+}
 
-    .show-pwd {
-        cursor: pointer;
-        color: #889aa4;
-    }
+.captcha-item :deep(.el-input-group__append) {
+    padding: 0;
+    background-color: transparent;
+    border: 1px solid #dcdfe6;
+    border-left: none;
+}
 
-    .captcha-container {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        cursor: pointer;
-        padding: 2px;
-        border: 1px solid #dcdfe6;
-        border-radius: 4px;
-        transition: all 0.3s;
-
-        &:hover {
-            border-color: #409eff;
-            transform: translateY(-50%) scale(1.05);
-        }
-
-        .captcha-img {
-            height: 38px;
-            width: 100px;
-            border-radius: 2px;
-            display: block;
-        }
-    }
-
-    .login-link {
-        text-align: center;
-        font-size: 14px;
-        color: #606266;
-        margin-top: 20px;
-
-        a {
-            color: #409eff;
-            text-decoration: none;
-
-            &:hover {
-                text-decoration: underline;
-            }
-        }
-    }
-
-    :deep(.custom-input) {
-        .el-input__wrapper {
-            padding: 0;
-            box-shadow: none !important;
-            background-color: transparent;
-        }
-
-        input {
-            height: 47px;
-            color: #333;
-            padding-left: 10px;
-            border: 1px solid #dcdfe6;
-            border-radius: 4px;
-            background-color: #fff;
-
-            &:focus {
-                border-color: #409eff;
-            }
-        }
-    }
-
-    :deep(.el-form-item) {
-        border: none;
-        background: transparent;
-        margin-bottom: 20px;
-
-        .el-form-item__error {
-            padding-top: 4px;
-        }
-    }
+.captcha-img {
+    height: 32px;
+    cursor: pointer;
+    vertical-align: middle;
+    margin: 0;
+    padding: 4px 8px;
+    border-radius: 0 4px 4px 0;
+    background-color: #fff;
 }
 </style>

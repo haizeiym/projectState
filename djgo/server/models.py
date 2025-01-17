@@ -268,9 +268,38 @@ class StateCodeModel(models.Model):
 
 
 class UMModel(AbstractUser):
-    project_id = models.IntegerField(verbose_name="项目ID", help_text="关联的项目ID")
+    project_ids = models.TextField(
+        verbose_name="项目IDs",
+        help_text="关联的项目ID列表，用逗号分隔",
+        blank=True,  # 允许为空
+        default="",  # 默认为空字符串
+    )
 
     class Meta:
         db_table = "auth_user"  # 使用默认的 auth_user 表名
         verbose_name = "用户"
         verbose_name_plural = "用户"
+
+    def get_project_ids(self):
+        """将字符串形式的项目ID转换为列表"""
+        return [int(pid) for pid in self.project_ids.split(",") if pid]
+
+    def add_project_id(self, project_id):
+        """添加项目ID"""
+        current_ids = self.get_project_ids()
+        if project_id not in current_ids:
+            current_ids.append(project_id)
+            self.project_ids = ",".join(map(str, current_ids))
+            self.save()
+
+    def remove_project_id(self, project_id):
+        """移除项目ID"""
+        current_ids = self.get_project_ids()
+        if project_id in current_ids:
+            current_ids.remove(project_id)
+            self.project_ids = ",".join(map(str, current_ids))
+            self.save()
+
+    def has_project_access(self, project_id):
+        """检查用户是否有权限访问特定项目"""
+        return project_id in self.get_project_ids()

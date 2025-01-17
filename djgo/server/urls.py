@@ -9,7 +9,7 @@ from .api import auth_views
 # 认证相关的 URL patterns
 auth_patterns = [
     path("login/", auth_views.login_view, name="login"),
-    path("register/", auth_views.register_view, name="register"),
+    path("register/", auth_views.register, name="register"),
     path("logout/", auth_views.logout_view, name="logout"),
 ]
 
