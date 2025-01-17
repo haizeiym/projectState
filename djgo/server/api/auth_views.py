@@ -1,7 +1,7 @@
 from django.contrib.auth import login, authenticate, logout
 from django.http import JsonResponse, HttpResponse
 from django.middleware.csrf import get_token
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
 import random
@@ -9,12 +9,13 @@ import string
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 import logging
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import os
 
 logger = logging.getLogger(__name__)
+User = get_user_model()  # 获取当前项目配置的用户模型
 
 
 @ensure_csrf_cookie
@@ -61,12 +62,25 @@ def login_view(request):
         return JsonResponse({"error": str(e)}, status=400)
 
 
+@csrf_exempt
 @api_view(["POST"])
 def register(request):
     try:
         username = request.data.get("username")
         password = request.data.get("password")
         captcha = request.data.get("captcha")
+
+        # 验证必填字段
+        if not username or not password or not captcha:
+            return Response({"error": "用户名、密码和验证码都是必填项"}, status=400)
+
+        # 验证用户名长度
+        if len(username) < 3:
+            return Response({"error": "用户名长度至少为3个字符"}, status=400)
+
+        # 验证密码长度
+        if len(password) < 6:
+            return Response({"error": "密码长度至少为6个字符"}, status=400)
 
         if not verify_captcha(request, captcha):
             return Response({"error": "验证码错误"}, status=400)
@@ -75,16 +89,19 @@ def register(request):
             return Response({"error": "用户名已存在"}, status=400)
 
         user = User.objects.create_user(
-            username=username,
-            password=password,
+            username=username, password=password, project_ids=""  # 添加空的项目ID列表
         )
 
+        # 注册成功后自动登录
+        login(request, user)
+
         return Response(
-            {"id": user.id, "username": user.username},
+            {"id": user.id, "username": user.username, "message": "注册成功"},
             status=201,
         )
 
     except Exception as e:
+        logger.error(f"Registration error: {str(e)}")
         return Response({"error": str(e)}, status=500)
 
 

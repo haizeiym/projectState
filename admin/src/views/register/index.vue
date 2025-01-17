@@ -47,8 +47,14 @@ const registerForm = ref({
 const captchaUrl = ref('/api/captcha/' + '?t=' + Date.now())
 
 const rules = {
-    username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-    password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+    username: [
+        { required: true, message: '请输入用户名', trigger: 'blur' },
+        { min: 3, message: '用户名长度至少为3个字符', trigger: 'blur' }
+    ],
+    password: [
+        { required: true, message: '请输入密码', trigger: 'blur' },
+        { min: 6, message: '密码长度至少为6个字符', trigger: 'blur' }
+    ],
     confirmPassword: [
         { required: true, message: '请确认密码', trigger: 'blur' },
         {
@@ -72,16 +78,24 @@ const handleRegister = async () => {
         await registerFormRef.value.validate()
         loading.value = true
 
-        await register({
+        const response: any = await register({
             username: registerForm.value.username,
             password: registerForm.value.password,
             captcha: registerForm.value.captcha
         })
-
-        ElMessage.success('注册成功')
+        console.log(response)
+        if (response.message) {
+            ElMessage.success(response.message)
+        } else {
+            ElMessage.success('注册成功')
+        }
         router.push('/login')
     } catch (error: any) {
-        ElMessage.error(error.response?.data?.error || '注册失败')
+        const errorMsg = error.response?.error || error.message || '注册失败'
+        ElMessage.error(errorMsg)
+        if (errorMsg.includes('验证码')) {
+            refreshCaptcha()
+        }
     } finally {
         loading.value = false
     }

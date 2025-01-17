@@ -36,9 +36,10 @@ export function register(data: any) {
     return request({
         url: '/admin/auth/register/',
         method: 'post',
-        data,
-        headers: {
-            'Content-Type': 'application/json'
+        data: {
+            username: data.username,
+            password: data.password,
+            captcha: data.captcha
         }
     })
 } 
