@@ -34,7 +34,7 @@ const router = createRouter({
                     meta: { title: '编辑项目', icon: 'edit' },
                 },
                 {
-                    path: 'node/tree/:projectId',
+                    path: 'node/tree/:nodeId',
                     component: () => import('../views/node/tree.vue'),
                     name: 'NodeTree',
                     meta: { title: '节点管理', icon: 'tree' }

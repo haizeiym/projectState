@@ -46,9 +46,9 @@ const defaultProps = {
 
 const fetchNodeTree = async () => {
     try {
-        const projectId = Number(route.params.projectId)
-        const response = await getNodeTree(projectId)
-        treeData.value = response.data || []
+        const nodeId = Number(route.params.nodeId)
+        const response: any = await getNodeTree(nodeId)
+        treeData.value = response.children || []
     } catch (error: any) {
         ElMessage.error('获取节点树失败')
         console.error('Error fetching node tree:', error)
