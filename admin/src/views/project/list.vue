@@ -35,6 +35,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { getProjectList, deleteProject } from '../../api/project'
 import { updateUserProjects } from '../../api/auth'
 import { userStore } from '../../stores/user'
+import { deleteNode } from '../../api/node'
 
 const router = useRouter()
 const loading = ref(false)
@@ -90,8 +91,8 @@ const handleDelete = (row: any) => {
         type: 'warning'
     }).then(async () => {
         try {
+            await deleteNode(row.node_id)
             await deleteProject(row.project_id)
-
             // 更新用户的 project_ids
             if (userStore.userInfo.value?.id) {
                 const projectIds = userStore.userInfo.value.projectIds || []
