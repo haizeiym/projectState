@@ -152,15 +152,15 @@ def get_captcha(request):
     request.session.modified = True  # 确保 session 被保存
 
     # 创建图片
-    width = 90
-    height = 40
+    width = 120
+    height = 48
     image = Image.new("RGB", (width, height), color=(255, 255, 255))
     draw = ImageDraw.Draw(image)
 
     # 获取字体文件路径
     font_path = os.path.join(os.path.dirname(__file__), "../static/fonts/arial.ttf")
     try:
-        font = ImageFont.truetype(font_path, 28)
+        font = ImageFont.truetype(font_path, 32)
     except:
         font = ImageFont.load_default()
 
@@ -170,12 +170,12 @@ def get_captcha(request):
         y1 = random.randint(0, height)
         x2 = random.randint(0, width)
         y2 = random.randint(0, height)
-        draw.line([(x1, y1), (x2, y2)], fill=(169, 169, 169))
+        draw.line([(x1, y1), (x2, y2)], fill=(200, 200, 200))
 
     # 添加验证码文字
     for i, char in enumerate(code):
-        x = 18 * i + 15
-        y = random.randint(5, 12)
+        x = 24 * i + 20
+        y = random.randint(8, 16)
         draw.text((x, y), char, fill=(0, 0, 0), font=font)
 
     # 保存图片

@@ -1,59 +1,23 @@
 <template>
     <div class="login-container">
-        <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on"
-            label-position="left">
-            <div class="title-container">
-                <h3 class="title">登录</h3>
-            </div>
-
+        <el-form ref="loginFormRef" :model="loginForm" :rules="rules" class="login-form">
+            <h3 class="title">登录</h3>
             <el-form-item prop="username">
-                <span class="svg-container">
-                    <el-icon>
-                        <User />
-                    </el-icon>
-                </span>
-                <el-input v-model="loginForm.username" placeholder="用户名" name="username" type="text" tabindex="1"
-                    autocomplete="on" class="custom-input" />
+                <el-input v-model="loginForm.username" placeholder="用户名" maxlength="20" />
             </el-form-item>
-
             <el-form-item prop="password">
-                <span class="svg-container">
-                    <el-icon>
-                        <Lock />
-                    </el-icon>
-                </span>
-                <el-input v-model="loginForm.password" :type="passwordVisible ? 'text' : 'password'" placeholder="密码"
-                    name="password" tabindex="2" autocomplete="on" @keyup.enter="handleLogin" class="custom-input">
-                    <template #suffix>
-                        <el-icon class="show-pwd" @click="passwordVisible = !passwordVisible">
-                            <View v-if="passwordVisible" />
-                            <Hide v-else />
-                        </el-icon>
-                    </template>
-                </el-input>
+                <el-input v-model="loginForm.password" type="password" placeholder="密码" />
             </el-form-item>
-
-            <el-form-item prop="captcha">
-                <span class="svg-container">
-                    <el-icon>
-                        <Key />
-                    </el-icon>
-                </span>
-                <el-input v-model="loginForm.captcha" placeholder="验证码" name="captcha" type="text" tabindex="3"
-                    autocomplete="off" class="custom-input" style="width: 60%" />
+            <el-form-item prop="captcha" class="captcha-item">
+                <el-input v-model="loginForm.captcha" placeholder="验证码" maxlength="4" />
                 <div class="captcha-container">
-                    <img :src="captchaUrl" @click="refreshCaptcha" alt="captcha" class="captcha-img">
+                    <img :src="captchaUrl" @click="refreshCaptcha" alt="验证码" class="captcha-img">
                 </div>
             </el-form-item>
-
-            <el-button :loading="loading" type="primary" style="width: 100%; margin-bottom: 30px; height: 47px;"
-                @click.prevent="handleLogin">
-                登录
-            </el-button>
-
-            <div class="register-link">
-                <router-link to="/register">注册新账号</router-link>
-            </div>
+            <el-form-item>
+                <el-button :loading="loading" type="primary" @click="handleLogin" class="submit-btn">登录</el-button>
+                <el-button @click="goToRegister" class="submit-btn">注册账号</el-button>
+            </el-form-item>
         </el-form>
     </div>
 </template>
@@ -62,7 +26,6 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { User, Lock, View, Hide, Key } from '@element-plus/icons-vue'
 import { getCSRFToken } from '../../api/auth'
 import { userStore } from '../../stores/user'
 import type { FormInstance } from 'element-plus'
@@ -133,117 +96,73 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .login-container {
-    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f3f3f3;
+}
+
+.login-form {
+    width: 400px;
+    padding: 30px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.submit-btn {
     width: 100%;
-    background-color: #f0f2f5;
-    overflow: hidden;
+    margin-top: 10px;
+}
+
+.captcha-item {
+    position: relative;
+}
+
+.captcha-container {
+    position: absolute;
+    right: 1px;
+    top: 1px;
+    height: 38px;
+    cursor: pointer;
+    background: #fff;
+    border-radius: 0 4px 4px 0;
+    border-left: 1px solid #dcdfe6;
+    padding: 0 15px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    transition: all 0.3s;
+}
 
-    .login-form {
-        width: 520px;
-        max-width: 100%;
-        padding: 35px;
-        margin: 0 auto;
-        background: #ffffff;
-        border-radius: 4px;
-        box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-    }
+.captcha-container:hover {
+    background-color: #f5f7fa;
+}
 
-    .title-container {
-        .title {
-            font-size: 26px;
-            color: #333;
-            margin: 0 auto 40px auto;
-            text-align: center;
-            font-weight: bold;
-        }
-    }
+.captcha-img {
+    height: 34px;
+    cursor: pointer;
+}
 
-    .svg-container {
-        padding: 6px 5px 6px 15px;
-        color: #889aa4;
-        vertical-align: middle;
-        display: inline-block;
-        width: 30px;
-        text-align: center;
-    }
+.login-form :deep(.el-input__wrapper) {
+    box-shadow: 0 0 0 1px #dcdfe6;
+    height: 40px;
+}
 
-    .show-pwd {
-        cursor: pointer;
-        color: #889aa4;
-    }
+.login-form :deep(.el-input__wrapper.is-focus) {
+    box-shadow: 0 0 0 1px #409eff;
+}
 
-    .captcha-container {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        cursor: pointer;
-        padding: 2px;
-        border: 1px solid #dcdfe6;
-        border-radius: 4px;
-        transition: all 0.3s;
+.login-form :deep(.el-form-item.is-error .el-input__wrapper) {
+    box-shadow: 0 0 0 1px #f56c6c;
+}
 
-        &:hover {
-            border-color: #409eff;
-            transform: translateY(-50%) scale(1.05);
-        }
-
-        .captcha-img {
-            height: 38px;
-            width: 100px;
-            border-radius: 2px;
-            display: block;
-        }
-    }
-
-    .register-link {
-        text-align: center;
-        font-size: 14px;
-        color: #606266;
-        margin-top: 20px;
-
-        a {
-            color: #409eff;
-            text-decoration: none;
-
-            &:hover {
-                text-decoration: underline;
-            }
-        }
-    }
-
-    :deep(.custom-input) {
-        .el-input__wrapper {
-            padding: 0;
-            box-shadow: none !important;
-            background-color: transparent;
-        }
-
-        input {
-            height: 47px;
-            color: #333;
-            padding-left: 10px;
-            border: 1px solid #dcdfe6;
-            border-radius: 4px;
-            background-color: #fff;
-
-            &:focus {
-                border-color: #409eff;
-            }
-        }
-    }
-
-    :deep(.el-form-item) {
-        border: none;
-        background: transparent;
-        margin-bottom: 20px;
-
-        .el-form-item__error {
-            padding-top: 4px;
-        }
-    }
+.captcha-item :deep(.el-input__wrapper) {
+    padding-right: 120px;
 }
 </style>

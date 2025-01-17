@@ -83,7 +83,7 @@ const handleRegister = async () => {
             password: registerForm.value.password,
             captcha: registerForm.value.captcha
         })
-        console.log(response)
+        
         if (response.message) {
             ElMessage.success(response.message)
         } else {
@@ -150,12 +150,12 @@ onMounted(() => {
     position: absolute;
     right: 1px;
     top: 1px;
-    height: 32px;
+    height: 38px;
     cursor: pointer;
     background: #fff;
     border-radius: 0 4px 4px 0;
     border-left: 1px solid #dcdfe6;
-    padding: 0 12px;
+    padding: 0 15px;
     display: flex;
     align-items: center;
     transition: all 0.3s;
@@ -166,12 +166,13 @@ onMounted(() => {
 }
 
 .captcha-img {
-    height: 28px;
+    height: 34px;
     cursor: pointer;
 }
 
 .register-form :deep(.el-input__wrapper) {
     box-shadow: 0 0 0 1px #dcdfe6;
+    height: 40px;
 }
 
 .register-form :deep(.el-input__wrapper.is-focus) {
@@ -183,6 +184,6 @@ onMounted(() => {
 }
 
 .captcha-item :deep(.el-input__wrapper) {
-    padding-right: 100px;
+    padding-right: 120px;
 }
 </style>
