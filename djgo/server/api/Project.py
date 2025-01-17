@@ -239,10 +239,31 @@ class Project:
     def list(request):
         """获取项目列表"""
         try:
-            projects = ProjectModel.objects.all()
-            result = []
+            # 获取请求中的 project_ids 参数
+            project_ids_str = request.GET.get("project_ids", "")
+
+            # 如果提供了 project_ids，转换为整数列表
+            if project_ids_str:
+                try:
+                    project_ids = json.loads(project_ids_str)
+                    # 确保 project_ids 是列表
+                    if isinstance(project_ids, (int, str)):
+                        project_ids = [int(project_ids)]
+                    elif isinstance(project_ids, list):
+                        project_ids = [int(pid) for pid in project_ids]
+                    else:
+                        project_ids = []
+                except (json.JSONDecodeError, ValueError) as e:
+                    project_ids = []
+
+                projects = ProjectModel.objects.filter(project_id__in=project_ids)
+            else:
+                projects = ProjectModel.objects.none()
+
+            # 将查询结果转换为列表
+            project_list = []
             for project in projects:
-                result.append(
+                project_list.append(
                     {
                         "project_id": project.project_id,
                         "project_name": project.project_name,
@@ -251,6 +272,7 @@ class Project:
                         "node_id": project.node_id,
                     }
                 )
-            return JsonResponse(result, safe=False)
+
+            return JsonResponse({"data": project_list})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)

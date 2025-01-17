@@ -102,30 +102,15 @@ class ProjectModel(models.Model):
     """
 
     # 基本信息字段
-    project_id = models.AutoField(
-        primary_key=True, verbose_name="项目ID", help_text="项目的唯一标识符"
-    )
-    project_name = models.CharField(
-        max_length=255, verbose_name="项目名称", help_text="项目的显示名称"
-    )
-    description = models.TextField(
-        null=True, blank=True, verbose_name="描述", help_text="项目的详细描述"
-    )
+    project_id = models.IntegerField(primary_key=True)
+    project_name = models.CharField(max_length=255)
+    description = models.TextField()
 
     # 状态字段
-    state = models.IntegerField(
-        default=0,
-        verbose_name="状态",
-        help_text="项目的当前状态",
-    )
+    state = models.IntegerField(default=0)
 
     # 关联节点
-    node_id = models.IntegerField(
-        default=0,
-        validators=[MinValueValidator(0)],
-        verbose_name="关联节点ID",
-        help_text="项目关联的主节点ID",
-    )
+    node_id = models.IntegerField(default=0)
 
     class Meta:
         db_table = "project"

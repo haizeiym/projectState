@@ -30,9 +30,12 @@ export function getProjectById(projectId: number) {
     })
 }
 
-export function getProjectList() {
+export function getProjectList(projectIds: number[]) {
     return request({
         url: '/api/project/list',
-        method: 'get'
+        method: 'get',
+        params: {
+            project_ids: JSON.stringify(projectIds)
+        }
     })
 } 

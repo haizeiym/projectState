@@ -57,7 +57,16 @@ const hasManagePermission = computed(() => {
 const fetchProjects = async () => {
     try {
         loading.value = true
-        const response = await getProjectList()
+        if (!userStore.userInfo.value?.projectIds?.length) {
+            projects.value = []
+            return
+        }
+
+        const projectIds = Array.isArray(userStore.userInfo.value.projectIds)
+            ? userStore.userInfo.value.projectIds
+            : [userStore.userInfo.value.projectIds]
+
+        const response = await getProjectList(projectIds)
         projects.value = response.data || []
     } catch (error: any) {
         ElMessage.error('获取项目列表失败')
