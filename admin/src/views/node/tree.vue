@@ -22,6 +22,11 @@
                     <span>{{ node.label }}</span>
                     <div class="node-operations">
                         <span class="node-actions">
+                            <span class="node-state">
+                                <el-tag :type="getStateType(data.state)">
+                                    {{ getStateName(data.state) }}
+                                </el-tag>
+                            </span>
                             <el-button type="success" link @click="handleAddChild(data)" class="action-button">
                                 <el-icon>
                                     <Plus />
@@ -37,11 +42,6 @@
                                     <Delete />
                                 </el-icon>删除
                             </el-button>
-                            <span class="node-state">
-                                <el-tag :type="getStateType(data.state)">
-                                    {{ getStateName(data.state) }}
-                                </el-tag>
-                            </span>
                         </span>
                     </div>
                 </div>
@@ -79,12 +79,12 @@ const fetchNodeTree = async () => {
 }
 
 const handleAddNode = () => {
-    const projectId = route.params.projectId
-    router.push(`/main/node/add/${projectId}`)
+    const nodeId = route.params.nodeId
+    router.push(`/main/node/add/${nodeId}?parent_id=${nodeId}`)
 }
 
 const handleAddChild = (data: any) => {
-    router.push(`/main/node/add/${route.params.nodeId}?parent_id=${data.node_id}`)
+    router.push(`/main/node/add/${data.node_id}?parent_id=${route.params.nodeId}`)
 }
 
 const handleEdit = (data: any) => {

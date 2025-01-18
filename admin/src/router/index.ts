@@ -40,7 +40,7 @@ const router = createRouter({
                     meta: { title: '节点管理', icon: 'tree' }
                 },
                 {
-                    path: 'node/add/:projectId',
+                    path: 'node/add/:nodeId',
                     component: () => import('../views/node/add.vue'),
                     name: 'NodeAdd',
                     meta: { title: '添加节点', icon: 'plus' }

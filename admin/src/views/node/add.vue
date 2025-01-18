@@ -4,13 +4,13 @@
             <el-form-item label="节点名称" prop="node_name">
                 <el-input v-model="form.node_name" placeholder="请输入节点名称" />
             </el-form-item>
-            <el-form-item label="父节点" prop="parent_id">
+            <!-- <el-form-item label="父节点" prop="parent_id">
                 <el-select v-model="form.parent_id" placeholder="请选择父节点" clearable>
                     <el-option label="无父节点" :value="0" />
                     <el-option v-for="node in nodeList" :key="node.node_id" :label="node.node_name"
                         :value="node.node_id" />
                 </el-select>
-            </el-form-item>
+            </el-form-item> -->
             <el-form-item label="状态" prop="state">
                 <el-select v-model="form.state" placeholder="请选择状态">
                     <el-option label="未开始" :value="0" />
@@ -28,23 +28,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
-import { createNode, getNodeList } from '../../api/node'
+import { createNode } from '../../api/node'
 
 const route = useRoute()
 const router = useRouter()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
-const nodeList = ref([])
+const parentId = ref(Number(route.query.parent_id))
 
 const form = ref({
     node_name: '',
-    parent_id: 0,
-    state: 0,
-    project_id: Number(route.params.projectId)
+    parent_id: Number(route.params.nodeId),
+    state: 0
 })
 
 const rules = {
@@ -57,17 +56,6 @@ const rules = {
     ]
 }
 
-const fetchNodeList = async () => {
-    try {
-        const projectId = Number(route.params.projectId)
-        const response = await getNodeList(projectId)
-        nodeList.value = response.data || []
-    } catch (error: any) {
-        ElMessage.error('获取节点列表失败')
-        console.error('Error fetching node list:', error)
-    }
-}
-
 const handleSubmit = async () => {
     if (!formRef.value) return
 
@@ -77,7 +65,7 @@ const handleSubmit = async () => {
 
         await createNode(form.value)
         ElMessage.success('创建成功')
-        router.push(`/main/node/tree/${form.value.project_id}`)
+        router.push(`/main/node/tree/${parentId.value}`)
     } catch (error: any) {
         ElMessage.error(error.message || '保存失败')
     } finally {
@@ -86,12 +74,10 @@ const handleSubmit = async () => {
 }
 
 const handleCancel = () => {
-    router.push(`/main/node/tree/${form.value.project_id}`)
+    router.push(`/main/node/tree/${parentId.value}`)
 }
 
-onMounted(() => {
-    fetchNodeList()
-})
+
 </script>
 
 <style scoped>
