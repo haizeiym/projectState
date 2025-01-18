@@ -34,15 +34,14 @@ const route = useRoute()
 const router = useRouter()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
-const parentId = ref(Number(route.query.parent_id))
 const currentNodeId = ref(Number(route.params.nodeId))
+const parentId = ref(Number(route.query.parent_id))
 
 const form = ref({
     node_name: '',
     description: '',
-    parent_id: 0,
     state: 0,
-    project_id: 0
+    parent_id: 0
 })
 
 const rules = {
@@ -66,7 +65,6 @@ const fetchNode = async () => {
         if (data) {
             form.value = {
                 ...data,
-                parent_id: data.parent_id || 0
             }
         }
     } catch (error: any) {
@@ -80,6 +78,7 @@ const handleSubmit = async () => {
     try {
         await formRef.value.validate()
         loading.value = true
+        console.log(currentNodeId.value, form.value, parentId.value)
         await updateNode(currentNodeId.value, form.value)
         ElMessage.success('更新成功')
         router.push(`/main/node/tree/${parentId.value}`)
