@@ -16,8 +16,8 @@
             </div>
         </div>
         <el-table :data="stateData" style="width: 100%">
+            <el-table-column prop="state_code" label="状态代码" />
             <el-table-column prop="state_name" label="状态名称" />
-            <el-table-column prop="description" label="描述" />
             <el-table-column label="操作" width="280">
                 <template #default="scope">
                     <div class="action-buttons">
