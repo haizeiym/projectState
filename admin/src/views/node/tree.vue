@@ -88,7 +88,7 @@ const handleAddChild = (data: any) => {
 }
 
 const handleEdit = (data: any) => {
-    router.push(`/main/node/edit/${data.node_id}`)
+    router.push(`/main/node/edit/${data.node_id}?parent_id=${route.params.nodeId}`)
 }
 
 const handleDelete = (_node: any, data: any) => {

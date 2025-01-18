@@ -4,12 +4,8 @@
             <el-form-item label="节点名称" prop="node_name">
                 <el-input v-model="form.node_name" placeholder="请输入节点名称" />
             </el-form-item>
-            <el-form-item label="父节点" prop="parent_id">
-                <el-select v-model="form.parent_id" placeholder="请选择父节点" clearable>
-                    <el-option label="无父节点" :value="0" />
-                    <el-option v-for="node in nodeList" :key="node.node_id" :label="node.node_name"
-                        :value="node.node_id" :disabled="node.node_id === currentNodeId" />
-                </el-select>
+            <el-form-item label="节点描述" prop="description">
+                <el-input v-model="form.description" placeholder="请输入节点描述" />
             </el-form-item>
             <el-form-item label="状态" prop="state">
                 <el-select v-model="form.state" placeholder="请选择状态">
@@ -32,17 +28,18 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
-import { getNodeById, updateNode, getNodeList } from '../../api/node'
+import { getNodeById, updateNode } from '../../api/node'
 
 const route = useRoute()
 const router = useRouter()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
-const nodeList = ref([])
+const parentId = ref(Number(route.query.parent_id))
 const currentNodeId = ref(Number(route.params.nodeId))
 
 const form = ref({
     node_name: '',
+    description: '',
     parent_id: 0,
     state: 0,
     project_id: 0
@@ -53,6 +50,10 @@ const rules = {
         { required: true, message: '请输入节点名称', trigger: 'blur' },
         { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
     ],
+    description: [
+        { required: true, message: '请输入节点描述', trigger: 'blur' },
+        { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
+    ],
     state: [
         { required: true, message: '请选择状态', trigger: 'change' }
     ]
@@ -61,13 +62,12 @@ const rules = {
 const fetchNode = async () => {
     try {
         const nodeId = Number(route.params.nodeId)
-        const response = await getNodeById(nodeId)
-        if (response.data) {
+        const data: any = await getNodeById(nodeId)
+        if (data) {
             form.value = {
-                ...response.data,
-                parent_id: response.data.parent_id || 0
+                ...data,
+                parent_id: data.parent_id || 0
             }
-            await fetchNodeList()
         }
     } catch (error: any) {
         ElMessage.error('获取节点信息失败')
@@ -75,26 +75,14 @@ const fetchNode = async () => {
     }
 }
 
-const fetchNodeList = async () => {
-    try {
-        const response = await getNodeList(form.value.project_id)
-        nodeList.value = response.data || []
-    } catch (error: any) {
-        ElMessage.error('获取节点列表失败')
-        console.error('Error fetching node list:', error)
-    }
-}
-
 const handleSubmit = async () => {
     if (!formRef.value) return
-
     try {
         await formRef.value.validate()
         loading.value = true
-
         await updateNode(currentNodeId.value, form.value)
         ElMessage.success('更新成功')
-        router.push(`/main/node/tree/${form.value.project_id}`)
+        router.push(`/main/node/tree/${parentId.value}`)
     } catch (error: any) {
         ElMessage.error(error.message || '保存失败')
     } finally {
@@ -103,7 +91,7 @@ const handleSubmit = async () => {
 }
 
 const handleCancel = () => {
-    router.push(`/main/node/tree/${form.value.project_id}`)
+    router.push(`/main/node/tree/${parentId.value}`)
 }
 
 onMounted(() => {
