@@ -2,7 +2,10 @@
     <div class="project-list">
         <div class="header">
             <h2>项目列表</h2>
-            <el-button type="primary" @click="handleAdd" v-if="hasManagePermission">添加项目</el-button>
+            <div class="button-group">
+                <el-button type="primary" @click="handleAdd" v-if="hasManagePermission">添加项目</el-button>
+                <el-button type="primary" @click="handleStateManagement" v-if="hasManagePermission">状态管理</el-button>
+            </div>
         </div>
         <el-table :data="filteredProjects" style="width: 100%" v-loading="loading">
             <el-table-column prop="project_id" label="项目ID" width="100" />
@@ -119,6 +122,10 @@ const handleDelete = (row: any) => {
     })
 }
 
+const handleStateManagement = () => {
+    router.push('/main/state/management')
+}
+
 onMounted(() => {
     if (userStore.userInfo.value) {
         fetchProjects()
@@ -146,7 +153,13 @@ watch(() => userStore.userInfo.value, (newVal) => {
     margin-bottom: 20px;
 }
 
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
 .header h2 {
     margin: 0;
+    flex-grow: 1;
 }
 </style>
