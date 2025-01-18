@@ -20,7 +20,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
-import { createState } from '../api/state'
+import { createState } from '../../api/state'
 
 const router = useRouter()
 const formRef = ref<FormInstance>()

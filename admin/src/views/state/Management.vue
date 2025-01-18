@@ -38,7 +38,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Edit, Delete } from '@element-plus/icons-vue'
-import { getStateList, deleteState } from '../api/state'
+import { getStateList, deleteState } from '../../api/state'
 
 const router = useRouter()
 const stateData = ref([])

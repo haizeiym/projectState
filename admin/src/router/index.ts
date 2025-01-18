@@ -50,6 +50,24 @@ const router = createRouter({
                     component: () => import('../views/node/edit.vue'),
                     name: 'NodeEdit',
                     meta: { title: '编辑节点', icon: 'edit' }
+                },
+                {
+                    path: 'state/add',
+                    component: () => import('../views/state/Add.vue'),
+                    name: 'StateAdd',
+                    meta: { title: '添加状态', icon: 'plus' }
+                },
+                {
+                    path: 'state/edit/:stateId',
+                    component: () => import('../views/state/Edit.vue'),
+                    name: 'StateEdit',
+                    meta: { title: '编辑状态', icon: 'edit' }
+                },
+                {
+                    path: 'state/management',
+                    component: () => import('../views/state/Management.vue'),
+                    name: 'StateManagement',
+                    meta: { title: '状态管理', icon: 'edit' }
                 }
             ]
         },

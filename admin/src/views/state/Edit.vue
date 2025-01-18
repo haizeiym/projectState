@@ -1,5 +1,5 @@
 <template>
-    <div class="add-container">
+    <div class="edit-container">
         <el-form ref="formRef" :model="form" :rules="rules" label-width="120px">
             <el-form-item label="状态名称" prop="state_name">
                 <el-input v-model="form.state_name" placeholder="请输入状态名称" />
@@ -16,15 +16,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
-import { createState } from '../api/state'
+import { getStateById, updateState } from '../../api/state'
 
+const route = useRoute()
 const router = useRouter()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
+const currentStateId = ref(Number(route.params.stateId))
 
 const form = ref({
     state_name: '',
@@ -42,15 +44,29 @@ const rules = {
     ]
 }
 
+const fetchState = async () => {
+    try {
+        const stateId = Number(route.params.stateId)
+        const data: any = await getStateById(stateId)
+        if (data) {
+            form.value = {
+                ...data,
+            }
+        }
+    } catch (error: any) {
+        ElMessage.error('获取状态信息失败')
+        console.error('Error fetching state:', error)
+    }
+}
+
 const handleSubmit = async () => {
     if (!formRef.value) return
-
     try {
         await formRef.value.validate()
         loading.value = true
-        await createState(form.value)
-        ElMessage.success('创建成功')
-        router.push('/main/state-management')
+        await updateState(currentStateId.value, form.value)
+        ElMessage.success('更新成功')
+        router.push('/main/state/management')
     } catch (error: any) {
         ElMessage.error(error.message || '保存失败')
     } finally {
@@ -59,12 +75,16 @@ const handleSubmit = async () => {
 }
 
 const handleCancel = () => {
-    router.push('/main/state-management')
+    router.push('/main/state/management')
 }
+
+onMounted(() => {
+    fetchState()
+})
 </script>
 
 <style scoped>
-.add-container {
+.edit-container {
     padding: 20px;
     max-width: 800px;
     margin: 0 auto;
