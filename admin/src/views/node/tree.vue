@@ -16,7 +16,7 @@
             </div>
         </div>
         <el-table :data="treeData" style="width: 100%" row-key="node_id"
-            :tree-props="{ children: 'children', hasChildren: 'hasChildren' }">
+            :tree-props="{ children: 'children', hasChildren: 'hasChildren' }" default-expand-all>
             <el-table-column prop="node_name" label="节点名称" />
             <el-table-column prop="description" label="描述" />
             <el-table-column prop="state" label="状态">
