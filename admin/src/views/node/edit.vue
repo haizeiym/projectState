@@ -78,7 +78,6 @@ const handleSubmit = async () => {
     try {
         await formRef.value.validate()
         loading.value = true
-        console.log(currentNodeId.value, form.value, parentId.value)
         await updateNode(currentNodeId.value, form.value)
         ElMessage.success('更新成功')
         router.push(`/main/node/tree/${parentId.value}`)

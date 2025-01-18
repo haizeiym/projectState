@@ -32,7 +32,7 @@ export function createNode(data: any) {
 export function updateNode(nodeId: number, data: any) {
     return request({
         url: `/api/node/update/${nodeId}`,
-        method: 'put',
+        method: 'post',
         data
     })
 }
