@@ -7,6 +7,23 @@
             <el-form-item label="项目描述" prop="description">
                 <el-input v-model="form.description" type="textarea" :rows="4" placeholder="请输入项目描述" />
             </el-form-item>
+
+            <el-form-item label="bot_token" prop="bot_token">
+                <el-input v-model="pntgForm.bot_token" type="textarea" :rows="4" placeholder="请输入bot_token" />
+            </el-form-item>
+
+            <el-form-item label="chat_id" prop="chat_id">
+                <el-input v-model="pntgForm.chat_id" type="textarea" :rows="4" placeholder="请输入chat_id" />
+            </el-form-item>
+
+            <el-form-item label="url" prop="url">
+                <el-input v-model="pntgForm.url" type="textarea" :rows="4" placeholder="请输入url" />
+            </el-form-item>
+
+            <el-form-item label="状态码" prop="state_codes">
+                <el-input v-model="pntgForm.state_codes" type="textarea" :rows="4" placeholder="请输入状态码" />
+            </el-form-item>
+
             <el-form-item>
                 <el-button type="primary" @click="handleSubmit" :loading="loading">保存</el-button>
                 <el-button @click="handleCancel">取消</el-button>
@@ -21,7 +38,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { getProjectById, updateProject } from '../../api/project'
-
+import { getPNTGByProjectId, updatePNTG } from '../../api/pntg'
 const route = useRoute()
 const router = useRouter()
 const formRef = ref<FormInstance>()
@@ -29,7 +46,14 @@ const loading = ref(false)
 
 const form = ref({
     project_name: '',
-    description: ''
+    description: '',
+})
+
+const pntgForm = ref({
+    bot_token: '',
+    chat_id: '',
+    url: '',
+    state_codes: ''
 })
 
 const rules = {
@@ -46,16 +70,24 @@ const rules = {
 const fetchProject = async () => {
     try {
         const projectId = Number(route.params.id)
-        const response = await getProjectById(projectId)
-        if (response.data) {
+        const data: any = await getProjectById(projectId)
+        if (data) {
             form.value = {
-                project_name: response.data.project_name,
-                description: response.data.description
+                project_name: data.project_name,
+                description: data.description,
+            }
+        }
+        const pntgData: any = await getPNTGByProjectId(projectId)
+        if (pntgData) {
+            pntgForm.value = {
+                bot_token: pntgData.bot_token,
+                chat_id: pntgData.chat_id,
+                url: pntgData.url,
+                state_codes: pntgData.state_codes
             }
         }
     } catch (error: any) {
         ElMessage.error('获取项目信息失败')
-        console.error('Error fetching project:', error)
     }
 }
 
@@ -68,7 +100,7 @@ const handleSubmit = async () => {
 
         const projectId = Number(route.params.id)
         await updateProject(projectId, form.value)
-
+        await updatePNTG(projectId, pntgForm.value)
         ElMessage.success('更新成功')
         router.push('/main/projects')
     } catch (error: any) {

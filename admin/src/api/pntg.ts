@@ -20,12 +20,12 @@ export function updatePNTG(projectId: number, data: {
 }) {
     return request({
         url: `/api/pntg/update/${projectId}`,
-        method: 'put',
+        method: 'post',
         data
     })
 }
 
-export function getPNTG(projectId: number) {
+export function getPNTGByProjectId(projectId: number) {
     return request({
         url: `/api/pntg/get/${projectId}`,
         method: 'get'

@@ -11,7 +11,7 @@ export function createProject(data: any) {
 export function updateProject(projectId: number, data: any) {
     return request({
         url: `/api/project/update/${projectId}`,
-        method: 'put',
+        method: 'post',
         data
     })
 }
