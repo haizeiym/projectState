@@ -15,26 +15,33 @@
                 </el-button>
             </div>
         </div>
-        <el-table :data="stateData" style="width: 100%">
-            <el-table-column prop="state_code" label="状态代码" />
-            <el-table-column prop="state_name" label="状态名称" />
-            <el-table-column label="操作" width="280">
-                <template #default="scope">
-                    <div class="action-buttons">
-                        <el-button type="primary" link @click="handleEdit(scope.row)" class="action-button">
-                            <el-icon>
-                                <Edit />
-                            </el-icon>编辑
-                        </el-button>
-                        <el-button type="danger" link @click="handleDelete(scope.row)" class="action-button">
-                            <el-icon>
-                                <Delete />
-                            </el-icon>删除
-                        </el-button>
-                    </div>
-                </template>
-            </el-table-column>
-        </el-table>
+        <div class="table-container">
+            <el-table :data="stateData" style="width: 100%" border>
+                <el-table-column prop="state_code" label="状态代码" width="120" align="center" />
+                <el-table-column prop="state_name" label="状态名称" width="200" align="center" />
+                <el-table-column label="状态显示" width="180" align="center">
+                    <template #default="scope">
+                        <StateTag :modelValue="scope.row.state_code" />
+                    </template>
+                </el-table-column>
+                <el-table-column label="操作" width="280" align="center">
+                    <template #default="scope">
+                        <div class="action-buttons">
+                            <el-button type="primary" link @click="handleEdit(scope.row)" class="action-button">
+                                <el-icon>
+                                    <Edit />
+                                </el-icon>编辑
+                            </el-button>
+                            <el-button type="danger" link @click="handleDelete(scope.row)" class="action-button">
+                                <el-icon>
+                                    <Delete />
+                                </el-icon>删除
+                            </el-button>
+                        </div>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
     </div>
 </template>
 
@@ -44,6 +51,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Edit, Delete, Back } from '@element-plus/icons-vue'
 import { getStateListData, deleteStateData, getStateEntries } from '../../utils/stateUtils'
+import StateTag from '../../components/StateTag.vue'
 
 const router = useRouter()
 const stateData = ref<any[]>([])
@@ -117,8 +125,15 @@ onMounted(() => {
     gap: 10px;
 }
 
+.table-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
 .action-buttons {
     display: flex;
+    justify-content: center;
     gap: 8px;
 }
 
