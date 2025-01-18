@@ -4,13 +4,9 @@
             <el-form-item label="节点名称" prop="node_name">
                 <el-input v-model="form.node_name" placeholder="请输入节点名称" />
             </el-form-item>
-            <!-- <el-form-item label="父节点" prop="parent_id">
-                <el-select v-model="form.parent_id" placeholder="请选择父节点" clearable>
-                    <el-option label="无父节点" :value="0" />
-                    <el-option v-for="node in nodeList" :key="node.node_id" :label="node.node_name"
-                        :value="node.node_id" />
-                </el-select>
-            </el-form-item> -->
+            <el-form-item label="节点描述" prop="description">
+                <el-input v-model="form.description" placeholder="请输入节点描述" />
+            </el-form-item>
             <el-form-item label="状态" prop="state">
                 <el-select v-model="form.state" placeholder="请选择状态">
                     <el-option label="未开始" :value="0" />
@@ -38,17 +34,22 @@ const route = useRoute()
 const router = useRouter()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
-const parentId = ref(Number(route.query.parent_id))
+const currentNodeId = ref(Number(route.params.nodeId))
 
 const form = ref({
     node_name: '',
-    parent_id: Number(route.params.nodeId),
+    parent_id: Number(route.query.parent_id) || 0,
+    description: '',
     state: 0
 })
 
 const rules = {
     node_name: [
         { required: true, message: '请输入节点名称', trigger: 'blur' },
+        { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
+    ],
+    description: [
+        { required: true, message: '请输入节点描述', trigger: 'blur' },
         { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
     ],
     state: [
@@ -65,7 +66,7 @@ const handleSubmit = async () => {
 
         await createNode(form.value)
         ElMessage.success('创建成功')
-        router.push(`/main/node/tree/${parentId.value}`)
+        router.push(`/main/node/tree/${currentNodeId.value}`)
     } catch (error: any) {
         ElMessage.error(error.message || '保存失败')
     } finally {
@@ -74,7 +75,7 @@ const handleSubmit = async () => {
 }
 
 const handleCancel = () => {
-    router.push(`/main/node/tree/${parentId.value}`)
+    router.push(`/main/node/tree/${currentNodeId.value}`)
 }
 
 

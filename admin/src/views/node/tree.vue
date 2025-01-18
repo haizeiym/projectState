@@ -22,6 +22,7 @@
                     <span>{{ node.label }}</span>
                     <div class="node-operations">
                         <span class="node-actions">
+                            <span>{{ data.description }}</span>
                             <span class="node-state">
                                 <el-tag :type="getStateType(data.state)">
                                     {{ getStateName(data.state) }}
@@ -84,7 +85,7 @@ const handleAddNode = () => {
 }
 
 const handleAddChild = (data: any) => {
-    router.push(`/main/node/add/${data.node_id}?parent_id=${route.params.nodeId}`)
+    router.push(`/main/node/add/${route.params.nodeId}?parent_id=${data.node_id}`)
 }
 
 const handleEdit = (data: any) => {
