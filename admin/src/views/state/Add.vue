@@ -50,7 +50,7 @@ const handleSubmit = async () => {
         loading.value = true
         await createState(form.value)
         ElMessage.success('创建成功')
-        router.push('/main/state-management')
+        router.push('/main/state/management')
     } catch (error: any) {
         ElMessage.error(error.message || '保存失败')
     } finally {
@@ -59,7 +59,7 @@ const handleSubmit = async () => {
 }
 
 const handleCancel = () => {
-    router.push('/main/state-management')
+    router.push('/main/state/management')
 }
 </script>
 

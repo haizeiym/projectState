@@ -8,6 +8,11 @@
                         <Plus />
                     </el-icon>添加状态
                 </el-button>
+                <el-button type="primary" @click="handleBackToProjects">
+                    <el-icon>
+                        <Back />
+                    </el-icon>返回项目列表
+                </el-button>
             </div>
         </div>
         <el-table :data="stateData" style="width: 100%">
@@ -37,7 +42,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Edit, Delete } from '@element-plus/icons-vue'
+import { Plus, Edit, Delete, Back } from '@element-plus/icons-vue'
 import { getStateList, deleteState } from '../../api/state'
 
 const router = useRouter()
@@ -57,8 +62,12 @@ const handleAddState = () => {
     router.push('/main/state/add')
 }
 
+const handleBackToProjects = () => {
+    router.push('/main/projects')
+}
+
 const handleEdit = (data: any) => {
-    router.push(`/main/state/edit/${data.state_id}`)
+    router.push(`/main/state/edit/${data.state_code}`)
 }
 
 const handleDelete = (data: any) => {

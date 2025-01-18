@@ -2,10 +2,10 @@
     <div class="edit-container">
         <el-form ref="formRef" :model="form" :rules="rules" label-width="120px">
             <el-form-item label="状态名称" prop="state_name">
-                <el-input v-model="form.state_name" placeholder="请输入状态名称" />
+                <el-input v-model="form.state_code" placeholder="请输入状态名称" disabled />
             </el-form-item>
-            <el-form-item label="状态描述" prop="description">
-                <el-input v-model="form.description" type="textarea" :rows="4" placeholder="请输入状态描述" />
+            <el-form-item label="状态名称" prop="state_name">
+                <el-input v-model="form.state_name" placeholder="请输入状态名称" />
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="handleSubmit" :loading="loading">保存</el-button>
@@ -30,24 +30,19 @@ const currentStateId = ref(Number(route.params.stateId))
 
 const form = ref({
     state_name: '',
-    description: ''
+    state_code: currentStateId.value
 })
 
 const rules = {
     state_name: [
         { required: true, message: '请输入状态名称', trigger: 'blur' },
         { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
-    ],
-    description: [
-        { required: true, message: '请输入状态描述', trigger: 'blur' },
-        { max: 500, message: '最多 500 个字符', trigger: 'blur' }
     ]
 }
 
 const fetchState = async () => {
     try {
-        const stateId = Number(route.params.stateId)
-        const data: any = await getStateById(stateId)
+        const data: any = await getStateById(currentStateId.value)
         if (data) {
             form.value = {
                 ...data,
