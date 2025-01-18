@@ -180,7 +180,6 @@ onMounted(() => {
     width: 300px;
     min-height: 22px;
     padding: 4px 8px;
-    background-color: #f5f7fa;
     border-radius: 4px;
 }
 
