@@ -77,7 +77,7 @@ const handleDelete = (data: any) => {
         type: 'warning'
     }).then(async () => {
         try {
-            await deleteState(data.state_id)
+            await deleteState(data.state_code)
             ElMessage.success('删除成功')
             await fetchStateList()
         } catch (error) {
