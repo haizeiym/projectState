@@ -22,7 +22,9 @@
                     <span>{{ node.label }}</span>
                     <div class="node-operations">
                         <span class="node-actions">
-                            <span>{{ data.description }}</span>
+                            <div class="description-wrapper">
+                                <span class="description-text">{{ data.description }}</span>
+                            </div>
                             <span class="node-state">
                                 <el-tag :type="getStateType(data.state)">
                                     {{ getStateName(data.state) }}
@@ -163,25 +165,46 @@ onMounted(() => {
     display: flex;
     align-items: center;
     font-size: 14px;
-    padding-right: 8px;
+    padding: 8px;
 }
 
 .node-operations {
     margin-left: auto;
     display: flex;
     align-items: center;
+    gap: 16px;
+    flex: 1;
+}
+
+.description-wrapper {
+    width: 300px;
+    min-height: 22px;
+    padding: 4px 8px;
+    background-color: #f5f7fa;
+    border-radius: 4px;
+}
+
+.description-text {
+    display: block;
+    color: #606266;
+    line-height: 1.4;
+    word-break: break-all;
+    white-space: pre-wrap;
 }
 
 .node-state {
-    margin-left: 16px;
     display: flex;
     align-items: center;
+    min-width: 80px;
+    justify-content: center;
 }
 
 .node-actions {
     display: flex;
     gap: 8px;
     align-items: center;
+    margin-left: auto;
+    flex-shrink: 0;
 }
 
 .action-button {
