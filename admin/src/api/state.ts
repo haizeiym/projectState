@@ -11,7 +11,7 @@ export function createState(data: any) {
 export function updateState(stateCode: number, data: any) {
     return request({
         url: `/api/statecode/update/${stateCode}`,
-        method: 'put',
+        method: 'post',
         data
     })
 }
