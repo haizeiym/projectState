@@ -15,41 +15,39 @@
                 </el-button>
             </div>
         </div>
-        <el-tree ref="treeRef" :data="treeData" :props="defaultProps" node-key="node_id" default-expand-all
-            :expand-on-click-node="false">
-            <template #default="{ node, data }">
-                <div class="custom-tree-node">
-                    <span>{{ node.label }}</span>
-                    <div class="node-operations">
-                        <span class="node-actions">
-                            <div class="description-wrapper">
-                                <span class="description-text">{{ data.description }}</span>
-                            </div>
-                            <span class="node-state">
-                                <el-tag :type="getStateType(data.state)">
-                                    {{ getStateName(data.state) }}
-                                </el-tag>
-                            </span>
-                            <el-button type="success" link @click="handleAddChild(data)" class="action-button">
-                                <el-icon>
-                                    <Plus />
-                                </el-icon>添加子节点
-                            </el-button>
-                            <el-button type="primary" link @click="handleEdit(data)" class="action-button">
-                                <el-icon>
-                                    <Edit />
-                                </el-icon>编辑
-                            </el-button>
-                            <el-button type="danger" link @click="handleDelete(node, data)" class="action-button">
-                                <el-icon>
-                                    <Delete />
-                                </el-icon>删除
-                            </el-button>
-                        </span>
+        <el-table :data="treeData" style="width: 100%" row-key="node_id"
+            :tree-props="{ children: 'children', hasChildren: 'hasChildren' }">
+            <el-table-column prop="node_name" label="节点名称" />
+            <el-table-column prop="description" label="描述" />
+            <el-table-column prop="state" label="状态">
+                <template #default="scope">
+                    <el-tag :type="getStateType(scope.row.state)">
+                        {{ getStateName(scope.row.state) }}
+                    </el-tag>
+                </template>
+            </el-table-column>
+            <el-table-column label="操作" width="280">
+                <template #default="scope">
+                    <div class="action-buttons">
+                        <el-button type="success" link @click="handleAddChild(scope.row)" class="action-button">
+                            <el-icon>
+                                <Plus />
+                            </el-icon>添加子节点
+                        </el-button>
+                        <el-button type="primary" link @click="handleEdit(scope.row)" class="action-button">
+                            <el-icon>
+                                <Edit />
+                            </el-icon>编辑
+                        </el-button>
+                        <el-button type="danger" link @click="handleDelete(scope.row)" class="action-button">
+                            <el-icon>
+                                <Delete />
+                            </el-icon>删除
+                        </el-button>
                     </div>
-                </div>
-            </template>
-        </el-tree>
+                </template>
+            </el-table-column>
+        </el-table>
     </div>
 </template>
 
@@ -62,13 +60,7 @@ import { getNodeTree, deleteNode } from '../../api/node'
 
 const route = useRoute()
 const router = useRouter()
-const treeRef = ref()
 const treeData = ref([])
-
-const defaultProps = {
-    children: 'children',
-    label: 'node_name'
-}
 
 const fetchNodeTree = async () => {
     try {
@@ -94,7 +86,7 @@ const handleEdit = (data: any) => {
     router.push(`/main/node/edit/${data.node_id}?parent_id=${route.params.nodeId}`)
 }
 
-const handleDelete = (_node: any, data: any) => {
+const handleDelete = (data: any) => {
     ElMessageBox.confirm('确定要删除该节点吗？', '警告', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -160,50 +152,9 @@ onMounted(() => {
     gap: 10px;
 }
 
-.custom-tree-node {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-    padding: 8px;
-}
-
-.node-operations {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex: 1;
-}
-
-.description-wrapper {
-    width: 300px;
-    min-height: 22px;
-    padding: 4px 8px;
-    border-radius: 4px;
-}
-
-.description-text {
-    display: block;
-    color: #606266;
-    line-height: 1.4;
-    word-break: break-all;
-    white-space: pre-wrap;
-}
-
-.node-state {
-    display: flex;
-    align-items: center;
-    min-width: 80px;
-    justify-content: center;
-}
-
-.node-actions {
+.action-buttons {
     display: flex;
     gap: 8px;
-    align-items: center;
-    margin-left: auto;
-    flex-shrink: 0;
 }
 
 .action-button {

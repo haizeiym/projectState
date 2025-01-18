@@ -5,7 +5,7 @@
                 <el-input v-model="form.node_name" placeholder="请输入节点名称" />
             </el-form-item>
             <el-form-item label="节点描述" prop="description">
-                <el-input v-model="form.description" placeholder="请输入节点描述" />
+                <el-input v-model="form.description" type="textarea" :rows="4" placeholder="请输入节点描述" />
             </el-form-item>
             <el-form-item label="状态" prop="state">
                 <el-select v-model="form.state" placeholder="请选择状态">
@@ -49,13 +49,6 @@ const rules = {
         { required: true, message: '请输入节点名称', trigger: 'blur' },
         { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
     ],
-    description: [
-        { required: true, message: '请输入节点描述', trigger: 'blur' },
-        { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
-    ],
-    state: [
-        { required: true, message: '请选择状态', trigger: 'change' }
-    ]
 }
 
 const fetchNode = async () => {
