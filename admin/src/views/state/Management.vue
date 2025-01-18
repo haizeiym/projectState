@@ -43,15 +43,19 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Edit, Delete, Back } from '@element-plus/icons-vue'
-import { getStateList, deleteState } from '../../api/state'
+import { getStateListData, deleteStateData, getStateEntries } from '../../utils/stateUtils'
 
 const router = useRouter()
-const stateData = ref([])
+const stateData = ref<any[]>([])
 
 const fetchStateList = async () => {
     try {
-        const response: any = await getStateList()
-        stateData.value = response || []
+        const response: any = await getStateListData()
+        const entries = getStateEntries(response).map(([code, name]) => ({
+            state_code: code,
+            state_name: name
+        }))
+        stateData.value = entries
     } catch (error: any) {
         ElMessage.error('获取状态列表失败')
         console.error('Error fetching state list:', error)
@@ -77,7 +81,7 @@ const handleDelete = (data: any) => {
         type: 'warning'
     }).then(async () => {
         try {
-            await deleteState(data.state_code)
+            await deleteStateData(data.state_code)
             ElMessage.success('删除成功')
             await fetchStateList()
         } catch (error) {
@@ -89,6 +93,7 @@ const handleDelete = (data: any) => {
 onMounted(() => {
     fetchStateList()
 })
+
 </script>
 
 <style scoped>

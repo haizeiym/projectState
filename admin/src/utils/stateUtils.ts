@@ -1,54 +1,49 @@
-import request from './request'
+import { getStateList, createState, updateState, deleteState, getStateById } from '../api/state'
 
 export interface StateCode {
     state_code: number
     state_name: string
-    description: string
 }
 
 // 状态码缓存
 let stateCache: Record<number, string> | null = null
 
 // 获取状态码列表
-export async function getStateList() {
-    const response = await request({
-        url: '/api/statecode/list',
-        method: 'get'
-    })
-    return response
+export async function getStateListData() {
+    if (!stateCache) {
+        const response = await getStateList()
+        if (response && Array.isArray(response)) {
+            stateCache = response.reduce(function(acc: Record<number, string>, item: StateCode) {
+                acc[item.state_code] = item.state_name
+                return acc
+            }, {})
+        } else {
+            console.error('Invalid state codes data:', response)
+            stateCache = {}
+        }
+    }
+    return stateCache
+}
+
+
+export function getStateEntries(cache: Record<number, string>):any[] {
+    const entries: [number, string][] = []
+    for (const key in cache) {
+        if (cache.hasOwnProperty(key)) {
+            entries.push([Number(key), cache[key]])
+        }
+    }
+    return entries
 }
 
 // 获取状态标签
 export async function getStateLabel(state: number) {
-    const cache = await getStateCache()
+    const cache = await getStateListData()
     if (!cache || Object.keys(cache).length === 0) {
         console.warn('State cache is empty')
         return '未知状态'
     }
     return cache[state] || '未知状态'
-}
-
-// 获取状态码缓存
-export async function getStateCache() {
-    if (!stateCache) {
-        try {
-            const response = await getStateList()
-            // 检查响应格式
-            if (response && Array.isArray(response)) {
-                stateCache = response.reduce((acc: Record<number, string>, item: StateCode) => {
-                    acc[item.state_code] = item.state_name
-                    return acc
-                }, {})
-            } else {
-                console.error('Invalid state codes data:', response)
-                stateCache = {}
-            }
-        } catch (error) {
-            console.error('Failed to get state codes:', error)
-            stateCache = {}
-        }
-    }
-    return stateCache
 }
 
 // 清除状态码缓存
@@ -60,44 +55,31 @@ export function clearStateCache() {
 export async function addState(data: {
     state_code: number
     state_name: string
-    description: string
 }) {
-    const response = await request({
-        url: '/api/statecode/create',
-        method: 'post',
-        data
-    })
-    clearStateCache()
+    const response = await createState(data)
+    clearStateCache() // 清除缓存
+    await getStateListData() // 重新获取最新状态列表
     return response
 }
 
-export async function updateState(stateCode: number, data: {
+export async function updateStateData(stateCode: number, data: {
     state_name: string
-    description: string
 }) {
-    const response = await request({
-        url: `/api/statecode/update/${stateCode}`,
-        method: 'put',
-        data
-    })
-    clearStateCache()
+    const response = await updateState(stateCode, data)
+    clearStateCache() // 清除缓存
+    await getStateListData() // 重新获取最新状态列表
     return response
 }
 
-export async function deleteState(stateCode: number) {
-    const response = await request({
-        url: `/api/statecode/delete/${stateCode}`,
-        method: 'delete'
-    })
-    clearStateCache()
+export async function deleteStateData(stateCode: number) {
+    const response = await deleteState(stateCode)
+    clearStateCache() // 清除缓存
+    await getStateListData() // 重新获取最新状态列表
     return response
 }
 
-export async function getStateById(stateCode: number) {
-    return request({
-        url: `/api/statecode/get/${stateCode}`,
-        method: 'get'
-    })
+export async function getStateByIdData(stateCode: number) {
+    return getStateById(stateCode)
 }
 
 // 状态码颜色映射

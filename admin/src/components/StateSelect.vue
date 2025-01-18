@@ -9,8 +9,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { getStateCache, getStateColor } from '../utils/stateUtils';
+import { getStateListData, getStateColor } from '../utils/stateUtils';
 
+defineProps<{
+    modelValue: number | null
+}>()
 
 const emit = defineEmits<{
     'update:modelValue': [value: number | null]
@@ -22,7 +25,7 @@ const loading = ref(false)
 const loadStates = async () => {
     loading.value = true
     try {
-        const stateMap = await getStateCache()
+        const stateMap = await getStateListData()
         if (stateMap) {
             stateOptions.value = Object.entries(stateMap).map(([code, name]) => ({
                 value: Number(code),

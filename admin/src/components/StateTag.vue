@@ -11,7 +11,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue'
 import StateSelect from './StateSelect.vue'
 import { getStateLabel, getStateType } from '../utils/stateUtils'
@@ -43,7 +43,7 @@ const fetchStateLabel = async () => {
 watch(() => props.modelValue, fetchStateLabel, { immediate: true })
 
 // 处理状态变化
-const handleChange = (value) => {
+const handleChange = (value: number | null) => {
     emit('update:modelValue', value)
     emit('change', value)
 }

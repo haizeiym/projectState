@@ -20,7 +20,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
-import { getStateById, updateState } from '../../api/state'
+import { getStateByIdData, updateStateData } from '../../utils/stateUtils'
 
 const route = useRoute()
 const router = useRouter()
@@ -42,7 +42,7 @@ const rules = {
 
 const fetchState = async () => {
     try {
-        const data: any = await getStateById(currentStateId.value)
+        const data: any = await getStateByIdData(currentStateId.value)
         if (data) {
             form.value = {
                 ...data,
@@ -59,7 +59,7 @@ const handleSubmit = async () => {
     try {
         await formRef.value.validate()
         loading.value = true
-        await updateState(currentStateId.value, form.value)
+        await updateStateData(currentStateId.value, form.value)
         ElMessage.success('更新成功')
         router.push('/main/state/management')
     } catch (error: any) {

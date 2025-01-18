@@ -20,7 +20,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
-import { createState } from '../../api/state'
+import { addState } from '../../utils/stateUtils'
 
 const router = useRouter()
 const formRef = ref<FormInstance>()
@@ -48,7 +48,7 @@ const handleSubmit = async () => {
     try {
         await formRef.value.validate()
         loading.value = true
-        await createState(form.value)
+        await addState(form.value)
         ElMessage.success('创建成功')
         router.push('/main/state/management')
     } catch (error: any) {
