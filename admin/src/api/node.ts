@@ -37,6 +37,14 @@ export function updateNode(nodeId: number, data: any) {
     })
 }
 
+export function batchUpdateNode(data: any) {
+    return request({
+        url: '/api/node/batch_update',
+        method: 'post',
+        data
+    })
+}
+
 export function deleteNode(nodeId: number) {
     return request({
         url: `/api/node/delete/${nodeId}`,

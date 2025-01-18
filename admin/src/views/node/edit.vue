@@ -8,7 +8,7 @@
                 <el-input v-model="form.description" type="textarea" :rows="4" placeholder="请输入节点描述" />
             </el-form-item>
             <el-form-item label="状态" prop="state">
-                <el-select v-model="form.state" placeholder="请选择状态">
+                <el-select v-model="form.state" placeholder="请选择状态" @change="handleStateChange">
                     <el-option label="未开始" :value="0" />
                     <el-option label="正常" :value="1" />
                     <el-option label="警告" :value="2" />
@@ -28,7 +28,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
-import { getNodeById, updateNode } from '../../api/node'
+import { getNodeById, getNodeTree, updateNode, batchUpdateNode } from '../../api/node'
 
 const route = useRoute()
 const router = useRouter()
@@ -53,8 +53,7 @@ const rules = {
 
 const fetchNode = async () => {
     try {
-        const nodeId = Number(route.params.nodeId)
-        const data: any = await getNodeById(nodeId)
+        const data: any = await getNodeById(currentNodeId.value)
         if (data) {
             form.value = {
                 ...data,
@@ -78,6 +77,30 @@ const handleSubmit = async () => {
         ElMessage.error(error.message || '保存失败')
     } finally {
         loading.value = false
+    }
+}
+
+const handleStateChange = async (newState: any) => {
+    try {
+        const nodeTree = await getNodeTree(currentNodeId.value)
+        const collectNodeIds = (node: any, ids: any = [currentNodeId.value]) => {
+            if (node.children && node.children.length > 0) {
+                node.children.forEach((child: any) => {
+                    ids.push(child.node_id)
+                    collectNodeIds(child, ids)
+                })
+            }
+            return ids
+        }
+        const nodeIds = collectNodeIds(nodeTree)
+        await batchUpdateNode({
+            node_ids: nodeIds,
+            state: newState
+        })
+        ElMessage.success('状态更新成功')
+        router.push(`/main/node/tree/${parentId.value}`)
+    } catch (error: any) {
+        ElMessage.error('更新子节点状态失败：' + (error.response?.data?.message || error.message))
     }
 }
 
