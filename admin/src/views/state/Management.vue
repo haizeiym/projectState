@@ -16,9 +16,8 @@
             </div>
         </div>
         <div class="table-container">
-            <el-table :data="stateData" style="width: 100%" border>
+            <el-table :data="stateData" style="width: 100%">
                 <el-table-column prop="state_code" label="状态代码" width="120" align="center" />
-                <el-table-column prop="state_name" label="状态名称" width="200" align="center" />
                 <el-table-column label="状态显示" width="180" align="center">
                     <template #default="scope">
                         <StateTag :modelValue="scope.row.state_code" />
