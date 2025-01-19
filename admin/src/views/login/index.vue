@@ -1,6 +1,6 @@
 <template>
     <div class="login-container">
-        <el-form ref="loginFormRef" :model="loginForm" :rules="rules" class="login-form">
+        <el-form ref="loginFormRef" :model="loginForm" class="login-form">
             <h3 class="title">登录</h3>
             <el-form-item prop="username">
                 <el-input v-model="loginForm.username" placeholder="用户名" maxlength="20" />
@@ -80,6 +80,10 @@ const handleLogin = async () => {
     } finally {
         loading.value = false
     }
+}
+
+const goToRegister = () => {
+    router.push('/register')
 }
 
 onMounted(() => {

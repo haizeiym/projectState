@@ -36,6 +36,10 @@
     "src/**/*.vue",
     "src/router/index.ts"
   ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
   "references": [
     {
       "path": "./tsconfig.node.json"

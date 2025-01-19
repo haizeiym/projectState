@@ -9,6 +9,8 @@ services:
       - "8080:80"
     networks:
       - admin-network
+    environment:
+      - NODE_ENV=production
 
 networks:
   admin-network: 
