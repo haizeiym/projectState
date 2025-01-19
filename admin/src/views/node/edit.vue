@@ -8,12 +8,7 @@
                 <el-input v-model="form.description" type="textarea" :rows="4" placeholder="请输入节点描述" />
             </el-form-item>
             <el-form-item label="状态" prop="state">
-                <el-select v-model="form.state" placeholder="请选择状态" @change="handleStateChange">
-                    <el-option label="未开始" :value="0" />
-                    <el-option label="正常" :value="1" />
-                    <el-option label="警告" :value="2" />
-                    <el-option label="错误" :value="3" />
-                </el-select>
+                <StateSelect v-model="form.state" @change="handleStateChange" />
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="handleSubmit" :loading="loading">保存</el-button>
@@ -29,6 +24,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { getNodeById, getNodeTree, updateNode, batchUpdateNode } from '../../api/node'
+import StateSelect from '../../components/StateSelect.vue'
 
 const route = useRoute()
 const router = useRouter()

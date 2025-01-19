@@ -21,9 +21,7 @@
             <el-table-column prop="description" label="描述" />
             <el-table-column prop="state" label="状态">
                 <template #default="scope">
-                    <el-tag :type="getStateType(scope.row.state)">
-                        {{ getStateName(scope.row.state) }}
-                    </el-tag>
+                    <StateTag :modelValue="scope.row.state" />
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="280">
@@ -57,6 +55,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Back, Edit, Delete } from '@element-plus/icons-vue'
 import { getNodeTree, deleteNode } from '../../api/node'
+import StateTag from '../../components/StateTag.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -100,26 +99,6 @@ const handleDelete = (data: any) => {
             ElMessage.error('删除失败')
         }
     })
-}
-
-const getStateType = (state: number) => {
-    const stateMap: { [key: number]: string } = {
-        0: '',
-        1: 'success',
-        2: 'warning',
-        3: 'danger'
-    }
-    return stateMap[state] || ''
-}
-
-const getStateName = (state: number) => {
-    const stateMap: { [key: number]: string } = {
-        0: '未开始',
-        1: '正常',
-        2: '警告',
-        3: '错误'
-    }
-    return stateMap[state] || '未知'
 }
 
 const handleClose = () => {
