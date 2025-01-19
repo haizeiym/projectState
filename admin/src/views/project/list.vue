@@ -11,10 +11,10 @@
             <el-table-column prop="project_id" label="项目ID" width="100" />
             <el-table-column prop="project_name" label="项目名称" />
             <el-table-column prop="description" label="项目描述" />
-            <el-table-column prop="state" label="状态" width="100">
-                <!-- <template #default="scope">
+            <el-table-column label="状态" width="100">
+                <template #default="scope">
                     <StateTag :modelValue="scope.row.state" />
-                </template> -->
+                </template>
             </el-table-column>
             <el-table-column label="操作" width="280">
                 <template #default="scope">
@@ -44,6 +44,8 @@ import { getProjectList, deleteProject } from '../../api/project'
 import { updateUserProjects } from '../../api/auth'
 import { userStore } from '../../stores/user'
 import { deleteNode } from '../../api/node'
+
+import StateTag from '../../components/StateTag.vue'
 
 const router = useRouter()
 const loading = ref(false)

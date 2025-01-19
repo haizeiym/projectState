@@ -50,7 +50,7 @@ import { createPNTG } from '../../api/pntg'
 import { createNode } from '../../api/node'
 import { updateUserProjects } from '../../api/auth'
 import { userStore } from '../../stores/user'
-import { getStateCache, getStateType } from '../../utils/stateUtils'
+import { getStateListData, getStateType } from '../../utils/stateUtils'
 
 const router = useRouter()
 const form = ref({
@@ -115,7 +115,7 @@ const handleCancel = () => {
 }
 
 onMounted(async () => {
-    stateOptions.value = await getStateCache()
+    stateOptions.value = await getStateListData()
     const firstStateCode = Object.keys(stateOptions.value)[0]
     if (firstStateCode) {
         form.value.state = Number(firstStateCode)
