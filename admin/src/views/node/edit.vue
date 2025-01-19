@@ -48,6 +48,7 @@ const rules = {
 }
 
 const fetchNode = async () => {
+    console.log('currentNodeId', currentNodeId.value)
     try {
         const data: any = await getNodeById(currentNodeId.value)
         if (data) {

@@ -3,6 +3,9 @@
         <div class="header">
             <h2>节点管理</h2>
             <div class="header-actions">
+                <el-button type="primary" @click="toggleNodeIdVisibility">
+                    {{ showNodeId ? '隐藏节点ID' : '显示节点ID' }}
+                </el-button>
                 <el-button type="primary" @click="handleAddNode">
                     <el-icon>
                         <Plus />
@@ -17,6 +20,7 @@
         </div>
         <el-table :data="treeData" style="width: 100%" row-key="node_id"
             :tree-props="{ children: 'children', hasChildren: 'hasChildren' }" default-expand-all>
+            <el-table-column v-if="showNodeId" prop="node_id" label="节点ID" />
             <el-table-column prop="node_name" label="节点名称" />
             <el-table-column prop="description" label="描述" />
             <el-table-column prop="state" label="状态">
@@ -60,6 +64,7 @@ import StateTag from '../../components/StateTag.vue'
 const route = useRoute()
 const router = useRouter()
 const treeData = ref([])
+const showNodeId = ref(false)
 
 const fetchNodeTree = async () => {
     try {
@@ -103,6 +108,10 @@ const handleDelete = (data: any) => {
 
 const handleClose = () => {
     router.push('/main/projects')
+}
+
+const toggleNodeIdVisibility = () => {
+    showNodeId.value = !showNodeId.value
 }
 
 onMounted(() => {

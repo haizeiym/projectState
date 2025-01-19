@@ -3,12 +3,15 @@
         <div class="header">
             <h2>项目列表</h2>
             <div class="button-group">
+                <el-button type="primary" @click="toggleProjectIdVisibility">
+                    {{ showProjectId ? '隐藏项目ID' : '显示项目ID' }}
+                </el-button>
                 <el-button type="primary" @click="handleAdd" v-if="hasManagePermission">添加项目</el-button>
                 <el-button type="primary" @click="handleStateManagement" v-if="hasManagePermission">状态管理</el-button>
             </div>
         </div>
         <el-table :data="filteredProjects" style="width: 100%" v-loading="loading">
-            <el-table-column prop="project_id" label="项目ID" width="100" />
+            <el-table-column v-if="showProjectId" prop="project_id" label="项目ID" width="100" />
             <el-table-column prop="project_name" label="项目名称" />
             <el-table-column prop="description" label="项目描述" />
             <el-table-column label="状态" width="100">
@@ -50,6 +53,7 @@ import StateTag from '../../components/StateTag.vue'
 const router = useRouter()
 const loading = ref(false)
 const projects = ref([])
+const showProjectId = ref(false)
 
 const filteredProjects = computed(() => projects.value)
 
@@ -127,6 +131,10 @@ const handleDelete = (row: any) => {
 
 const handleStateManagement = () => {
     router.push('/main/state/management')
+}
+
+const toggleProjectIdVisibility = () => {
+    showProjectId.value = !showProjectId.value
 }
 
 onMounted(() => {
