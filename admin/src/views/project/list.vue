@@ -44,7 +44,7 @@ import { getProjectList, deleteProject } from '../../api/project'
 import { updateUserProjects } from '../../api/auth'
 import { userStore } from '../../stores/user'
 import { deleteNode } from '../../api/node'
-
+import { deletePNTG } from '../../api/pntg'
 import StateTag from '../../components/StateTag.vue'
 
 const router = useRouter()
@@ -102,6 +102,7 @@ const handleDelete = (row: any) => {
     }).then(async () => {
         try {
             await deleteNode(row.node_id)
+            await deletePNTG(row.project_id)
             await deleteProject(row.project_id)
             // 更新用户的 project_ids
             if (userStore.userInfo.value?.id) {
