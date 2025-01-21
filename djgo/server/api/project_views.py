@@ -1,5 +1,3 @@
-from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
 from django.contrib.auth import get_user_model
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
