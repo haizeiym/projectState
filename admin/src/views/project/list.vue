@@ -104,11 +104,13 @@ const handleDelete = (row: any) => {
             await deleteNode(row.node_id)
             await deletePNTG(row.project_id)
             await deleteProject(row.project_id)
+
             // 更新用户的 project_ids
             if (userStore.userInfo.value?.id) {
                 const projectIds = userStore.userInfo.value.projectIds || []
                 const updatedProjectIds = projectIds.filter(id => id !== row.project_id)
-                await updateUserProjects(userStore.userInfo.value.id, updatedProjectIds)
+                // 使用新的 handleUpdateUserProjects 函数
+                await handleUpdateUserProjects(userStore.userInfo.value.id, updatedProjectIds)
                 userStore.updateUserInfo({
                     ...userStore.userInfo.value,
                     projectIds: updatedProjectIds
@@ -131,6 +133,17 @@ const handleStateManagement = () => {
 
 const toggleProjectIdVisibility = () => {
     showProjectId.value = !showProjectId.value
+}
+
+const handleUpdateUserProjects = async (userId: number, projectIds: number[]) => {
+    try {
+        await updateUserProjects(userId, projectIds)
+        ElMessage.success('更新成功')
+        await fetchProjects()
+    } catch (error) {
+        console.error('更新失败:', error)
+        ElMessage.error('更新失败')
+    }
 }
 
 onMounted(() => {

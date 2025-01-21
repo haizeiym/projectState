@@ -44,12 +44,12 @@ export function register(data: any) {
     })
 }
 
-export function updateUserProjects(userId: number, projectIds: number[]) {
+export const updateUserProjects = (userId: number, projectIds: number[]) => {
     return request({
         url: `/api/user/projects/${userId}`,
-        method: 'put',
-        data: {
-            project_ids: projectIds
+        method: 'post',
+        data: { 
+            project_ids: projectIds.join(',') 
         }
     })
 } 

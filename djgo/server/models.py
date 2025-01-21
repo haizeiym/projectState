@@ -255,8 +255,17 @@ class StateCodeModel(models.Model):
 
 
 class UMModel(AbstractUser):
-    # 使用 ObjectIdField 作为主键
-    _id = djongo_models.ObjectIdField(primary_key=True, default=ObjectId)
+    # MongoDB 的 ObjectId
+    _id = djongo_models.ObjectIdField(default=ObjectId)
+
+    # 使用 IntegerField 而不是 AutoField
+    user_id = models.IntegerField(
+        unique=True,
+        null=True,
+        blank=True,
+        verbose_name="用户ID",
+        help_text="用户的整数ID",
+    )
 
     project_ids = models.TextField(
         verbose_name="项目IDs",
@@ -265,7 +274,6 @@ class UMModel(AbstractUser):
         default="",
     )
 
-    # 添加必要的字段
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
@@ -274,12 +282,22 @@ class UMModel(AbstractUser):
         verbose_name = "用户"
         verbose_name_plural = "用户"
 
+    def save(self, *args, **kwargs):
+        # 如果没有设置 user_id，则生成一个新的
+        if not self.user_id:
+            # 获取当前最大的 user_id
+            max_id = UMModel.objects.all().aggregate(models.Max("user_id"))[
+                "user_id__max"
+            ]
+            self.user_id = (max_id or 100000) + 1
+        super().save(*args, **kwargs)
+
     @property
     def id(self):
         """
-        为了兼容性，将 _id 转换为字符串形式
+        为了兼容性，返回用户ID
         """
-        return str(self._id)
+        return self.user_id or self.pk
 
     def get_project_ids(self):
         """将字符串形式的项目ID转换为列表"""

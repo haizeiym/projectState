@@ -99,12 +99,12 @@ def register(request):
         login(request, user)
 
         # 确保会话中存储了正确的用户 ID
-        request.session["_auth_user_id"] = user.id
+        request.session["_auth_user_id"] = user.user_id
         request.session.save()
 
         return Response(
             {
-                "id": user.id,
+                "id": user.user_id,
                 "username": user.username,
                 "message": "注册成功",
                 "is_active": user.is_active,
