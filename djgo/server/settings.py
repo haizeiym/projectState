@@ -2,7 +2,7 @@
 SECRET_KEY = "project-state-fuck-QWET-DFXX-!@#$"  # 在生产环境中应该使用环境变量存储
 
 # 调试模式
-DEBUG = True
+DEBUG = False
 
 # 允许的主机
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
@@ -54,7 +54,7 @@ DATABASES = {
         "ENGINE": "djongo",
         "NAME": "nodes",
         "CLIENT": {
-            "host": "localhost",
+            "host": "dj_mongo",  # 使用 Docker Compose 中的服务名称
             "port": 27017,
             "username": "root",
             "password": "root",
@@ -108,6 +108,8 @@ AUTHENTICATION_BACKENDS = [
 SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_AGE = 1209600  # 2周
+SESSION_ENGINE = "django.contrib.sessions.backends.db"  # 使用数据库存储会话
+SESSION_COOKIE_NAME = "sessionid"
 
 # REST Framework 设置
 REST_FRAMEWORK = {

@@ -1,5 +1,5 @@
 # Use the official Node.js image as the base image
-FROM node:18-alpine as build-stage
+FROM node:18-alpine AS build-stage
 
 # Set the working directory
 WORKDIR /app
@@ -17,7 +17,12 @@ COPY . .
 RUN npm run build
 
 # Use Nginx to serve the application
-FROM nginx:stable-alpine as production-stage
+FROM nginx:stable-alpine AS production-stage
+
+# Copy Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy the build output to Nginx's html directory
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 
 # Expose port 80

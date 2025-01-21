@@ -256,12 +256,12 @@ class UMModel(AbstractUser):
     project_ids = models.TextField(
         verbose_name="项目IDs",
         help_text="关联的项目ID列表，用逗号分隔",
-        blank=True,  # 允许为空
-        default="",  # 默认为空字符串
+        blank=True,
+        default="",
     )
 
     class Meta:
-        db_table = "auth_user"  # 使用默认的 auth_user 表名
+        db_table = "auth_user"
         verbose_name = "用户"
         verbose_name_plural = "用户"
 

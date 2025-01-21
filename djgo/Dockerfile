@@ -8,18 +8,17 @@ ENV PYTHONUNBUFFERED 1
 # Set the working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    libpq-dev \
-    && apt-get clean
+# Copy the Django project files
+COPY requirements.txt .
 
 # Install Python dependencies
-COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the Django project files
-COPY . /app/
+COPY . .
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
 
 # Expose the port the app runs on
 EXPOSE 8000
