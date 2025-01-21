@@ -5,7 +5,7 @@ SECRET_KEY = "project-state-fuck-QWET-DFXX-!@#$"  # 在生产环境中应该使�
 DEBUG = False
 
 # 允许的主机
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["0.0.0.0", "127.0.0.1", "localhost"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -54,7 +54,7 @@ DATABASES = {
         "ENGINE": "djongo",
         "NAME": "nodes",
         "CLIENT": {
-            "host": "dj_mongo",  # 使用 Docker Compose 中的服务名称
+            "host": "dj_mongo",
             "port": 27017,
             "username": "root",
             "password": "root",
@@ -81,6 +81,8 @@ AUTH_USER_MODEL = "server.UMModel"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:8080",
+    "http://127.0.0.1:8000",
+    "http://0.0.0.0:8000",
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
@@ -105,11 +107,11 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Session 设置
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+SESSION_COOKIE_NAME = "sessionid"
 SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_AGE = 1209600  # 2周
-SESSION_ENGINE = "django.contrib.sessions.backends.db"  # 使用数据库存储会话
-SESSION_COOKIE_NAME = "sessionid"
 
 # REST Framework 设置
 REST_FRAMEWORK = {

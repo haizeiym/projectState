@@ -6,8 +6,8 @@
                 <el-button type="primary" @click="toggleProjectIdVisibility">
                     {{ showProjectId ? '隐藏项目ID' : '显示项目ID' }}
                 </el-button>
-                <el-button type="primary" @click="handleAdd" v-if="hasManagePermission">添加项目</el-button>
-                <el-button type="primary" @click="handleStateManagement" v-if="hasManagePermission">状态管理</el-button>
+                <el-button type="primary" @click="handleAdd">添加项目</el-button>
+                <el-button type="primary" @click="handleStateManagement">状态管理</el-button>
             </div>
         </div>
         <el-table :data="filteredProjects" style="width: 100%" v-loading="loading">
@@ -62,10 +62,6 @@ const hasProjectPermission = (projectId: number) => {
     return userProjectIds.includes(projectId)
 }
 
-const hasManagePermission = computed(() => {
-    const userProjectIds = userStore.userInfo.value?.projectIds ?? []
-    return userProjectIds.length > 0
-})
 
 const fetchProjects = async () => {
     try {

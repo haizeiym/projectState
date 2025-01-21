@@ -10,6 +10,7 @@ export default defineConfig({
       '@': resolve(__dirname, './src')
     }
   },
+  base: '/',  // Ensure this matches your deployment path
   server: {
     port: 8000,
     open: true, // 服务启动时是否自动打开浏览器

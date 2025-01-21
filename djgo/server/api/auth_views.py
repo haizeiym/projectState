@@ -42,7 +42,9 @@ def login_view(request):
             return JsonResponse({"error": "Invalid captcha"}, status=400)
 
         user = authenticate(username=username, password=password)
+
         if user is not None:
+            print(f"User ID: {user.id}")
             if user.is_active:
                 login(request, user)
                 return JsonResponse(
@@ -88,15 +90,25 @@ def register(request):
         if User.objects.filter(username=username).exists():
             return Response({"error": "用户名已存在"}, status=400)
 
+        # 使用 create_user 方法创建用户
         user = User.objects.create_user(
-            username=username, password=password, project_ids=""  # 添加空的项目ID列表
+            username=username, password=password, project_ids="", is_active=True
         )
 
         # 注册成功后自动登录
         login(request, user)
 
+        # 确保会话中存储了正确的用户 ID
+        request.session["_auth_user_id"] = user.id
+        request.session.save()
+
         return Response(
-            {"id": user.id, "username": user.username, "message": "注册成功"},
+            {
+                "id": user.id,
+                "username": user.username,
+                "message": "注册成功",
+                "is_active": user.is_active,
+            },
             status=201,
         )
 

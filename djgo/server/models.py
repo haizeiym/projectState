@@ -4,6 +4,8 @@ from django.core.validators import MinValueValidator
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import AbstractUser
+from djongo import models as djongo_models
+from bson import ObjectId
 
 
 class NodeModel(models.Model):
@@ -253,6 +255,9 @@ class StateCodeModel(models.Model):
 
 
 class UMModel(AbstractUser):
+    # 使用 ObjectIdField 作为主键
+    _id = djongo_models.ObjectIdField(primary_key=True, default=ObjectId)
+
     project_ids = models.TextField(
         verbose_name="项目IDs",
         help_text="关联的项目ID列表，用逗号分隔",
@@ -260,10 +265,21 @@ class UMModel(AbstractUser):
         default="",
     )
 
+    # 添加必要的字段
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+
     class Meta:
         db_table = "auth_user"
         verbose_name = "用户"
         verbose_name_plural = "用户"
+
+    @property
+    def id(self):
+        """
+        为了兼容性，将 _id 转换为字符串形式
+        """
+        return str(self._id)
 
     def get_project_ids(self):
         """将字符串形式的项目ID转换为列表"""
