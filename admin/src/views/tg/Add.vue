@@ -27,6 +27,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { createPNTG } from '../../api/pntg'
+import { addTgConfigToCache } from '../../utils/tgUtils'
 
 const router = useRouter()
 const formRef = ref<FormInstance>()
@@ -62,7 +63,8 @@ const handleSubmit = async () => {
         await formRef.value.validate()
         loading.value = true
 
-        await createPNTG(form.value)
+        const response = await createPNTG(form.value)
+        addTgConfigToCache(response)
         ElMessage.success('创建成功')
         router.push('/main/tg/management')
     } catch (error: any) {

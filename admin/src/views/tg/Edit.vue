@@ -26,7 +26,8 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
-import { getPNTGByTgId, updatePNTG } from '../../api/pntg'
+import { updatePNTG } from '../../api/pntg'
+import { getTgConfigById, updateTgConfigInCache } from '../../utils/tgUtils'
 
 const route = useRoute()
 const router = useRouter()
@@ -59,12 +60,14 @@ const rules = {
 const fetchTgConfig = async () => {
     try {
         const tgId = Number(route.params.tgId)
-        const data: any = await getPNTGByTgId(tgId)
-        form.value = {
-            tg_name: data.tg_name,
-            bot_token: data.bot_token,
-            chat_id: data.chat_id,
-            url: data.url
+        const data = await getTgConfigById(tgId)
+        if (data) {
+            form.value = {
+                tg_name: data.tg_name,
+                bot_token: data.bot_token || '',
+                chat_id: data.chat_id || '',
+                url: data.url || ''
+            }
         }
     } catch (error: any) {
         ElMessage.error('获取配置信息失败')
@@ -79,7 +82,8 @@ const handleSubmit = async () => {
         loading.value = true
 
         const tgId = Number(route.params.tgId)
-        await updatePNTG(tgId, form.value)
+        const response: any = await updatePNTG(tgId, form.value)
+        updateTgConfigInCache(response)
         ElMessage.success('更新成功')
         router.push('/main/tg/management')
     } catch (error: any) {

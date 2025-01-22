@@ -32,17 +32,17 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Back } from '@element-plus/icons-vue'
 import PageLayout from '../../components/PageLayout.vue'
-import { getTgList, deletePNTG } from '../../api/pntg'
+import { deletePNTG } from '../../api/pntg'
+import { getAllTgConfigs, deleteTgConfigFromCache, TgConfig } from '../../utils/tgUtils'
 
 const router = useRouter()
 const loading = ref(false)
-const tgList = ref([])
+const tgList = ref<TgConfig[]>([])
 
 const fetchTgList = async () => {
     try {
         loading.value = true
-        const response: any = await getTgList()
-        tgList.value = response
+        tgList.value = await getAllTgConfigs()
     } catch (error: any) {
         ElMessage.error('获取列表失败：' + error.message)
     } finally {
@@ -68,8 +68,9 @@ const handleDelete = async (row: any) => {
             type: 'warning'
         })
         await deletePNTG(row.tg_id)
+        deleteTgConfigFromCache(row.tg_id)
         ElMessage.success('删除成功')
-        fetchTgList()
+        await fetchTgList()
     } catch (error: any) {
         if (error !== 'cancel') {
             ElMessage.error('删除失败：' + error.message)
