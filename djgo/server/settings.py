@@ -1,3 +1,5 @@
+import os
+
 # Django 基本设置
 SECRET_KEY = "project-state-fuck-QWET-DFXX-!@#$"  # 在生产环境中应该使用环境变量存储
 
@@ -49,12 +51,15 @@ TEMPLATES = [
     },
 ]
 
+# 根据环境变量决定数据库主机
+DB_HOST = os.environ.get("DB_HOST", "localhost")
+
 DATABASES = {
     "default": {
         "ENGINE": "djongo",
         "NAME": "nodes",
         "CLIENT": {
-            "host": "dj_mongo",
+            "host": DB_HOST,  # 使用环境变量
             "port": 27017,
             "username": "root",
             "password": "root",

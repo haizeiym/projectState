@@ -198,16 +198,17 @@ def sync_project_states(sender, instance, **kwargs):
 
 
 class PNTGModel(models.Model):
-    project_id = models.IntegerField(
+    tg_id = models.AutoField(
         primary_key=True,
-        validators=[MinValueValidator(0)],
-        verbose_name="项目ID",
-        help_text="项目的ID",
+        validators=[MinValueValidator(1000)],
+        verbose_name="Telegram ID",
+        help_text="Telegram 配置的唯一标识符",
     )
 
-    state_codes = models.TextField(
-        verbose_name="状态码",
-        help_text="状态码",
+    tg_name = models.CharField(
+        max_length=255,
+        verbose_name="Telegram 名称",
+        help_text="Telegram 配置的名称",
     )
 
     bot_token = models.CharField(
@@ -231,7 +232,7 @@ class PNTGModel(models.Model):
         db_table = "pntg"
         verbose_name = "PNTG"
         verbose_name_plural = "PNTG"
-        ordering = ["project_id"]
+        ordering = ["tg_id"]
 
 
 class StateCodeModel(models.Model):

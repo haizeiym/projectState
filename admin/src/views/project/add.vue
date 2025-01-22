@@ -11,27 +11,7 @@
             <el-form-item label="描述">
                 <el-input v-model="form.description" type="textarea" />
             </el-form-item>
-            <el-form-item label="状态">
-                <StateSelect v-model="form.state" />
-            </el-form-item>
-            <!-- PNTGModel Fields -->
-            <el-form-item label="Bot Token">
-                <el-input v-model="form.bot_token" />
-            </el-form-item>
-            <el-form-item label="Chat ID">
-                <el-input v-model="form.chat_id" />
-            </el-form-item>
-            <el-form-item label="URL">
-                <el-input v-model="form.url" />
-            </el-form-item>
-            <el-form-item label="发送消息状态码">
-                <el-select v-model="selectedStateCodes" multiple placeholder="选择状态码">
-                    <el-option v-for="value in Object.keys(stateOptions)" :key="value" :label="stateOptions[value]"
-                        :value="Number(value)">
-                        <el-tag :type="getStateType(Number(value))">{{ stateOptions[value] }}</el-tag>
-                    </el-option>
-                </el-select>
-            </el-form-item>
+
             <el-form-item>
                 <el-button type="primary" @click="handleSubmit">创建</el-button>
                 <el-button @click="handleCancel">取消</el-button>
@@ -44,13 +24,11 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import StateSelect from '../../components/StateSelect.vue'
 import { createProject } from '../../api/project'
-import { createPNTG } from '../../api/pntg'
 import { createNode } from '../../api/node'
 import { updateUserProjects } from '../../api/auth'
 import { userStore } from '../../stores/user'
-import { getStateListData, getStateType } from '../../utils/stateUtils'
+import { getStateListData } from '../../utils/stateUtils'
 
 const router = useRouter()
 const form = ref({
@@ -81,14 +59,6 @@ const handleSubmit = async () => {
             project_name: form.value.project_name,
             description: form.value.description,
             state: form.value.state
-        })
-
-        // 创建 PNTG 配置
-        await createPNTG({
-            project_id: projectResponse.project_id,
-            bot_token: form.value.bot_token,
-            chat_id: form.value.chat_id,
-            url: form.value.url
         })
 
         // 更新用户的 project_ids
