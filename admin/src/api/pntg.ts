@@ -38,4 +38,11 @@ export function deletePNTG(tgId: number) {
         url: `/api/pntg/delete/${tgId}`,
         method: 'delete'
     })
+}
+
+export function getTgList() {
+    return request({
+        url: '/api/pntg/list',
+        method: 'get'
+    })
 } 

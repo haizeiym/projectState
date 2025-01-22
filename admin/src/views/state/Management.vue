@@ -78,7 +78,7 @@ const handleBackToProjects = () => {
 }
 
 const handleEdit = (data: any) => {
-    router.push(`/main/state/edit/${data.state_code}`)
+    router.push(`/main/state/edit/${data.tg_id}`)
 }
 
 const handleDelete = (data: any) => {

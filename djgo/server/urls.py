@@ -37,9 +37,10 @@ urlpatterns = [
     path("api/project/list", Project.list, name="project_list"),
     # PNTG API endpoints
     path("api/pntg/create", PNTG.create, name="pntg_create"),
-    path("api/pntg/delete/<int:project_id>", PNTG.delete, name="pntg_delete"),
-    path("api/pntg/update/<int:project_id>", PNTG.update, name="pntg_update"),
-    path("api/pntg/get/<int:project_id>", PNTG.get, name="pntg_get"),
+    path("api/pntg/delete/<int:tg_id>", PNTG.delete, name="pntg_delete"),
+    path("api/pntg/update/<int:tg_id>", PNTG.update, name="pntg_update"),
+    path("api/pntg/get/<int:tg_id>", PNTG.get, name="pntg_get"),
+    path("api/pntg/list", PNTG.list, name="pntg_list"),
     # StateCode API endpoints
     path("api/statecode/create", StateCode.create, name="statecode_create"),
     path(

@@ -6,6 +6,7 @@ from django.dispatch import receiver
 from django.contrib.auth.models import AbstractUser
 from djongo import models as djongo_models
 from bson import ObjectId
+from djongo.models import ObjectIdField
 
 
 class NodeModel(models.Model):
@@ -198,8 +199,9 @@ def sync_project_states(sender, instance, **kwargs):
 
 
 class PNTGModel(models.Model):
-    tg_id = models.AutoField(
-        primary_key=True,
+    _id = ObjectIdField(primary_key=True, default=ObjectId)
+    tg_id = models.IntegerField(
+        unique=True,
         validators=[MinValueValidator(1000)],
         verbose_name="Telegram ID",
         help_text="Telegram 配置的唯一标识符",
@@ -233,6 +235,18 @@ class PNTGModel(models.Model):
         verbose_name = "PNTG"
         verbose_name_plural = "PNTG"
         ordering = ["tg_id"]
+
+    def save(self, *args, **kwargs):
+        # 如果没有 tg_id，获取当前最大值并加1
+        if not self.tg_id:
+            try:
+                max_tg_id = PNTGModel.objects.aggregate(max_id=models.Max("tg_id"))[
+                    "max_id"
+                ]
+                self.tg_id = (max_tg_id or 999) + 1
+            except Exception:
+                self.tg_id = 1000
+        super().save(*args, **kwargs)
 
 
 class StateCodeModel(models.Model):

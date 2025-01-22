@@ -8,6 +8,7 @@
                 </el-button>
                 <el-button type="primary" @click="handleAdd">添加项目</el-button>
                 <el-button type="primary" @click="handleStateManagement">状态管理</el-button>
+                <el-button type="primary" @click="handleTgManagement">TG管理</el-button>
             </div>
         </div>
         <el-table :data="filteredProjects" style="width: 100%" v-loading="loading">
@@ -129,6 +130,10 @@ const handleDelete = (row: any) => {
 
 const handleStateManagement = () => {
     router.push('/main/state/management')
+}
+
+const handleTgManagement = () => {
+    router.push('/main/tg/management')
 }
 
 const toggleProjectIdVisibility = () => {

@@ -68,6 +68,24 @@ const router = createRouter({
                     component: () => import('../views/state/Management.vue'),
                     name: 'StateManagement',
                     meta: { title: '状态管理', icon: 'edit' }
+                },
+                {
+                    path: 'tg/management',
+                    component: () => import('../views/tg/Management.vue'),
+                    name: 'TgManagement',
+                    meta: { title: 'Telegram 管理', icon: 'edit' }
+                },
+                {
+                    path: 'tg/add',
+                    component: () => import('../views/tg/Add.vue'),
+                    name: 'TgAdd',
+                    meta: { title: '添加 Telegram', icon: 'plus' }
+                },
+                {
+                    path: 'tg/edit/:tgId',
+                    component: () => import('../views/tg/Edit.vue'),
+                    name: 'TgEdit',
+                    meta: { title: '编辑 Telegram', icon: 'edit' }
                 }
             ]
         },
