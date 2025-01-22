@@ -6,7 +6,7 @@
                     <Plus />
                 </el-icon>添加配置
             </el-button>
-            <el-button type="primary" @click="handleBackToProjects">
+            <el-button @click="handleBackToProjects">
                 <el-icon>
                     <Back />
                 </el-icon>返回项目列表
@@ -30,7 +30,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, Back } from '@element-plus/icons-vue'
 import PageLayout from '../../components/PageLayout.vue'
 import { getTgList, deletePNTG } from '../../api/pntg'
 
