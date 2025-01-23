@@ -4,8 +4,12 @@ FROM node:18-alpine AS build-stage
 # Set the working directory
 WORKDIR /app
 
+# Set environment variable
+ARG NODE_ENV
+ENV NODE_ENV=${NODE_ENV}
+
 # Copy package.json and package-lock.json
-COPY package.json package-lock.json ./
+COPY package*.json ./
 
 # Install dependencies
 RUN npm install

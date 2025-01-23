@@ -12,7 +12,7 @@ export default defineConfig({
   },
   base: '/',  // Ensure this matches your deployment path
   server: {
-    port: 8000,
+    port: 5173,
     open: true, // 服务启动时是否自动打开浏览器
     cors: true, // 允许跨域
     host: "localhost",
