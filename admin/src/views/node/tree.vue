@@ -160,7 +160,7 @@ const getTgConfigs = async () => {
 
 const getStateEmoji = (state: number) => {
     // 根据状态码范围返回不同的表情
-    if (state >= 0 && state < 2000) {
+    if (state > 0 && state < 2000) {
         return '🔴' // 进行中
     } else if (state >= 2000 && state < 3000) {
         return '🟡' // 警告
@@ -179,14 +179,16 @@ const generateNodesInfo = (nodes: any[], level = 0) => {
         const stateEmoji = getStateEmoji(node.state)
 
         // 节点名称、状态表情和描述
-        info += '  '.repeat(level) + `${stateEmoji} **${node.node_name}**`
+        info += '  '.repeat(level) + `**${node.node_name}**`
         if (node.description) {
-            info += `: ${node.description}`
+            info += ` ${node.description}`
         }
         info += '\n'
 
         // 状态信息（使用缩进）
-        info += '  '.repeat(level + 1) + `└─ **${stateCache.value?.[node.state] || '未知状态'}**\n`
+        if (level > 0 || node.children && node.children.length === 0) {
+            info += '  '.repeat(level + 1) + `└─ ${stateEmoji}**${stateCache.value?.[node.state] || '未知状态'}**\n`
+        }
 
         // 递归处理子节点
         if (node.children && node.children.length > 0) {
