@@ -174,44 +174,55 @@ const getStateEmoji = (state: number) => {
 
 const generateNodesInfo = (nodes: any[], level = 0) => {
     let info = ''
+
+    // 当 state_code 不为 '0' 时，收集所有匹配状态的节点，不考虑层级
+    if (selectedTgData.value?.state_code !== '0') {
+        const collectMatchingNodes = (nodes: any[]) => {
+            nodes.forEach(node => {
+                // 如果状态匹配且是叶子节点，添加到结果中
+                if (node.state.toString() === selectedTgData.value?.state_code &&
+                    (!node.children || node.children.length === 0)) {
+                    const stateEmoji = getStateEmoji(node.state)
+                    info += `${stateEmoji} ${node.node_name}`
+                    if (node.description) {
+                        info += ` ${node.description}`
+                    }
+                    info += '\n'
+                }
+
+                // 递归检查子节点
+                if (node.children && node.children.length > 0) {
+                    collectMatchingNodes(node.children)
+                }
+            })
+        }
+
+        collectMatchingNodes(nodes)
+        return info
+    }
+
+    // 当 state_code 为 '0' 时，保持原有的树形结构显示
     nodes.forEach(node => {
         const stateEmoji = getStateEmoji(node.state)
-        let shouldIncludeNode = false
-        let childInfo = ''
 
-        // 如果有子节点，先递归处理
+        // 添加当前节点信息
+        info += '  '.repeat(level) + `**${node.node_name}**`
+        if (node.description) {
+            info += ` ${node.description}`
+        }
+        info += '\n'
+
+        // 添加状态信息
+        if (level > 0 || !node.children || node.children.length === 0) {
+            info += '  '.repeat(level + 1) + `└─ ${stateEmoji}**${stateCache.value?.[node.state] || '未知状态'}**\n`
+        }
+
+        // 递归处理子节点
         if (node.children && node.children.length > 0) {
-            childInfo = generateNodesInfo(node.children, level + 1)
-        }
-
-        // 判断是否应该包含当前节点
-        if (selectedTgData.value?.state_code === '0') {
-            // 状态码为0时包含所有节点
-            shouldIncludeNode = true
-        } else if (node.state.toString() === selectedTgData.value?.state_code && node.children?.length === 0) {
-            // 状态码匹配时包含节点
-            shouldIncludeNode = true
-        }
-
-        if (shouldIncludeNode) {
-            // 添加当前节点信息
-            info += '  '.repeat(level) + `**${node.node_name}**`
-            if (node.description) {
-                info += ` ${node.description}`
-            }
-            info += '\n'
-
-            // 添加状态信息
-            if (level > 0 || !node.children || node.children.length === 0) {
-                info += '  '.repeat(level + 1) + `└─ ${stateEmoji}**${stateCache.value?.[node.state] || '未知状态'}**\n`
-            }
-        }
-
-        // 如果子节点有内容，添加子节点信息
-        if (childInfo) {
-            info += childInfo
+            info += generateNodesInfo(node.children, level + 1)
         }
     })
+
     return info
 }
 
