@@ -63,7 +63,7 @@ const handleSubmit = async () => {
         await formRef.value.validate()
         loading.value = true
 
-        const response = await createPNTG(form.value)
+        const response: any = await createPNTG(form.value)
         addTgConfigToCache(response)
         ElMessage.success('创建成功')
         router.push('/main/tg/management')

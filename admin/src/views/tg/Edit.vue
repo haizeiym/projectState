@@ -60,7 +60,7 @@ const rules = {
 const fetchTgConfig = async () => {
     try {
         const tgId = Number(route.params.tgId)
-        const data = await getTgConfigById(tgId)
+        const data: any = await getTgConfigById(tgId)
         if (data) {
             form.value = {
                 tg_name: data.tg_name,

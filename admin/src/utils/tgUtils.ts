@@ -3,9 +3,9 @@ import { getTgList } from '../api/pntg'
 export interface TgConfig {
     tg_id: number
     tg_name: string
-    bot_token?: string
-    chat_id?: string
-    url?: string
+    bot_token: string
+    chat_id: string
+    url: string
 }
 
 let tgConfigCache: TgConfig[] = []

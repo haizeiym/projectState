@@ -19,6 +19,9 @@ class PNTG:
                     {
                         "tg_id": pntg.tg_id,
                         "tg_name": pntg.tg_name,
+                        "bot_token": pntg.bot_token,
+                        "chat_id": pntg.chat_id,
+                        "url": pntg.url,
                     }
                     for pntg in pntg_list
                 ],
