@@ -175,24 +175,41 @@ const getStateEmoji = (state: number) => {
 const generateNodesInfo = (nodes: any[], level = 0) => {
     let info = ''
     nodes.forEach(node => {
-        // 获取状态对应的表情
         const stateEmoji = getStateEmoji(node.state)
+        let shouldIncludeNode = false
+        let childInfo = ''
 
-        // 节点名称、状态表情和描述
-        info += '  '.repeat(level) + `**${node.node_name}**`
-        if (node.description) {
-            info += ` ${node.description}`
-        }
-        info += '\n'
-
-        // 状态信息（使用缩进）
-        if (level > 0 || node.children && node.children.length === 0) {
-            info += '  '.repeat(level + 1) + `└─ ${stateEmoji}**${stateCache.value?.[node.state] || '未知状态'}**\n`
-        }
-
-        // 递归处理子节点
+        // 如果有子节点，先递归处理
         if (node.children && node.children.length > 0) {
-            info += generateNodesInfo(node.children, level + 1)
+            childInfo = generateNodesInfo(node.children, level + 1)
+        }
+
+        // 判断是否应该包含当前节点
+        if (selectedTgData.value?.state_code === '0') {
+            // 状态码为0时包含所有节点
+            shouldIncludeNode = true
+        } else if (node.state.toString() === selectedTgData.value?.state_code && node.children?.length === 0) {
+            // 状态码匹配时包含节点
+            shouldIncludeNode = true
+        }
+
+        if (shouldIncludeNode) {
+            // 添加当前节点信息
+            info += '  '.repeat(level) + `**${node.node_name}**`
+            if (node.description) {
+                info += ` ${node.description}`
+            }
+            info += '\n'
+
+            // 添加状态信息
+            if (level > 0 || !node.children || node.children.length === 0) {
+                info += '  '.repeat(level + 1) + `└─ ${stateEmoji}**${stateCache.value?.[node.state] || '未知状态'}**\n`
+            }
+        }
+
+        // 如果子节点有内容，添加子节点信息
+        if (childInfo) {
+            info += childInfo
         }
     })
     return info
@@ -206,6 +223,7 @@ const sendNodesInfo = async () => {
 
     try {
         const nodesInfo = generateNodesInfo(treeData.value)
+        if (nodesInfo.trim() === '') return ElMessage.warning('没有满足发送条件的节点')
         console.log(nodesInfo)
         await sendMessage(
             selectedTgData.value.bot_token,
