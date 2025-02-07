@@ -14,7 +14,12 @@
                 <el-input v-model="form.url" placeholder="请输入 URL" />
             </el-form-item>
             <el-form-item label="发送状态码" prop="state_code">
-                <el-input v-model="form.state_code" placeholder="请输入发送状态码" />
+                <el-radio-group v-model="form.state_code">
+                    <el-radio label="0">全部状态</el-radio>
+                    <el-radio v-for="[code, name] in Object.entries(stateCache || {})" :key="code" :label="code">
+                        {{ name }}
+                    </el-radio>
+                </el-radio-group>
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="handleSubmit" :loading="loading">保存</el-button>
@@ -25,23 +30,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { createPNTG } from '../../api/pntg'
 import { addTgConfigToCache } from '../../utils/tgUtils'
+import { getStateListData } from '../../utils/stateUtils'
 
 const router = useRouter()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
+
+const stateCache = ref<Record<number, string> | null>(null)
+
+// 初始化状态数据
+onMounted(async () => {
+    stateCache.value = await getStateListData()
+})
 
 const form = ref({
     tg_name: '',
     bot_token: '',
     chat_id: '',
     url: '',
-    state_code: ''
+    state_code: '0'  // 默认选择全部状态
 })
 
 const rules = {

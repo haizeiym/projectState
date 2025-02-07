@@ -14,7 +14,12 @@
                 <el-input v-model="form.url" placeholder="请输入 URL" />
             </el-form-item>
             <el-form-item label="发送状态码" prop="state_code">
-                <el-input v-model="form.state_code" placeholder="请输入发送状态码" />
+                <el-radio-group v-model="form.state_code">
+                    <el-radio label="0">全部状态</el-radio>
+                    <el-radio v-for="[code, name] in Object.entries(stateCache || {})" :key="code" :label="code">
+                        {{ name }}
+                    </el-radio>
+                </el-radio-group>
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="handleSubmit" :loading="loading">保存</el-button>
@@ -31,6 +36,7 @@ import { ElMessage } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { updatePNTG } from '../../api/pntg'
 import { getTgConfigById, updateTgConfigInCache } from '../../utils/tgUtils'
+import { getStateListData } from '../../utils/stateUtils'
 
 const route = useRoute()
 const router = useRouter()
@@ -60,6 +66,8 @@ const rules = {
         { required: true, message: '请输入 URL', trigger: 'blur' }
     ]
 }
+
+const stateCache = ref<Record<number, string> | null>(null)
 
 const fetchTgConfig = async () => {
     try {
@@ -102,7 +110,8 @@ const handleCancel = () => {
     router.push('/main/tg/management')
 }
 
-onMounted(() => {
+onMounted(async () => {
+    stateCache.value = await getStateListData()
     fetchTgConfig()
 })
 </script>

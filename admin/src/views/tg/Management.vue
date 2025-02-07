@@ -16,7 +16,11 @@
         <el-table :data="tgList" v-loading="loading" style="width: 100%">
             <el-table-column prop="tg_id" label="ID" width="100" />
             <el-table-column prop="tg_name" label="名称" />
-            <el-table-column prop="state_code" label="发送状态码" />
+            <el-table-column prop="state_code" label="发送状态码">
+                <template #default="{ row }">
+                    {{ row.state_code === '0' ? '全部状态' : stateCache?.[Number(row.state_code)] || '未知状态' }}
+                </template>
+            </el-table-column>
             <el-table-column label="操作" width="200">
                 <template #default="{ row }">
                     <el-button type="primary" size="small" @click="handleEdit(row)">编辑</el-button>
@@ -35,7 +39,10 @@ import { Plus, Back } from '@element-plus/icons-vue'
 import PageLayout from '../../components/PageLayout.vue'
 import { deletePNTG } from '../../api/pntg'
 import { getAllTgConfigs, deleteTgConfigFromCache, TgConfig } from '../../utils/tgUtils'
+import { getStateListData } from '../../utils/stateUtils'
 
+
+const stateCache = ref<Record<number, string> | null>(null)
 const router = useRouter()
 const loading = ref(false)
 const tgList = ref<TgConfig[]>([])
@@ -79,7 +86,8 @@ const handleDelete = async (row: any) => {
     }
 }
 
-onMounted(() => {
+onMounted(async () => {
+    stateCache.value = await getStateListData()
     fetchTgList()
 })
 </script>

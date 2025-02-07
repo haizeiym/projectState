@@ -59,7 +59,7 @@
             <el-form>
                 <el-form-item label="选择TG">
                     <el-select v-model="selectedTgData" placeholder="请选择TG">
-                        <el-option v-for="item in tgConfigs" :key="item.tg_id" :label="`名称:${item.tg_name} --- 发送码:${item.state_code !== '0' ?
+                        <el-option v-for="item in tgConfigs" :key="item.tg_id" :label="`${item.tg_name} --- 发送码:${item.state_code !== '0' ?
                             `(${stateCache?.[Number(item.state_code)] || '未知状态'})` :
                             '(全部状态)'}`" :value="item" />
                     </el-select>
