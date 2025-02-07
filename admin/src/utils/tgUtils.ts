@@ -6,6 +6,7 @@ export interface TgConfig {
     bot_token: string
     chat_id: string
     url: string
+    state_code: string;
 }
 
 let tgConfigCache: TgConfig[] = []

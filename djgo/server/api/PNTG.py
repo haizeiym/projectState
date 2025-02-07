@@ -22,6 +22,7 @@ class PNTG:
                         "bot_token": pntg.bot_token,
                         "chat_id": pntg.chat_id,
                         "url": pntg.url,
+                        "state_code": pntg.state_code,
                     }
                     for pntg in pntg_list
                 ],
@@ -58,6 +59,7 @@ class PNTG:
                     bot_token=data["bot_token"],
                     chat_id=data["chat_id"],
                     url=data["url"],
+                    state_code=data["state_code"],
                 )
                 pntg.save()  # 保存后会生成 tg_id
 
@@ -71,6 +73,7 @@ class PNTG:
                         "bot_token": pntg.bot_token,
                         "chat_id": pntg.chat_id,
                         "url": pntg.url,
+                        "state_code": pntg.state_code,
                     },
                     status=201,
                     encoder=CustomJSONEncoder,
@@ -106,6 +109,7 @@ class PNTG:
                     "bot_token": pntg.bot_token,
                     "chat_id": pntg.chat_id,
                     "url": pntg.url,
+                    "state_code": pntg.state_code,
                 }
             )
         except PNTGModel.DoesNotExist:
@@ -128,6 +132,7 @@ class PNTG:
             pntg.bot_token = data.get("bot_token", pntg.bot_token)
             pntg.chat_id = data.get("chat_id", pntg.chat_id)
             pntg.url = data.get("url", pntg.url)
+            pntg.state_code = data.get("state_code", pntg.state_code)
             pntg.save()
 
             return JsonResponse(
@@ -137,6 +142,7 @@ class PNTG:
                     "bot_token": pntg.bot_token,
                     "chat_id": pntg.chat_id,
                     "url": pntg.url,
+                    "state_code": pntg.state_code,
                 }
             )
 

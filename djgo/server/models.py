@@ -230,6 +230,12 @@ class PNTGModel(models.Model):
         help_text="Telegram URL",
     )
 
+    state_code = models.TextField(
+        default="0",
+        verbose_name="状态码",
+        help_text="状态码",
+    )
+
     class Meta:
         db_table = "pntg"
         verbose_name = "PNTG"

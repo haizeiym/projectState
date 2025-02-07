@@ -16,6 +16,7 @@
         <el-table :data="tgList" v-loading="loading" style="width: 100%">
             <el-table-column prop="tg_id" label="ID" width="100" />
             <el-table-column prop="tg_name" label="名称" />
+            <el-table-column prop="state_code" label="发送状态码" />
             <el-table-column label="操作" width="200">
                 <template #default="{ row }">
                     <el-button type="primary" size="small" @click="handleEdit(row)">编辑</el-button>

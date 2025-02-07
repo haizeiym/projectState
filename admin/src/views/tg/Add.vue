@@ -13,6 +13,9 @@
             <el-form-item label="URL" prop="url">
                 <el-input v-model="form.url" placeholder="请输入 URL" />
             </el-form-item>
+            <el-form-item label="发送状态码" prop="state_code">
+                <el-input v-model="form.state_code" placeholder="请输入发送状态码" />
+            </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="handleSubmit" :loading="loading">保存</el-button>
                 <el-button @click="handleCancel">取消</el-button>
@@ -37,7 +40,8 @@ const form = ref({
     tg_name: '',
     bot_token: '',
     chat_id: '',
-    url: ''
+    url: '',
+    state_code: ''
 })
 
 const rules = {

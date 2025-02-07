@@ -5,6 +5,7 @@ export function createPNTG(data: {
     bot_token: string;
     chat_id: string;
     url: string;
+    state_code: string;
 }) {
     return request({
         url: '/api/pntg/create',
@@ -18,6 +19,7 @@ export function updatePNTG(tgId: number, data: {
     bot_token: string;
     chat_id: string;
     url: string;
+    state_code: string;
 }) {
     return request({
         url: `/api/pntg/update/${tgId}`,
