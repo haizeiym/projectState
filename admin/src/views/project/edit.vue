@@ -36,10 +36,6 @@ const rules = {
     project_name: [
         { required: true, message: '请输入项目名称', trigger: 'blur' },
         { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
-    ],
-    description: [
-        { required: true, message: '请输入项目描述', trigger: 'blur' },
-        { max: 500, message: '最多 500 个字符', trigger: 'blur' }
     ]
 }
 
