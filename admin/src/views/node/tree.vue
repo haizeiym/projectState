@@ -83,6 +83,7 @@ import { Plus, Back, Edit, Delete, Message } from '@element-plus/icons-vue'
 import { getNodeTree, deleteNode } from '../../api/node'
 import { getAllTgConfigs } from '../../utils/tgUtils'
 import StateTag from '../../components/StateTag.vue'
+import { getStateListData } from '../../utils/stateUtils'
 import { TgConfig } from '../../utils/tgUtils'
 import { sendMessage } from '../../api/pntg'
 
@@ -93,7 +94,7 @@ const showNodeId = ref(false)
 const tgDialogVisible = ref(false)
 const selectedTgData = ref<TgConfig | null>(null)
 const tgConfigs = ref<TgConfig[]>([])
-
+const stateCache = ref<Record<number, string> | null>(null)
 const fetchNodeTree = async () => {
     try {
         const nodeId = Number(route.params.nodeId)
@@ -142,8 +143,9 @@ const toggleNodeIdVisibility = () => {
     showNodeId.value = !showNodeId.value
 }
 
-const handleSendNodes = () => {
+const handleSendNodes = async () => {
     getTgConfigs()
+    stateCache.value = await getStateListData()
     tgDialogVisible.value = true
 }
 
@@ -163,7 +165,7 @@ const generateNodesInfo = (nodes: any[], level = 0) => {
         if (node.description) {
             info += '  '.repeat(level + 1) + `描述: ${node.description}\n`
         }
-        info += '  '.repeat(level + 1) + `状态: ${node.state}\n`
+        info += '  '.repeat(level + 1) + `状态: ${stateCache.value?.[node.state] || '未知状态'}\n`
 
         if (node.children && node.children.length > 0) {
             info += generateNodesInfo(node.children, level + 1)
