@@ -83,7 +83,7 @@ import { Plus, Back, Edit, Delete, Message } from '@element-plus/icons-vue'
 import { getNodeTree, deleteNode } from '../../api/node'
 import { getAllTgConfigs } from '../../utils/tgUtils'
 import StateTag from '../../components/StateTag.vue'
-import { getStateListData } from '../../utils/stateUtils'
+import { getStateListData, getStateEmoji } from '../../utils/stateUtils'
 import { TgConfig } from '../../utils/tgUtils'
 import { sendMessage } from '../../api/pntg'
 
@@ -156,20 +156,6 @@ const getTgConfigs = async () => {
     } catch (error) {
         ElMessage.error('获取TG配置失败')
     }
-}
-
-const getStateEmoji = (state: number) => {
-    // 根据状态码范围返回不同的表情
-    if (state > 0 && state < 2000) {
-        return '🔴' // 进行中
-    } else if (state >= 2000 && state < 3000) {
-        return '🟡' // 警告
-    } else if (state >= 3000 && state < 4000) {
-        return '✅' // 成功
-    } else if (state >= 4000 && state < 5000) {
-        return '❌' // 错误
-    }
-    return '❓' // 未知状态
 }
 
 const generateNodesInfo = (nodes: any[], level = 0) => {

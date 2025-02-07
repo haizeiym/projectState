@@ -111,3 +111,17 @@ export function getStateType(state: number) {
     }
     return 'info'
 }
+
+// 获取状态表情
+export function getStateEmoji(state: number) {
+    if (state > 0 && state < 2000) {
+        return '🔴' // 进行中
+    } else if (state >= 2000 && state < 3000) {
+        return '🟡' // 警告
+    } else if (state >= 3000 && state < 4000) {
+        return '✅' // 成功
+    } else if (state >= 4000 && state < 5000) {
+        return '❌' // 错误
+    }
+    return '❓' // 未知状态
+}
