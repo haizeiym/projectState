@@ -6,6 +6,11 @@
                 <el-button type="primary" @click="toggleNodeIdVisibility">
                     {{ showNodeId ? '隐藏节点ID' : '显示节点ID' }}
                 </el-button>
+                <el-button type="success" @click="handleSendNodes">
+                    <el-icon>
+                        <Message />
+                    </el-icon>发送节点
+                </el-button>
                 <el-button type="primary" @click="handleAddNode">
                     <el-icon>
                         <Plus />
@@ -50,6 +55,23 @@
                 </template>
             </el-table-column>
         </el-table>
+        <el-dialog v-model="tgDialogVisible" title="选择发送目标" width="30%">
+            <el-form>
+                <el-form-item label="选择TG">
+                    <el-select v-model="selectedTgData" placeholder="请选择TG">
+                        <el-option v-for="item in tgConfigs" :key="item.tg_id" :label="item.tg_name" :value="item" />
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="handleCancel">取消</el-button>
+                    <el-button type="primary" @click="sendNodesInfo">
+                        发送
+                    </el-button>
+                </span>
+            </template>
+        </el-dialog>
     </div>
 </template>
 
@@ -57,14 +79,20 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Back, Edit, Delete } from '@element-plus/icons-vue'
+import { Plus, Back, Edit, Delete, Message } from '@element-plus/icons-vue'
 import { getNodeTree, deleteNode } from '../../api/node'
+import { getAllTgConfigs } from '../../utils/tgUtils'
 import StateTag from '../../components/StateTag.vue'
+import { TgConfig } from '../../utils/tgUtils'
+import { sendMessage } from '../../api/pntg'
 
 const route = useRoute()
 const router = useRouter()
 const treeData = ref([])
 const showNodeId = ref(false)
+const tgDialogVisible = ref(false)
+const selectedTgData = ref<TgConfig | null>(null)
+const tgConfigs = ref<TgConfig[]>([])
 
 const fetchNodeTree = async () => {
     try {
@@ -112,6 +140,68 @@ const handleClose = () => {
 
 const toggleNodeIdVisibility = () => {
     showNodeId.value = !showNodeId.value
+}
+
+const handleSendNodes = () => {
+    getTgConfigs()
+    tgDialogVisible.value = true
+}
+
+const getTgConfigs = async () => {
+    try {
+        const response: any = await getAllTgConfigs()
+        tgConfigs.value = response
+    } catch (error) {
+        ElMessage.error('获取TG配置失败')
+    }
+}
+
+const generateNodesInfo = (nodes: any[], level = 0) => {
+    let info = ''
+    nodes.forEach(node => {
+        info += '  '.repeat(level) + `- ${node.node_name}\n`
+        if (node.description) {
+            info += '  '.repeat(level + 1) + `描述: ${node.description}\n`
+        }
+        info += '  '.repeat(level + 1) + `状态: ${node.state}\n`
+
+        if (node.children && node.children.length > 0) {
+            info += generateNodesInfo(node.children, level + 1)
+        }
+    })
+    return info
+}
+
+const sendNodesInfo = async () => {
+    if (!selectedTgData.value) {
+        ElMessage.warning('请选择发送目标')
+        return
+    }
+
+    try {
+        const nodesInfo = generateNodesInfo(treeData.value)
+        console.log(nodesInfo)
+        await sendMessage(
+            selectedTgData.value.bot_token,
+            selectedTgData.value.chat_id,
+            selectedTgData.value.url,
+            nodesInfo
+        )
+
+        ElMessage.success('发送成功')
+        resetAndClose()
+    } catch (error) {
+        ElMessage.error('发送失败')
+    }
+}
+
+const resetAndClose = () => {
+    selectedTgData.value = null
+    tgDialogVisible.value = false
+}
+
+const handleCancel = () => {
+    resetAndClose()
 }
 
 onMounted(() => {

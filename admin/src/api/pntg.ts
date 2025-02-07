@@ -46,3 +46,21 @@ export function getTgList() {
         method: 'get'
     })
 } 
+
+export function sendMessage(botToken: string, chatId: string, openUrl: string, message: string) {
+    const url = `https://api.telegram.org/bot${botToken}/sendMessage`
+    const payload = {
+        chat_id: chatId,
+        text: message,
+        parse_mode: 'Markdown',
+        reply_markup: {
+            inline_keyboard: [[{ text: "打开查看", url: openUrl }]]
+        }
+    }
+
+    return request({
+        url,
+        method: 'post',
+        data: payload
+    })
+}
