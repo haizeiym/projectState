@@ -161,9 +161,9 @@ const getTgConfigs = async () => {
 const generateNodesInfo = (nodes: any[], level = 0) => {
     let info = ''
     nodes.forEach(node => {
-        info += '  '.repeat(level) + `- ${node.node_name}\n`
+        info += '  '.repeat(level) + `-${node.node_name}`
         if (node.description) {
-            info += '  '.repeat(level + 1) + `描述: ${node.description}\n`
+            info += ` ${node.description}\n`
         }
         info += '  '.repeat(level + 1) + `状态: ${stateCache.value?.[node.state] || '未知状态'}\n`
 
