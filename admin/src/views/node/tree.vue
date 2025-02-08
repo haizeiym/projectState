@@ -94,9 +94,14 @@ const router = useRouter()
 const treeData = ref([])
 const showNodeId = ref(false)
 const tgDialogVisible = ref(false)
+const isHasStateCode = ref(false)
 const selectedTgData = ref<TgConfig | null>(null)
 const tgConfigs = ref<TgConfig[]>([])
 const stateCache = ref<Record<number, string> | null>(null)
+
+const projectName = route.query.project_name
+const description = route.query.description
+
 const fetchNodeTree = async () => {
     try {
         const nodeId = Number(route.params.nodeId)
@@ -163,11 +168,19 @@ const getTgConfigs = async () => {
 const generateNodesInfo = (nodes: any[], level = 0) => {
     let info = ''
 
-    // 当 state_code 不为 '0' 时，收集所有匹配状态的节点，不考虑层级
+    // 添加项目信息作为首层
+    if (level === 0) {
+        info += `***${projectName || '未命名项目'}***`
+        if (description) {
+            info += ` ***${description}***`
+        }
+        info += '\n\n'
+    }
+
+    // 当 state_code 不为 '0' 时，收集所有匹配状态的节点
     if (selectedTgData.value?.state_code !== '0') {
         const collectMatchingNodes = (nodes: any[]) => {
             nodes.forEach(node => {
-                // 如果状态匹配且是叶子节点，添加到结果中
                 if (node.state.toString() === selectedTgData.value?.state_code &&
                     (!node.children || node.children.length === 0)) {
                     const stateEmoji = getStateEmoji(node.state)
@@ -176,9 +189,9 @@ const generateNodesInfo = (nodes: any[], level = 0) => {
                         info += ` ${node.description}`
                     }
                     info += '\n'
+                    isHasStateCode.value = true
                 }
 
-                // 递归检查子节点
                 if (node.children && node.children.length > 0) {
                     collectMatchingNodes(node.children)
                 }
@@ -189,12 +202,13 @@ const generateNodesInfo = (nodes: any[], level = 0) => {
         return info
     }
 
-    // 当 state_code 为 '0' 时，保持原有的树形结构显示
+    // 当 state_code 为 '0' 时，显示完整树形结构
     nodes.forEach(node => {
         const stateEmoji = getStateEmoji(node.state)
+        const indent = '  '.repeat(level + 1) // 增加一级缩进，为项目信息留出空间
 
         // 添加当前节点信息
-        info += '  '.repeat(level) + `**${node.node_name}**`
+        info += indent + `**${node.node_name}**`
         if (node.description) {
             info += ` ${node.description}`
         }
@@ -202,9 +216,9 @@ const generateNodesInfo = (nodes: any[], level = 0) => {
 
         // 添加状态信息
         if (level > 0 || !node.children || node.children.length === 0) {
-            info += '  '.repeat(level + 1) + `└─ ${stateEmoji}**${stateCache.value?.[node.state] || '未知状态'}**\n`
+            info += indent + `  └─ ${stateEmoji}**${stateCache.value?.[node.state] || '未知状态'}**\n`
+            isHasStateCode.value = true
         }
-
         // 递归处理子节点
         if (node.children && node.children.length > 0) {
             info += generateNodesInfo(node.children, level + 1)
@@ -221,9 +235,14 @@ const sendNodesInfo = async () => {
     }
 
     try {
+        isHasStateCode.value = false
         const nodesInfo = generateNodesInfo(treeData.value)
-        if (nodesInfo.trim() === '') return ElMessage.warning('没有满足发送条件的节点')
-        console.log(nodesInfo)
+        if (!isHasStateCode.value) {
+            ElMessage.warning('没有满足发送条件的节点')
+            resetAndClose()
+            return
+        }
+
         await sendMessage(
             selectedTgData.value.bot_token,
             selectedTgData.value.chat_id,

@@ -26,7 +26,7 @@
                         v-if="hasProjectPermission(scope.row.project_id)">
                         编辑
                     </el-button>
-                    <el-button type="success" size="small" @click="handleNodes(scope.row)"
+                    <el-button type="success" size="small" @click="handleNodeManage(scope.row)"
                         v-if="hasProjectPermission(scope.row.project_id)">
                         节点
                     </el-button>
@@ -90,8 +90,14 @@ const handleEdit = (row: any) => {
     router.push(`/main/project/edit/${row.project_id}`)
 }
 
-const handleNodes = (row: any) => {
-    router.push(`/main/node/tree/${row.node_id}`)
+const handleNodeManage = (row: any) => {
+    router.push({
+        path: `/main/node/tree/${row.node_id}`,
+        query: {
+            project_name: row.project_name,
+            description: row.description
+        }
+    })
 }
 
 const handleDelete = (row: any) => {
