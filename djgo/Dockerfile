@@ -4,6 +4,7 @@ FROM python:3.9-slim
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+ENV PYTHONPATH=/app
 
 # Set the working directory
 WORKDIR /app
@@ -16,9 +17,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the Django project files
 COPY . .
-
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
 
 # Expose the port the app runs on
 EXPOSE 8000
